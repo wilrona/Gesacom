@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %} Statistique | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+    <div class="col-lg-12">
+        <div class="page-header">
+          <h1>Heures de developpement chargees </h1>
+        </div>
+         <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+            <div class="btn-group">
+                  <h2 class="text-center" style="margin-top: 0;">Periode <small>01/01/{{ now_year }}</small> au <small> 31/12/{{ now_year }}</small> </h2>
+              </div>
+              <div class="btn-group pull-right">
+                <form class="navbar-form navbar-left" role="search" method="get" action="">
+                  <div class="form-group">
+                      <label for="">Exercice en cours :</label>
+                      <select name="year" id="" class="form-control g-select input-lg">
+                          <option value="">Annee en cours</option>
+                          {% for year in list_year %}
+                            <option value="{{ year }}" {% if year == current_year %} selected {% endif %}>{{ year }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <button type="submit" class="btn btn-info">OK</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            {% for datas in analyses %}
+              <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                  <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{ datas.user.get().key.id() }}" aria-expanded="true" aria-controls="{{ datas.user.get().key.id() }}">
+                      <strong>Collaborateur :</strong> {{ datas.user.get().first_name }} {{ datas.user.get().last_name }}
+                    </a>
+                  </h4>
+                </div>
+                <div id="{{ datas.user.get().key.id() }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                  <div class="panel-body">
+                      <table class="table table-striped">
+                          <thead>
+                              <tr>
+                                  <th>Code Client</th>
+                                  <th>Nom du Client</th>
+                                  <th>Prospect</th>
+                                  <th>Heure devlp</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                          {% for client in datas.clients %}
+                              <tr>
+                                  <td>{{ client.ref_client }}</td>
+                                  <td>{{ client.client }}</td>
+                                  <td>
+                                      {% if client.prospect %}
+                                      {{ client.prospect.get().name }}
+                                      {% else %}
+                                        -
+                                      {% endif %}
+                                  </td>
+                                  <td>{{ client.time }}</td>
+                              </tr>
+                          {% endfor %}
+                          </tbody>
+                      </table>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+{% endblock %}
+

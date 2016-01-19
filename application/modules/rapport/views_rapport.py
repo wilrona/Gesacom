@@ -491,7 +491,7 @@ def etat_conso_prod():
 @roles_required([('super_admin', 'stat')])
 def etat_dev_charge():
     menu = 'stat'
-    submenu = 'etat_conso_prod'
+    submenu = 'dev_charge'
     title_page = 'Heures de developpement chargees'
 
     time_zones = pytz.timezone('Africa/Douala')
@@ -522,17 +522,46 @@ def etat_dev_charge():
             infos = {}
             infos['user'] = detail.temps_id.get().user_id
             if detail.temps_id.get().tache_id.get().projet_id:
-                infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id
-                infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
+                infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
+                infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
+                infos['prospect'] = None
+                if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
+                    infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
+                infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
             else:
                 client_accent = Client.query(
                     Client.myself == True
                 ).get()
-                infos['client'] = client_accent
+                infos['ref_client'] = client_accent.ref
+                infos['client'] = client_accent.name
                 infos['prospect'] = None
+                infos['client_ent'] = client_accent.myself
 
             infos['user_infos'] = 1
+            infos['client_infos'] = 1
             infos['time'] = detail.conversion
             analyse.append(infos)
+
+    grouper = itemgetter("user", "user_infos")
+
+    analyses = []
+
+    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
+        temp_dict = dict(zip(["user", "user_infos"], key))
+
+        temp_dict['clients'] = []
+        under_grouper = itemgetter("ref_client", "client", "client_infos")
+
+        for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
+            temp_dict_under = dict(zip(["ref_client", "client", "client_infos"], key))
+            temp_dict_under['time'] = 0
+            for item in grp:
+                temp_dict_under['time'] += item['time']
+                temp_dict_under['prospect'] = None
+                if item['client_ent']:
+                    if item['prospect']:
+                        temp_dict_under['prospect'] = item['prospect']
+            temp_dict['clients'].append(temp_dict_under)
+        analyses.append(temp_dict)
 
     return render_template('rapport/heure-de-developpement-chargee.html', **locals())
