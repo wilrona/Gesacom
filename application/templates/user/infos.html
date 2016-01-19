@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Utilisateur : <small>{{ user.first_name }} {{ user.last_name }} </small> <i class="fa fa-power-off pull-right {% if user.logged %} text-success {% else %} text-danger {% endif %}" title="{% if user.logged %} connecte {% else %} deconnecte {% endif %}"></i></h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+
+
+        <form role="form" method="post" class="form-horizontal">
+
+            {{ form.hidden_tag() }}
+             <div class="form-group">
+                 {{ form.matricule.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                    {% if user.matricule %}
+                        {{ form.matricule.data }}
+                        <input type="hidden" name="matricule" value="{{ form.matricule.data }}"/>
+                    {% else %}
+                         {{ form.matricule(class_='form-control') }}
+                    {% endif %}
+                {% for message in form.matricule.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Nom </label>
+                <div class="col-sm-8">
+                  <p class="form-control-static">{{ user.first_name }}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Prenom </label>
+                <div class="col-sm-8">
+                  <p class="form-control-static">{{ user.last_name }}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Email </label>
+                <div class="col-sm-8">
+                  <p class="form-control-static">{{ user.email }}</p>
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.site_id.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.site_id(class_='form-control g-select input-lg') }}
+                {% for message in form.site_id.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.departement_id.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.departement_id(class_='form-control g-select input-lg') }}
+                    {% for message in form.departement_id.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.fonction_id.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.fonction_id(class_='form-control g-select input-lg') }}
+                  {% for message in form.fonction_id.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.grade_id.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.grade_id(class_='form-control g-select input-lg') }}
+                    {% for message in form.grade_id.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Taux horaire Applique </label>
+                <div class="col-sm-8">
+                  <p class="form-control-static lead">{{ user.tauxH|format_price() }} </p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Derniere connexion : </label>
+                <div class="col-sm-8">
+                  <p class="form-control-static">
+                      {% if user.date_last_logged %}
+                        {{ user.date_last_logged|format_date('%d-%m-%Y %H:%M') }}
+                      {% else %}
+                        Aucune Connexion
+                      {% endif %}
+                  </p>
+                </div>
+            </div>
+            {% if current_user.has_roles([('super_admin', 'user_infos')], ['edit']) %}
+            <div class="form-group">
+                <div class="col-sm-offset-4 col-sm-8">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </div>
+            {% endif %}
+
+        </form>
+
+
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_user.html' %}
+    </div>
+
+{% endblock %}

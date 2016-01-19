@@ -1,0 +1,48 @@
+
+    <ul class="nav nav-tabs-google nav-stacked myitems" data-spy="affix" data-offset-top="60">
+    {% if current_user.has_roles([('super_admin', 'entreprise')]) %}
+      <li {% if context == 'information' %} class="active" {% endif %}>
+        <a href="{{ url_for('societe.index') }}"> Information Ent.</a>
+      </li>
+    {% endif %}
+     {% if current_user.has_roles([('super_admin', 'site')]) %}
+      <li {% if context == 'site' %} class="active" {% endif %}>
+        <a href="{{ url_for('site.index') }}"> Sites </a>
+      </li>
+     {% endif %}
+    {% if current_user.has_roles([('super_admin', 'departement')]) %}
+      <li {% if context == 'departement' %} class="active" {% endif %} >
+        <a href="{{ url_for('departement.index') }}"> Departements </a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'fonction')]) %}
+      <li {% if context == 'fonction' %} class="active" {% endif %}>
+        <a href="{{ url_for('fonction.index') }}">Fonctions </a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'grade')]) %}
+      <li {% if context == 'grade' %} class="active" {% endif %}>
+        <a href="{{ url_for('grade.index') }}">Grades </a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'frais')]) %}
+      <li {% if context == 'frais' %} class="active" {% endif %}>
+        <a href="{{ url_for('frais.index') }}"> Frais </a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'domaine')]) %}
+      <li {% if context == 'domaine' %} class="active" {% endif %}>
+        <a href="{{ url_for('domaine.index') }}">Domaines/Lignes de service </a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'prestation')]) %}
+      <li {% if context == 'prestation' %} class="active" {% endif %}>
+        <a href="{{ url_for('prestation.index') }}">Prestation </a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'charge')]) %}
+        <li {% if context == 'charge' %} class="active" {% endif %}>
+        <a href="{{ url_for('charge.index') }}">Charges/Impots </a>
+      </li>
+    {% endif %}
+    </ul>

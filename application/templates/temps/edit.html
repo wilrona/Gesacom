@@ -1,0 +1,54 @@
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Feuille de temps</h4>
+    <h5>Periode : {{ temps.date_start|format_date('%d %b %Y') }} au {{ temps.date_end|format_date('%d %b %Y') }} <span class="pull-right">{{ temps.tache_id.get().titre }}</span></h5>
+</div>
+
+    <div class="modal-body">
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="20%">Date</th>
+                <th width="50%">Description</th>
+                <th width="15%">Temps</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                   <tr>
+                    <td>{{ data.date|format_date('%d/%m/%Y') }}</td>
+                    <td>{{ data.description }}</td>
+                    <td>{{ data.heure|format_date('%H:%M') }}</td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+    </div>
+    <div class="modal-footer">
+        <div class="pull-left">
+
+        </div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+    </div>
+<script>
+    $('.pagination > li > a').on('click', function(e){
+        e.preventDefault();
+        href = $(this).attr('href');
+        if(href){
+            $.ajax({
+                url: "{{ url_for('temps.view', temps_id=temps_id) }}",
+                type: 'GET',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+        }
+    })
+
+</script>

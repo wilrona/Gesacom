@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <title>{% block title%}Gesacom{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/todc-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/select2.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-datepicker.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-datetimepicker.css">
+    {% block style_block %}{# page-specific CSS #}
+        <link href="/static/css/app.css" rel="stylesheet" />
+    {% endblock %}
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <script type="text/javascript" src="/static/js/jquery-1.11.2.js"></script>
+
+    {% block head_script %}
+
+    {% endblock %}
+
+</head>
+<body class="scrollable">
+    {% block layout_body %}
+
+        {% block layout_before_content %} {% include 'includes/nav.html' %}        {% endblock %}
+
+        <div class="container-fluid">
+         <div class="row" >
+            <div class="col-md-2 sidebar">
+                    {% block layout_nav_left %}    {% include 'includes/nav_left.html' %}      {% endblock %}
+            </div>
+            <div class="col-md-10 col-md-offset-2 main" style="margin-top: 5px;">
+                {% block layout_content %}                                                 {% endblock %}
+            </div>
+
+          </div>
+        </div>
+
+        {% block layout_after_content %}
+
+            <div class="modal" id="myModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+
+                </div>
+              </div>
+            </div>
+
+        {% endblock %}
+
+    {% endblock %}
+
+    <script type="text/javascript" src="/static/js/moment.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap-datepicker.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.min.js"></script>
+    <script type="text/javascript" src="/static/js/dataTables.min.js"></script>
+    <script type="text/javascript" src="/static/js/dataTables.bootstrap.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.dataTables.columnFilter.js"></script>
+    <script type="text/javascript" src="/static/js/select2.full.js"></script>
+    <script type="text/javascript" src="/static/js/inputmask.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.inputmask.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.inputmask.bundle.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.price_format.2.0.min.js"></script>
+    <script type="text/javascript" src="/static/js/app.js"></script>
+    {% block footer_script %}{# defer-capable JS block #}{% endblock %}
+
+    {{ profiler_includes|safe }}
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %} {% if propect %} Prospect {% else %} Clients {% endif %} | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Liste des {% if prospect %} prospects {% else %} clients {% endif %} </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('client.edit', prospect=prospect) }}" class="btn btn-primary {% if not current_user.has_roles([('super_admin', 'client')], ['edit']) %} disabled {% endif %}">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width=15%">Reference</th>
+                <th width="40%">Nom du client</th>
+                <th width="30%">Date Creation</th>
+                <th width="20%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                  <tr {% if data.myself %} class="active" {% endif %}>
+                    <td>{{ data.ref }}</td>
+                    <td>{{ data.name }}</td>
+                    <td>{{ data.date_created|format_date('%d-%m-%Y %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('client.edit', client_id=data.key.id(), prospect=prospect) }}" class="btn btn-link btn-xs" ><i class="fa fa-pencil-square-o"></i></a>
+                        {% if current_user.has_roles([('super_admin', 'client')], ['delete']) %}
+                        <a href="{{ url_for('client.delete', client_id=data.key.id(), prospect=prospect) }}" class="btn btn-link btn-xs" ><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+
+    <div class="col-lg-3">
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="fa fa-pencil-square-o"></i> " pour effectuer les modifications sur un {% if prospect %} prospect {% else %} client {% endif %}</small>
+        </p>
+    </div>
+
+{% endblock %}

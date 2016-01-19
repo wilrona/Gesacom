@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Permission : <small>{{ user.first_name }} {{ user.last_name }} </small> <i class="fa fa-power-off pull-right {% if user.logged %} text-success {% else %} text-danger {% endif %}" title="{% if user.logged %} connecte {% else %} deconnecte {% endif %}"></i></h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+
+            <nav class="navbar navbar-toolbar" role="navigation">
+              <div class="container-fluid">
+                <div class="pull-left">
+                    <form class="navbar-form navbar-left" role="search" method="get">
+                      <div class="form-group">
+                          <select name="profil" id="" class="form-control g-select input-lg">
+                              <option value="">Appliquez un profil</option>
+                              {% for profil in list_profil %}
+                                    <option value="{{ profil.key.id() }}" {% if profil_select == profil.key.id() %} selected {% endif %}> {{ profil.name }} </option>
+                              {% endfor %}
+                          </select>
+                      </div>
+                      <button type="submit" class="btn btn-info">Appliquer</button>
+                    </form>
+                </div>
+          <form method="post" role="form" id="formulaire" class="form-inline">
+                <div class="btn-toolbar pull-right" role="toolbar">
+                    {% if current_user.has_roles([('super_admin', 'user_permission')], ['edit']) %}
+                      <div class="btn-group">
+                          <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                      </div>
+                    {% endif %}
+                </div>
+              </div>
+            </nav>
+
+            <div class="panel-group" id="accordion">
+                {% for data in liste_role %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                          <h4 class="panel-title">
+                            <a {% if loop.index != 1 %} class="collapsed" {% endif %} data-toggle="collapse" data-parent="#accordion" href="#{{ data.id }}">
+                              {{ data.titre }}
+                            </a>
+                          </h4>
+                        </div>
+                        <div id="{{ data.id }}" class="panel-collapse collapse {% if loop.index == 1 %} in {% endif %}">
+                          <div class="panel-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th width="45%">Role</th>
+                                            <th width="25%">Attrib.</th>
+                                            <th width="25%">Editer</th>
+                                            <th width="25%">Suppr.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for role in data.role %}
+                                        <tr class="addlist">
+                                            <td>{{ role.titre }}</td>
+                                            <td>
+                                                <input type="checkbox" class="attrib" name="attrib" value="{{ role.id }}" {% if role.id in attrib_list %} checked {% endif %}/>
+                                            </td>
+                                            <td>
+                                                    <input type="checkbox" class="edit" {% if role.action < 1 %} disabled = "disabled" {% endif %} name="edit" value="{{ role.id }}" {% if role.id in edit_list %} checked {% endif %}/>
+                                            </td>
+                                            <td>
+
+                                                    <input type="checkbox" class="delete" {% if role.action != 2 %} disabled = "disabled" {% endif %} name="delete" value="{{ role.id }}" {% if role.id in delete_list %} checked {% endif %} />
+
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="4">
+                                            <h4 class="text-center">Aucune information</h4>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                          </div>
+                        </div>
+                      </div>
+                {% endfor %}
+            </div>
+        </form>
+
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_user.html' %}
+    </div>
+
+{% endblock %}
+
+{% block footer_script %}
+    <script>
+        $('.attrib').on('click', function(){
+            if($(this).is(':checked')){
+                $(this).parent().parent().addClass('current');
+
+                if($('.current .edit').attr('disabled') != 'disabled'){
+                    $('.current .edit').prop('checked', true);
+                }
+
+                if($('.current .delete').attr('disabled') != 'disabled'){
+                    $('.current .delete').prop('checked', true);
+                }
+                $(this).parent().parent().removeClass('current');
+            }else{
+                $(this).parent().parent().addClass('current');
+
+                if($('.current .edit').attr('disabled') != 'disabled'){
+                    $('.current .edit').prop('checked', false);
+                }
+
+                if($('.current .delete').attr('disabled') != 'disabled'){
+                    $('.current .delete').prop('checked', false);
+                }
+                $(this).parent().parent().removeClass('current');
+            }
+        });
+
+        $(".edit, .delete").on('click', function(){
+            if($(this).is(':checked')){
+                $(this).parent().parent().addClass('current');
+                $('.current .attrib').prop('checked', true);
+                $(this).parent().parent().removeClass('current');
+            }
+        });
+    </script>
+
+{% endblock %}

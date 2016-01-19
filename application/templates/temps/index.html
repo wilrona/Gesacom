@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %} Feuille de temps | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Listes des feuilles de temps</h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="">
+              <div class="btn-group">
+                <form class="navbar-form navbar-left" role="search" method="get">
+                  <div class="form-group">
+                      <label for="">Semaine :</label>
+                      <select name="year" id="" class="form-control g-select input-lg">
+                          <option value="">Filtrer par semaine</option>
+                      </select>
+                  </div>
+                    <input type="hidden" name="start" id="start_input"/>
+                    <input type="hidden" name="end" id="end_input"/>
+                  <button type="submit" class="btn btn-info">OK</button>
+                </form>
+              </div>
+            </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="25%">Semaine</th>
+                <th width="20%">Tache</th>
+                <th width="20%">Projet</th>
+                <th width="15%">Client</th>
+                <th width="15%">Utilisateur</th>
+                <th width="10%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                   <tr>
+                    <td >{{ data.date_start|format_date('%d-%b-%Y') }} / {{ data.date_end|format_date('%d-%b-%Y') }}</td>
+                    <td>{{ data.tache_id.get().titre }}</td>
+                    <td>{{ data.tache_id.get().projet_id.get().titre }}</td>
+                    <td>{{ data.tache_id.get().projet_id.get().client_id.get().ref }}</td>
+                    <td>{{ data.user_id.get().last_name }}</td>
+                    <td>
+                        <a href="{{ url_for('temps.view', temps_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static"><i class="glyphicon glyphicon-eye-open"></i></a>
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="glyphicon glyphicon-eye-open"></i> " pour visualiser les details d'une feuille de temps</small>
+        </p>
+    </div>
+
+{% endblock %}

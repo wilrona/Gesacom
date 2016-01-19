@@ -1,0 +1,25 @@
+
+<ul class="nav nav-tabs-google nav-stacked myitems" data-spy="affix" data-offset-top="60">
+  <li>
+    <a href="{% if not user %} {{ url_for('projet.index') }} {% else %} {{ url_for('projet.me') }} {% endif %}"> Retour à la liste</a>
+  </li>
+  <li {% if context == 'information' %} class="active" {% endif %}>
+    <a href="{{ url_for('projet.edit', projet_id=projet_id) }}"> Informations</a>
+  </li>
+  {% if projet_id %}
+      {% if current_user.has_roles([('super_admin', 'projet_tache')]) or projet.responsable_id.get().key.id() == session.get('user_id')|int %}
+          <li {% if context == 'tache' %} class="active" {% endif %}>
+              <a href="{{ url_for('tache_projet.index', projet_id=projet_id) }}"> Taches</a>
+          </li>
+      {% endif %}
+      {% if current_user.has_roles([('super_admin', 'projet_frais')]) or projet.responsable_id.get().key.id() == session.get('user_id')|int %}
+          <li {% if context == 'frais' %} class="active" {% endif %}>
+              <a href="{{ url_for('frais_projet.index', projet_id=projet_id) }}"> Frais</a>
+          </li>
+      {% endif %}
+      <li>
+          <a href="#">Statistiques</a>
+      </li>
+  {% endif %}
+
+</ul>

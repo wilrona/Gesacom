@@ -1,0 +1,55 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Edition d'un department</h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire">
+
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+      <div class="form-group">
+        {{ form.libelle.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.libelle(class_='form-control', id="enter") }}
+        {% for message in form.libelle.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{{ url_for('departement.edit', dep_id=dep_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+
+    $('#enter').keypress(function(e) {
+        if (e.which == 13){
+            e.preventDefault();
+            $.ajax({
+                url: "{{ url_for('departement.edit', dep_id=dep_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+        }
+    });
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{{ url_for('departement.index') }}").delay();
+    {% endif %}
+</script>

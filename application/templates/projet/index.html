@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %} Projets | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Liste des projets {{ small_title }}</h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="pull-left">
+              <ul class="nav nav-pills nav-tabs-google nav-tabs-perso">
+                  <li {% if not request.args.get('filtre') %} class="active" {% endif %}><a href="{{ url_for('projet.index') }}">En cours</a></li>
+                  <li {% if request.args.get('filtre') and request.args.get('filtre') == 'suspend' %} class="active" {% endif %}><a href="{{ url_for('projet.index', filtre='suspend') }}">Suspendu</a></li>
+                  <li {% if request.args.get('filtre') and request.args.get('filtre') == 'cloture' %} class="active" {% endif %}><a href="{{ url_for('projet.index', filtre='cloture') }}">Cloture</a></li>
+              </ul>
+            </div>
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('projet.edit') }}" class="btn btn-primary {% if not current_user.has_roles([('super_admin', 'projet')], ['edit']) %} disabled {% endif %}">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th width="25%">Titre</th>
+                <th width="25%">Client</th>
+                <th width="25%">Responsable</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                   <tr>
+                    <td>{{ data.code }}</td>
+                    <td>{{ data.titre }}</td>
+                    <td>{{ data.client_id.get().name }}</td>
+                    <td>{{ data.responsable_id.get().first_name }} {{ data.responsable_id.get().last_name }}</td>
+                    <td>
+                        {% if current_user.has_roles([('super_admin', 'projet')], ['edit']) %}
+                        <a href="{{ url_for('projet.edit', projet_id=data.key.id()) }}" class="btn btn-link btn-xs" ><i class="fa fa-pencil-square-o"></i></a>
+                        {% endif %}
+                        {% if current_user.has_roles([('super_admin', 'projet')], ['delete']) and not data.closed and not data.suspend %}
+                        <a href="{{ url_for('projet.delete', projet_id=data.key.id()) }}" class="btn btn-link btn-xs" ><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="fa fa-pencil-square-o"></i> " pour effectuer les modifications d'un projet</small>
+        </p>
+    </div>
+
+{% endblock %}

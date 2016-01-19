@@ -1,0 +1,23 @@
+
+    <ul class="nav nav-tabs-google nav-stacked myitems" data-spy="affix" data-offset-top="60">
+    {% if current_user.has_roles([('super_admin', 'budget_userH')]) %}
+      <li {% if context == 'collaborateur' %} class="active" {% endif %}>
+        <a href="{{ url_for('budget.index') }}"> Budget des collaborateurs</a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'budget_userV')]) and not current_user.has_roles([('super_admin', 'budget_userH')]) %}
+      <li {% if context == 'collaborateur' %} class="active" {% endif %}>
+        <a href="{{ url_for('budget.valeur') }}"> Budget des collaborateurs</a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'budget_charge')]) %}
+      <li {% if context == 'charge' %} class="active" {% endif %}>
+        <a href="{{ url_for('budget.charge') }}"> Budget des Charges</a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'budget_client')]) %}
+      <li {% if context == 'client' %} class="active" {% endif %}>
+        <a href="{{ url_for('budget.client') }}"> Budget des clients</a>
+      </li>
+    {% endif %}
+    </ul>

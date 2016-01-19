@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %} Statistique | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Rapport et statistique </h1>
+        </div>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="65%">libelle</th>
+                <th width="30%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Remplissage des feuilles de temps par collaborateur</td>
+                    <td>
+                        <a href="{{ url_for('stat.collaborateur') }}" class="btn btn-link btn-xs" ><i class="glyphicon glyphicon-eye-open"></i></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Taux de chargeabilite Heure de  Production</td>
+                    <td>
+                        <a href="{{ url_for('stat.taux_HProd') }}" class="btn btn-link btn-xs" ><i class="glyphicon glyphicon-eye-open"></i></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Taux de chargeabilite des heures disponibles</td>
+                    <td>
+                        <a href="{{ url_for('stat.taux_HDispo') }}" class="btn btn-link btn-xs" ><i class="glyphicon glyphicon-eye-open"></i></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Consommation des heures disponibles</td>
+                    <td>
+                        <a href="{{ url_for('stat.etat_conso') }}" class="btn btn-link btn-xs" ><i class="glyphicon glyphicon-eye-open"></i></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Consommation des heures de production</td>
+                    <td>
+                        <a href="{{ url_for('stat.etat_conso_prod') }}" class="btn btn-link btn-xs" ><i class="glyphicon glyphicon-eye-open"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+    <div class="col-lg-3">
+
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="glyphicon glyphicon-eye-open"></i> " pour visualiser le rapport concerne</small>
+        </p>
+    </div>
+
+{% endblock %}

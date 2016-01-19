@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+
+{% block title %} Projets | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+    <div class="col-lg-9">
+    <div class="page-header">
+      <h1>
+          {% if projet_id %} {{ projet.titre }} {% else %} Nouveau projet {% endif %}</h1>
+      {% include 'includes/flash_message.html' %}
+    </div>
+
+    <nav class="navbar navbar-toolbar" role="navigation">
+      <div class="container-fluid">
+        <div class="btn-toolbar" role="toolbar">
+          <div class="pull-right">
+            {% if current_user.has_roles([('super_admin', 'projet')], ['edit']) and not projet.suspend and not projet.closed %}
+                <button type="button" id="submit" class="btn btn-primary ">Enregistrer</button>
+            {% endif %}
+            {% if projet_id %}
+                {% if projet.responsable_id.get().key.id() == session.get('user_id')|int %}
+                    {% if projet.suspend and not projet.closed %}
+                        <a href="{{ url_for('projet.suspend', projet_id=projet_id) }}" class="btn btn-info">Est suspendu</a>
+                    {% elif not projet.suspend and not projet.closed %}
+                        <a href="{{ url_for('projet.suspend', projet_id=projet_id) }}" class="btn btn-warning">Suspendre</a>
+                    {% endif %}
+
+                    {% if not projet.closed and not projet.suspend %}
+                        <a href="{{ url_for('projet.closed', projet_id=projet_id) }}" class="btn btn-danger">Cloturer</a>
+                    {% elif projet.closed and not projet.suspend %}
+                        <a href="{{ url_for('projet.closed', projet_id=projet_id) }}" class="btn btn-info">Est cloture</a>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <form role="form" class="form-horizontal" id="formulaire" {% if current_user.has_roles([('super_admin', 'projet')], ['edit']) %} action="{{ url_for('projet.edit', projet_id=projet_id) }} "method="post" {% endif %} >
+
+            {{ form.hidden_tag() }}
+        <div class="row">
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Code projet </label>
+                    <div class="col-sm-8">
+                      <p class="form-control-static">{{ projet.code }}</p>
+                    </div>
+                </div>
+                 <div class="form-group">
+                     {{ form.titre.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                     {{ form.titre(class_='form-control') }}
+                    {% for message in form.titre.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                 </div>
+                <div class="form-group">
+                     {{ form.domaine_id.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                     {{ form.domaine_id(class_='form-control g-select', id='domaine') }}
+                    {% for message in form.domaine_id.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                 </div>
+                <div class="form-group">
+                     {{ form.service_id.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                      <select name="service_id" class="form-control g-select" id="service">
+                        <option value="">Selection du service</option>
+                        {% for service in services %}
+                            <option value="{{ service.key.id() }}" {% if form.service_id.data == service.key or form.service_id.data|int == service.key.id() %} selected {% endif %}>{{ service.libelle }}</option>
+                        {% endfor %}
+                      </select>
+                    {% for message in form.service_id.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                 </div>
+                <div class="form-group">
+                     {{ form.client_id.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                    {% if projet_id %}
+                        <p class="form-control-static">{{ projet.client_id.get().name }}</p>
+                        <input type="hidden" name="client_id" value="{{ projet.client_id.get().key.id() }}"/>
+                    {% else %}
+                         {{ form.client_id(class_='form-control g-select', id="client") }}
+                         {% for message in form.client_id.errors %}
+                            <div class="alert alert-danger form-validator">{{ message }}</div>
+                         {% endfor %}
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="form-group">
+                     {{ form.prospect_id.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                    {{ test }}
+                    {% if projet_id %}
+                        <p class="form-control-static">
+                            {% if projet.prospect_id %}
+                                {{ projet.prospect_id.get().name }}
+                            {% else %}
+                                Aucun
+                            {% endif %}
+                        </p>
+                        <input type="hidden" name="prospect_id" value="{% if projet.prospect_id %} {{ projet.prospect_id.get().key.id() }} {% endif %}"/>
+                    {% else %}
+                          <select name="prospect_id" class="form-control g-select" id="prospect">
+                            <option value="">Selection du prospect</option>
+                            {% for prospect in prospects %}
+                                <option value="{{ prospect.key.id() }}" {% if form.prospect_id.data == prospect.key or form.prospect_id.data|int == prospect.key.id() %} selected {% endif %}>{{ prospect.name }}</option>
+                            {% endfor %}
+                          </select>
+                        {% for message in form.prospect_id.errors %}
+                            <div class="alert alert-danger form-validator">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    </div>
+                 </div>
+
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                     {{ form.heure.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                     {{ form.heure(class_='form-control') }}
+                    {% for message in form.heure.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group">
+                     {{ form.montant.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                     {{ form.montant(class_='form-control', id="amount") }}
+                    {% for message in form.montant.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group">
+                     {{ form.date_start.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                     {{ form.date_start(class_='form-control', id="datepicker") }}
+                    {% for message in form.date_start.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group">
+                     {{ form.date_end.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                     {{ form.date_end(class_='form-control', id="datepicker2") }}
+                    {% for message in form.date_end.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group">
+                     {{ form.responsable_id.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                     {{ form.responsable_id(class_='form-control g-select') }}
+                    {% for message in form.responsable_id.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                 </div>
+                 <div class="form-group">
+                     {{ form.facturable.label(class_='col-sm-4 control-label') }}
+                    <div class="col-sm-8">
+                    {% if projet_id %}
+                        <p class="form-control-static">
+                            {{ form.facturable(class_='form-control hidden') }}
+                            {% if form.facturable.data %}
+                                Oui
+                            {% else %}
+                                Non
+                            {% endif %}
+                        </p>
+                    {% else %}
+                        {{ form.facturable(class_='form-control') }}
+                        {% for message in form.facturable.errors %}
+                            <div class="alert alert-danger form-validator">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    </div>
+                 </div>
+            </div>
+        </div>
+            {% if current_user.has_roles([('super_admin', 'projet')], ['edit']) %}
+            <div class="form-group">
+                <div class="col-sm-offset-5 col-sm-6">
+                    <input type="submit" style="display: none;"/>
+                </div>
+            </div>
+            {% endif %}
+
+        </form>
+
+
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_projet.html' %}
+    </div>
+{% endblock %}
+{% block footer_script %}
+    <script>
+    {% if current_user.has_roles([('super_admin', 'projet')], ['edit']) %}
+        $('#submit').on('click', function(){
+
+            var number = $('#amount').val();
+            var number_split = number.split(" ");
+            var amount = "";
+            for (i = 0; i < number_split.length; i++){
+                amount += number_split[i];
+            }
+
+            if(amount){
+                $('#amount').val(parseFloat(amount));
+            }
+
+            $('#formulaire').submit();
+        });
+    {% endif %}
+
+        $('#domaine').on('change', function(e){
+            e.preventDefault();
+            $.ajax({
+                url: "{{ url_for('projet.services') }}/"+$(this).val(),
+                type: 'GET',
+                success: function(data) {
+
+                    var $options = $();
+                    $options = $options.add(
+                            $('<option>').attr('value', 0).html('Selection du service')
+                    );
+                    for (var key in data) {
+                        $options = $options.add(
+                            $('<option>').attr('value', key).html(data[key])
+                        );
+                    }
+                    $('#service').html($options);
+
+                }
+            });
+
+        });
+
+
+        $('#client').on('change', function(e){
+            e.preventDefault();
+            $.ajax({
+                url: "{{ url_for('projet.prospects') }}/"+$(this).val(),
+                type: 'GET',
+                success: function(data) {
+
+                    var $options = $();
+                    $options = $options.add(
+                            $('<option>').attr('value', 0).html('Selection du prospect')
+                    );
+                    for (var key in data) {
+                        $options = $options.add(
+                            $('<option>').attr('value', key).html(data[key])
+                        );
+                    }
+                    $('#prospect').html($options);
+
+                }
+            });
+
+        });
+    </script>
+
+{% endblock %}

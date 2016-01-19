@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %} Taches | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Mes taches </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+    <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="pull-left">
+              <ul class="nav nav-pills nav-tabs-google nav-tabs-perso">
+                  <li {% if not request.args.get('filtre') %} class="active" {% endif %}><a href="{{ url_for('tache.me') }}">En cours</a></li>
+                  <li {% if request.args.get('filtre') and request.args.get('filtre') == 'end' %} class="active" {% endif %}><a href="{{ url_for('tache.me', filtre='end') }}">Terminee</a></li>
+                  <li {% if request.args.get('filtre') and request.args.get('filtre') == 'cloture' %} class="active" {% endif %}><a href="{{ url_for('tache.me', filtre='cloture') }}">Cloturee</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th width="30%">Titre</th>
+                <th width="30%">Projet</th>
+                <th width="15%">Client</th>
+                <th width="15%">Prestation</th>
+                <th width="10%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                    {% if data.projet_id %}
+                        {% if not data.projet_id.get().suspend %}
+                           <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ data.titre }}</td>
+                                <td>{{ data.projet_id.get().titre }}</td>
+                                <td>{{ data.projet_id.get().code }}</td>
+                                <td>{{ data.prestation_id.get().libelle }}</td>
+                                <td>
+                                    <a href="{{ url_for('tache.detail', tache_id=data.key.id(), user='1') }}" class="btn btn-link btn-xs btn-xs"><i class="glyphicon glyphicon-eye-open"></i></a>
+                                </td>
+                           </tr>
+                        {% endif %}
+                    {% else %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ data.titre }}</td>
+                            <td> Aucun </td>
+                            <td> Aucun </td>
+                            <td>{{ data.prestation_id.get().libelle }}</td>
+                            <td>
+                                <a href="{{ url_for('tache.detail', tache_id=data.key.id(), user='1') }}" class="btn btn-link btn-xs btn-xs"><i class="glyphicon glyphicon-eye-open"></i></a>
+                            </td>
+                       </tr>
+                    {% endif %}
+                {% else %}
+                    <tr>
+                        <td colspan="7">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="glyphicon glyphicon-eye-open"></i> " pour effectuer les modifications sur un utilisateur</small>
+        </p>
+    </div>
+
+{% endblock %}

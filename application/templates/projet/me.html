@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %} Projets | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Mes projets </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="pull-left">
+              <ul class="nav nav-pills nav-tabs-google nav-tabs-perso">
+                  <li {% if not request.args.get('filtre') %} class="active" {% endif %}><a href="{{ url_for('projet.me') }}">En cours</a></li>
+                  <li {% if request.args.get('filtre') and request.args.get('filtre') == 'suspend' %} class="active" {% endif %}><a href="{{ url_for('projet.me', filtre='suspend') }}">Suspendu</a></li>
+                  <li {% if request.args.get('filtre') and request.args.get('filtre') == 'cloture' %} class="active" {% endif %}><a href="{{ url_for('projet.me', filtre='cloture') }}">Cloture</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th width="25%">Titre</th>
+                <th width="25%">Client</th>
+                <th width="25%">Responsable</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in all_projet %}
+                   <tr {% if data.responsable_id == session.get('user_id') %} class="active" {% endif %}>
+                    <td>{{ data.code }}</td>
+                    <td>{{ data.titre }}</td>
+                    <td>{{ data.client }}</td>
+                    <td>{{ data.responsable }}</td>
+                    <td>
+                        <a href="{{ url_for('projet.edit', projet_id=data.id, user='1') }}" class="btn btn-link btn-xs" ><i class="fa fa-pencil-square-o"></i></a>
+
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="glyphicon glyphicon-eye-open"></i> " pour effectuer les modifications sur un utilisateur</small>
+        </p>
+    </div>
+
+{% endblock %}

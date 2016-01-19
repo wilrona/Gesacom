@@ -1,0 +1,224 @@
+          <div class="nav nav-bar">
+                <img alt="Brand" src="/static/img/logo_accentCom.png" style="width:100%; height:70px;">
+          </div>
+          <hr>
+
+          <ul class="list-group nav nav-sidebar scrollable" style="height: 83%; overflow-y: auto; overflow-x: hidden">
+
+            <li class="list-group-item {% if menu == 'tache' %} active  {% endif %}">
+               <div class="list-group-item-wrapper">
+                    {% if not menu == 'tache' %}
+                      <div class="dropdown pull-right">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                        <ul role="menu" class="dropdown-menu">
+                          <li><a href="{{ url_for('tache.me') }}">Mes t&acirc;ches</a></li>
+                            {% if current_user.has_roles([('super_admin', 'tache')]) %}
+                          <li><a href="{{ url_for('tache.index') }}">Toutes les t&acirc;ches</a></li>
+                            {% endif %}
+                        </ul>
+                      </div>
+                   {% endif %}
+
+                  <a href="{{ url_for('tache.me') }}"><span class="glyphicon glyphicon-tasks"></span>&nbsp;&nbsp;T&acirc;ches<span class="sr-only"></span></a>
+                </div>
+
+             </li>
+            {% if menu == 'tache' %}
+                {% if submenu == 'tache' %}
+                   <li class="list-group-item subitem active"><a href="">Details de la t&acirc;che</a></li>
+                {% endif %}
+                <li class="list-group-item subitem {% if submenu == 'my' %} active {% endif %}"><a href="{{ url_for('tache.me') }}">Mes t&acirc;ches</a></li>
+                {% if current_user.has_roles([('super_admin', 'tache')]) %}
+                <li class="list-group-item subitem {% if submenu == 'tous' %} active {% endif %}"><a href="{{ url_for('tache.index') }}">Toutes les t&acirc;ches</a></li>
+                {% endif %}
+            {% endif %}
+
+            <li class="divider"></li>
+
+            <li class="list-group-item {% if menu == 'projet' %} active  {% endif %}">
+               <div class="list-group-item-wrapper">
+                   {% if not menu == 'projet' %}
+                      <div class="dropdown pull-right">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                        <ul role="menu" class="dropdown-menu">
+                          <li><a href="{{ url_for('projet.me') }}">Mes projets</a></li>
+                            {% if current_user.has_roles([('super_admin', 'projet')]) %}
+                          <li><a href="{{ url_for('projet.index') }}">Tous les projets</a></li>
+                            {% endif %}
+                        </ul>
+                      </div>
+                   {% endif %}
+
+                  <a href="{{ url_for('projet.me') }}"><span class="glyphicon glyphicon-list-alt"></span>&nbsp;&nbsp;Projets <span class="sr-only"></span></a>
+                </div>
+
+             </li>
+            {% if menu == 'projet' %}
+                {% if submenu == 'projet' %}
+                   <li class="list-group-item subitem active"><a href="">Details du projet</a></li>
+                {% endif %}
+                <li class="list-group-item subitem {% if submenu == 'my' %} active {% endif %}"><a href="{{ url_for('projet.me') }}">Mes projets</a></li>
+                {% if current_user.has_roles([('super_admin', 'projet')]) %}
+                <li class="list-group-item subitem {% if submenu == 'tous' %} active {% endif %}"><a href="{{ url_for('projet.index') }}">Tous les projets</a></li>
+                {% endif %}
+            {% endif %}
+
+{#            <li class="divider"></li>#}
+{##}
+{#            <li class="list-group-item {% if menu == 'temps' %} active  {% endif %}" >#}
+{#               <div class="list-group-item-wrapper">#}
+{#                  <div class="dropdown pull-right">#}
+{#                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>#}
+{#                    <ul role="menu" class="dropdown-menu">#}
+{#                      <li><a href="#">Action</a></li>#}
+{#                      <li><a href="#">Another action</a></li>#}
+{#                      <li><a href="#">Something else here</a></li>#}
+{#                      <li class="divider"></li>#}
+{#                      <li><a href="#">Separated link</a></li>#}
+{#                    </ul>#}
+{#                  </div>#}
+{##}
+{#                  <a href="{{ url_for('temps.index') }}"><span class="glyphicon glyphicon-calendar"></span>&nbsp;&nbsp;Feuilles de Temps<span class="sr-only"></span></a>#}
+{#                </div>#}
+{#            </li>#}
+{#            <li class="divider"></li>#}
+{#            <li class="list-group-item">#}
+{#               <div class="list-group-item-wrapper">#}
+{#                  <div class="dropdown pull-right">#}
+{#                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>#}
+{#                    <ul role="menu" class="dropdown-menu">#}
+{#                      <li><a href="#">Action</a></li>#}
+{#                      <li><a href="#">Another action</a></li>#}
+{#                      <li><a href="#">Something else here</a></li>#}
+{#                      <li class="divider"></li>#}
+{#                      <li><a href="#">Separated link</a></li>#}
+{#                    </ul>#}
+{#                  </div>#}
+{##}
+{#                  <a href="#"><span class="glyphicon glyphicon-folder-close"></span>&nbsp;&nbsp;Documents<span class="sr-only"></span></a>#}
+{#                </div>#}
+{##}
+{#             </li>#}
+          {% if current_user.has_roles([('super_admin', 'client', 'contact')]) %}
+             <li class="divider"></li>
+             <li class="list-group-item {% if menu == 'client' %} active  {% endif %}">
+               <div class="list-group-item-wrapper">
+                {% if not menu == 'client' %}
+                  <div class="dropdown pull-right">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                    <ul role="menu" class="dropdown-menu">
+                        {% if current_user.has_roles([('super_admin', 'client')]) %}
+                            <li><a href="{{ url_for('client.index') }}">Clients</a></li>
+                        {% endif %}
+                        {% if current_user.has_roles([('super_admin', 'client')]) %}
+                            <li><a href="{{ url_for('client.index', prospect=1) }}">Prospects</a></li>
+                        {% endif %}
+                        {% if current_user.has_roles([('super_admin', 'contact')]) %}
+                            <li><a href="{{ url_for('contact.index') }}">Contacts</a></li>
+                        {% endif %}
+                    </ul>
+                  </div>
+                {% endif %}
+
+                    <a href="{{ url_for('client.index') }}"><span class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;Clients<span class="sr-only"></span></a>
+                </div>
+             </li>
+            {% if menu == 'client' %}
+                {% if current_user.has_roles([('super_admin', 'client')]) %}
+                <li class="list-group-item subitem {% if submenu == 'client' %} active {% endif %}"><a href="{{ url_for('client.index') }}">Clients</a></li>
+                {% endif %}
+                {% if current_user.has_roles([('super_admin', 'client')]) %}
+                <li class="list-group-item subitem {% if submenu == 'prospect' %} active {% endif %}"><a href="{{ url_for('client.index', prospect=1) }}">Prospects</a></li>
+                {% endif %}
+                {% if current_user.has_roles([('super_admin', 'contact')]) %}
+                <li class="list-group-item subitem {% if submenu == 'contact' %} active {% endif %}"><a href="{{ url_for('contact.index') }}">Contacts</a></li>
+                {% endif %}
+            {% endif %}
+          {% endif %}
+
+            {% if current_user.has_roles([('super_admin', 'site', 'entreprise', 'departement', 'fonction', 'grade', 'frais', 'domaine', 'ligne', 'prestation', 'charge', 'profil', 'user', 'budget_userH', 'budget_userV', 'budget_charge', 'budget_client')]) %}
+                 <li class="divider"></li>
+                 <li class="list-group-item {% if menu == 'societe' %} active  {% endif %}">
+                   <div class="list-group-item-wrapper">
+                       {% if not menu == 'societe' %}
+                          <div class="dropdown pull-right">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                            <ul role="menu" class="dropdown-menu">
+                                {% if current_user.has_roles([('super_admin', 'site', 'entreprise', 'departement', 'fonction', 'grade', 'frais', 'domaine', 'ligne', 'prestation', 'charge')]) %}
+                              <li><a href="{{ url_for('societe.index') }}">Param&egrave;tre entreprise</a></li>
+                                {% endif %}
+                                {% if current_user.has_roles([('super_admin', 'profil')]) %}
+                              <li><a href="{{ url_for('profil.index') }}">Profils/Roles</a></li>
+                                {% endif %}
+                                {% if current_user.has_roles([('super_admin', 'user', 'user_infos', 'user_permmission', 'user_horaire', 'user_budget' )]) %}
+                              <li><a href="{{ url_for('user_param.index') }}">Utilisateur</a></li>
+                                {% endif %}
+
+{#                                Gestion des menus lie au budget#}
+                                {% if current_user.has_roles([('super_admin', 'budget_userH')]) %}
+                                    <li><a href="{{ url_for('budget.index') }}">Budget</a></li>
+                                {% endif %}
+                                {% if current_user.has_roles([('budget_userV')]) and not current_user.has_roles([('budget_userH')]) %}
+                                    <li><a href="{{ url_for('budget.valeur') }}">Budget</a></li>
+                                {% endif %}
+                                {% if current_user.has_roles([('budget_charge')]) and not current_user.has_roles([('budget_userH', 'budget_userV')]) %}
+                                    <li><a href="{{ url_for('budget.charge') }}">Budget</a></li>
+                                {% endif %}
+                                {% if current_user.has_roles([('budget_client')]) and not current_user.has_roles([('budget_userH', 'budget_userV', 'budget_charge')]) %}
+                                    <li><a href="{{ url_for('budget.client') }}">Budget</a></li>
+                                {% endif %}
+
+                            </ul>
+                          </div>
+                       {% endif %}
+                       <a href="{{ url_for('societe.index') }}"><span class="glyphicon glyphicon-cog"></span>&nbsp;&nbsp;Param&egrave;tres<span class="sr-only"></span></a>
+                    </div>
+                 </li>
+                 {% if menu == 'societe' %}
+                     {% if current_user.has_roles([('super_admin', 'entreprise')]) %}
+                    <li class="list-group-item subitem {% if submenu == 'entreprise' %} active {% endif %}"><a href="{{ url_for('societe.index') }}">Param&egrave;tre entreprise</a></li>
+                     {% endif %}
+                     {% if current_user.has_roles([('super_admin', 'profil')]) %}
+                    <li class="list-group-item subitem {% if submenu == 'roles' %} active {% endif %}"><a href="{{ url_for('profil.index') }}">Profils/Roles</a></li>
+                     {% endif %}
+                     {% if current_user.has_roles([('super_admin', 'user')]) %}
+                    <li class="list-group-item subitem {% if submenu == 'users' %} active {% endif %}"><a href="{{ url_for('user_param.index') }}">Utilisateurs</a></li>
+                     {% endif %}
+                     {% if current_user.has_roles([('super_admin', 'budget')]) %}
+                    <li class="list-group-item subitem {% if submenu == 'budget' %} active {% endif %}"><a href="{{ url_for('budget.index') }}">Budgets</a></li>
+                     {% endif %}
+                 {% endif %}
+            {% endif %}
+            {% if current_user.has_roles([('super_admin', 'stat')]) %}
+             <li class="divider"></li>
+             <li class="list-group-item {% if menu == 'stat' %} active  {% endif %}">
+               <div class="list-group-item-wrapper">
+{#                  <div class="dropdown pull-right">#}
+{#                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>#}
+{#                    <ul role="menu" class="dropdown-menu">#}
+{#                      <li><a href="#">Action</a></li>#}
+{#                      <li><a href="#">Another action</a></li>#}
+{#                      <li><a href="#">Something else here</a></li>#}
+{#                      <li class="divider"></li>#}
+{#                      <li><a href="#">Separated link</a></li>#}
+{#                    </ul>#}
+{#                  </div>#}
+
+               <a href="{{ url_for('stat.index') }}"><span class="glyphicon glyphicon-signal"></span>&nbsp;&nbsp;Statistiques &#124; Rapports<span class="sr-only"></span></a>
+                </div>
+
+
+            </li>
+                {% if menu == 'stat' %}
+                    <li class="list-group-item subitem {% if submenu == 'collaborateur' %} active {% endif %}"><a href="{{ url_for('stat.collaborateur') }}">Remplissage des FDT/Collab.</a></li>
+                    <li class="list-group-item subitem {% if submenu == 'taux_HProd' %} active {% endif %}"><a href="{{ url_for('stat.taux_HProd') }}">Taux de chargeabilite H. Prod </a></li>
+                    <li class="list-group-item subitem {% if submenu == 'taux_HDispo' %} active {% endif %}"><a href="{{ url_for('stat.taux_HDispo') }}">Taux de chargeabilite H. Dispo </a></li>
+                    <li class="list-group-item subitem {% if submenu == 'etat_conso' %} active {% endif %}"><a href="{{ url_for('stat.etat_conso') }}">Consommation des H. Dispo. </a></li>
+                    <li class="list-group-item subitem {% if submenu == 'etat_conso_prod' %} active {% endif %}"><a href="{{ url_for('stat.etat_conso_prod') }}">Consommation des H. Prod </a></li>
+
+
+                 {% endif %}
+            <li class="divider"></li>
+            {% endif %}
+
+          </ul>

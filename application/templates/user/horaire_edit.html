@@ -1,0 +1,74 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Creation du taux horaire pour {{ user.first_name }} {{ user.last_name }}</h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire">
+
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+      <div class="form-group">
+        {{ form.date_start.label(class_='col-sm-4 control-label') }}
+        <div class="col-sm-8">
+        {{ form.date_start(class_='form-control', id="datepickerbirth") }}
+        {% for message in form.date_start.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.montant.label(class_='col-sm-4 control-label') }}
+        <div class="col-sm-8">
+        {{ form.montant(class_='form-control', id="amount") }}
+        {% for message in form.montant.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+
+        var number = $('#amount').val();
+        var number_split = number.split(" ");
+        var amount = "";
+        for (i = 0; i < number_split.length; i++){
+            amount += number_split[i];
+        }
+
+        $('#amount').val(amount);
+
+        $.ajax({
+                url: "{{ url_for('user_param.horaire_edit', user_id=user_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+        });
+    });
+
+    $('#datepickerbirth').inputmask("date", { placeholder:"__/__/____"}).datepicker({
+        format: "dd/mm/yyyy",
+{#        startView: 2,#}
+        weekStart: 1,
+        todayBtn: "linked",
+        autoclose: false,
+        orientation: "top auto",
+        todayHighlight: true
+    });
+
+     $('#amount').autoNumeric("init",{
+            aSep: ' ',
+            aDec: '.'
+    });
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{{ url_for('user_param.horaire_refresh', user_id=user_id) }}").delay();
+    {% endif %}
+</script>

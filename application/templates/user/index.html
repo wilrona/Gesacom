@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Liste des utilisateurs/employes </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th width="35%">Nom</th>
+                <th width="35%">Prenom</th>
+                <th width="25%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in users %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ data.first_name }}</td>
+                    <td>{{ data.last_name }}</td>
+                    <td>
+                        {% if current_user.has_roles([('super_admin', 'user_infos')]) %}
+                            <a href="{{ url_for('user_param.infos', user_id=data.key.id()) }}" class="btn btn-link btn-xs" ><i class="glyphicon glyphicon-eye-open"></i></a>
+                        {% endif %}
+                        {% if not current_user.has_roles([('user_infos')]) and current_user.has_roles([('user_permission')]) %}
+                            <a href="{{ url_for('user_param.permission', user_id=data.key.id()) }}" class="btn btn-link btn-xs" ><i class="glyphicon glyphicon-eye-open"></i></a>
+                        {% endif %}
+                        {% if not current_user.has_roles([('user_infos', 'user_permission')]) and current_user.has_roles([('user_horaire')]) %}
+                            <a href="{{ url_for('user_param.horaire', user_id=data.key.id()) }}" class="btn btn-link btn-xs" ><i class="glyphicon glyphicon-eye-open"></i></a>
+                        {% endif %}
+                        {% if not data.is_active() %}
+                            <i class="fa fa-lock text-danger"></i>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="glyphicon glyphicon-eye-open"></i> " pour effectuer les modifications sur un utilisateur</small>
+        </p>
+    </div>
+
+{% endblock %}

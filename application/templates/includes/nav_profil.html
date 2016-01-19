@@ -1,0 +1,10 @@
+<ul class="nav nav-tabs-google nav-stacked myitems" data-spy="affix" data-offset-top="60">
+      <li {% if context == 'profil' %} class="active" {% endif %}>
+        <a href="{{ url_for('profil.index') }}"> Profils</a>
+      </li>
+{% if current_user.has_roles(['super_admin']) %}
+      <li {% if context == 'role' %} class="active" {% endif %}>
+        <a href="{{ url_for('role.index') }}"> Roles </a>
+      </li>
+{% endif %}
+</ul>

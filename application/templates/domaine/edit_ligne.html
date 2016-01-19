@@ -1,0 +1,80 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Creation/Modification d'un service</h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire">
+    <div class="modal-body">
+
+          {{ form.hidden_tag() }}
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Domaine</label>
+            <div class="col-sm-9">
+              <p class="form-control-static">{{ domaines.libelle }}</p>
+            </div>
+        </div>
+          <div class="form-group">
+            {{ form.code.label(class_='col-sm-3 control-label') }}
+            <div class="col-sm-9">
+            {{ form.code(class_='form-control', id="enter") }}
+            {% for message in form.code.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+            {% endfor %}
+            </div>
+          </div>
+          <div class="form-group">
+            {{ form.libelle.label(class_='col-sm-3 control-label') }}
+            <div class="col-sm-9">
+            {{ form.libelle(class_='form-control', id="enter") }}
+            {% for message in form.libelle.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+            {% endfor %}
+            </div>
+          </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <a href="{{ url_for('domaine.domaine_service', domaine_id=domaine_id) }}" class="btn btn-info" id="return">Retour</a>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+
+    $('#return').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: $(this).attr('href'),
+                type: 'GET',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{{ url_for('domaine.domaine_service_edit', domaine_id=domaine_id, service_id=service_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+    $('#enter').keypress(function(e) {
+        if (e.which == 13){
+            e.preventDefault();
+            $.ajax({
+                url: "{{ url_for('domaine.domaine_service_edit', domaine_id=domaine_id, service_id=service_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+        }
+    });
+
+</script>

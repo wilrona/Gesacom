@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Liste des Profils </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+
+                <a href="{{ url_for('profil.edit') }}" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th width="65%">Nom du profil</th>
+                <th width="25%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ data.name }}  {% if data.description %}<span data-trigger="hover" data-container="body" data-toggle="popover" data-placement="right" data-content="{{ data.description }}" class="popoverData btn btn-link btn-xs"><i class="fa fa-info-circle"></i></span> {% endif %}</td>
+                    <td>
+                        <a href="{{ url_for('profil.list', profil_id=data.key.id()) }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static"><i class="fa fa-list"></i> {% if data.count_role() %} ({{ data.count_role() }}) {% endif %} </a>
+                        <a href="{{ url_for('profil.edit', profil_id=data.key.id()) }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static"><i class="fa fa-pencil-square-o"></i></a>
+                        {% if not data.count_role() %}
+                            <a href="{{ url_for('profil.delete', profil_id=data.key.id()) }}" class="btn btn-link btn-xs"><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_profil.html' %}
+    </div>
+
+{% endblock %}

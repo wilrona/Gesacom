@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %} Projets | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Taches projets : <small>{{ projet.titre }}</small></h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('tache_projet.edit', projet_id=projet_id) }}" class="btn btn-primary {% if (not current_user.has_roles([('super_admin', 'projet_tache')], ['edit']) and not projet.responsable_id.get().key.id() == session.get('user_id')|int) or projet.suspend or projet.closed  %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th width="30%">Titre</th>
+                <th width="20%">Utilisateur</th>
+                <th width="15%">Nbr. Heure</th>
+                <th width="20%">Prestation</th>
+                <th width="15%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                   <tr {% if data.closed %} class="danger" {% endif %} {% if data.end %} class="warning" {% endif %}>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ data.titre }}</td>
+                    <td>{{ data.user_id.get().first_name }} {{ data.user_id.get().last_name }}</td>
+                    <td>{{ data.heure }}</td>
+                    <td>{{ data.prestation_id.get().libelle }}</td>
+                    <td>
+                        {% if (current_user.has_roles([('super_admin', 'projet_tache')], ['edit']) or projet.responsable_id.get().key.id() == session.get('user_id')|int) and not projet.suspend and not projet.closed %}
+                        <a href="{{ url_for('tache_projet.edit', projet_id=projet_id, tache_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static" ><i class="fa fa-pencil-square-o"></i></a>
+                        {% endif %}
+                        {% if (current_user.has_roles([('super_admin', 'projet_tache')], ['delete']) or projet.responsable_id.get().key.id() == session.get('user_id')|int) and not projet.suspend and not projet.closed %}
+                        <a href="{{ url_for('tache.delete', tache_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs"><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_projet.html' %}
+    </div>
+
+{% endblock %}

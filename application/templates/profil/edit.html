@@ -1,0 +1,75 @@
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Creation/Modification d'un profil</h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire">
+
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+      <div class="form-group">
+        {{ form.name.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.name(class_='form-control', id="enter") }}
+        {% for message in form.name.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.description.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.description(class_='form-control', id="enter") }}
+        {% for message in form.description.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-9 col-lg-offset-3">
+            <div class="checkbox">
+                <label for="" class="checkbox-inline">
+                    {{ form.active() }} {{ form.active.label(style='padding-left:0') }}
+                </label>
+            </div>
+            {% for message in form.active.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+            {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{{ url_for('profil.edit', profil_id=profil_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+    $('#enter').keypress(function(e) {
+        if (e.which == 13){
+            e.preventDefault();
+            $.ajax({
+                url: "{{ url_for('profil.edit', profil_id=profil_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+        }
+    });
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{{ url_for('profil.index') }}").delay();
+    {% endif %}
+</script>

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Budget des charges </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              {% if current_user.has_roles([('super_admin', 'budget_charge')], ['edit']) %}
+              <div class="btn-group pull-left">
+                  <button type="button" class="btn btn-primary" id="submit">Enregistrer les modifications</button>
+              </div>
+              {% endif %}
+              <div class="btn-group pull-right">
+                <form class="navbar-form navbar-left" role="search" method="get">
+                  <div class="form-group">
+                      <label for="">Exercice en cours :</label>
+                      <select name="year" id="" class="form-control g-select input-lg">
+                          <option value="">Annee en cours</option>
+                          {% for year in list_year %}
+                            <option value="{{ year }}" {% if year == current_year %} selected {% endif %}>{{ year }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <button type="submit" class="btn btn-info">OK</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <form class="form-horizontal" role="form" id="formulaire" {% if current_user.has_roles([('super_admin', 'budget_charge')], ['edit']) %}
+ method="post" action="{{ url_for('budget.charge_edit', page=page) }}" {% endif %}>
+            <table class="table table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Charges</th>
+                    <th>Montant </th>
+                </tr>
+            </thead>
+            <tbody>
+
+            {% for data in list_charge %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        {{ data.name }}
+                    </td>
+                    <td>
+                        {% if now_year <= current_year %}
+                            <input type="text" class="form-control numeric" name="name[{{ data.id }}]" value="{{ data.montant }}">
+                        {% else %}
+                            {{ data.montant }}
+                        {% endif %}
+                    </td>
+                  </tr>
+            {% else %}
+
+                <tr>
+                    <td colspan="3">
+                         <h4 class="text-center">Aucune information</h4>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+      {% if current_user.has_roles([('super_admin', 'budget_charge')], ['edit']) %}
+
+            <input type="hidden" name="year" value="{{ current_year }}"/>
+
+            <input type="submit" class="hidden"/>
+      {% endif %}
+</form>
+
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_budget.html' %}
+    </div>
+
+{% endblock %}
+{% block footer_script %}
+    <script>
+
+    $('.numeric').autoNumeric("init",{
+            aSep: ' ',
+            aDec: '.'
+    });
+    {% if current_user.has_roles([('super_admin', 'budget_charge')], ['edit']) %}
+
+        $('#submit').on('click', function(e){
+            e.preventDefault();
+
+            $('.numeric').each(function(){
+                var number = $(this).val();
+                var number_split = number.split(" ");
+                var amount = "";
+                for (i = 0; i < number_split.length; i++){
+                    amount += number_split[i];
+                }
+
+                $(this).val(amount);
+            });
+
+            $('#formulaire').submit();
+        });
+    {% endif %}
+    </script>
+{% endblock %}

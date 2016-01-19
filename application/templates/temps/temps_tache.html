@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %} Taches | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>FDT de la tache : <small>{{ tache.titre }}</small></h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group">
+                  <h2 class="text-center" style="margin-top: 0;">Semaine <small>{{ start|format_date('%d %b %Y') }}</small> au <small>{{ end|format_date('%d %b %Y') }}</small> </h2>
+              </div>
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('temps_tache.edit', tache_id=tache_id) }}" class="btn btn-primary {% if not tache.user_id.get().key.id() == session.get('user_id')|int or tache.end or tache.closed %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="20%">Date</th>
+                <th width="50%">Description</th>
+                <th width="15%">Temps</th>
+                {% if tache.user_id.get().key.id() == session.get('user_id')|int and not tache.closed and not tache.end %}
+                <th width="15%">Action</th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                   <tr>
+                    <td>{{ data.date|format_date('%d/%m/%Y') }}</td>
+                    <td>{{ data.description }}</td>
+                    <td>{{ data.heure|format_date('%H:%M') }}</td>
+                       {% if tache.user_id.get().key.id() == session.get('user_id')|int and not tache.closed and not tache.end %}
+                    <td>
+
+                            <a href="{{ url_for('temps_tache.edit', tache_id=tache_id, detail_fdt_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static" ><i class="fa fa-pencil-square-o"></i></a>
+                            <a href="{{ url_for('temps_tache.delete', detail_fdt_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs"><i class="fa fa-trash"></i></a>
+
+                    </td>
+                        {% endif %}
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_tache.html' %}
+    </div>
+
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %} Statistique | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-12">
+        <div class="page-header">
+          <h1>Remplissage des feuilles de temps par collaborateur </h1>
+        </div>
+         <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+            <div class="btn-group">
+                  <h2 class="text-center" style="margin-top: 0;">Periode <small>01/01/{{ now_year }}</small> au <small> 31/12/{{ now_year }}</small> </h2>
+              </div>
+              <div class="btn-group pull-right">
+                <form class="navbar-form navbar-left" role="search" method="get" action="">
+                  <div class="form-group">
+                      <label for="">Exercice en cours :</label>
+                      <select name="year" id="" class="form-control g-select input-lg">
+                          <option value="">Annee en cours</option>
+                          {% for year in list_year %}
+                            <option value="{{ year }}" {% if year == current_year %} selected {% endif %}>{{ year }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <button type="submit" class="btn btn-info">OK</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="15%">Collaborateur</th>
+                <th width="20%">Fonction</th>
+                <th width="10%" class="text-center">Administration</th>
+                <th width="10%" class="text-center">Formation</th>
+                <th width="10%" class="text-center">Developpement</th>
+                <th width="10%" class="text-center">Prod. Nfact</th>
+                <th width="10%" class="text-center">Prod. fact</th>
+                <th width="10%" class="text-center">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for datas in analyses %}
+                    <tr>
+                        <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                        <td>{{ datas.user.get().fonction_id.get().libelle }}</td>
+                        <td class="text-center">{{ datas.adm_time|round(3, 'floor') }} </td>
+                        <td class="text-center">{{ datas.form_time|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ datas.dev_time|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ datas.prod_time_nfact|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ datas.prod_time_fact|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ datas.total|round(3, 'floor') }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8">
+                            <h3 class="text-center">Aucune Information</h3>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+            <tfooter>
+                <tr class="active">
+                    <td colspan="2" class="text-center"> <strong>Total</strong></td>
+                    <td class="text-center">{{ total_adm|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ total_form|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ total_dev|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ total_prod_nfact|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ total_prod_fact|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ total|round(3, 'floor') }}</td>
+                </tr>
+
+            </tfooter>
+        </table>
+
+    </div>
+
+{% endblock %}

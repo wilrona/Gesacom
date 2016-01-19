@@ -1,0 +1,25 @@
+
+<ul class="nav nav-tabs-google nav-stacked myitems" data-spy="affix" data-offset-top="60">
+  <li>
+    <a href="{% if not user  %} {{ url_for('tache.index') }} {% else %} {{ url_for('tache.me') }} {% endif %}"> Retour à la liste</a>
+  </li>
+  <li {% if context == 'information' %} class="active" {% endif %}>
+    <a href="{{ url_for('tache.detail', tache_id=tache_id) }}"> Informations</a>
+  </li>
+  <li {% if context == 'fdt' %} class="active" {% endif %}>
+      <a href="{{ url_for('temps_tache.index', tache_id=tache_id) }}">Feuille de temps de la semaine</a>
+  </li>
+  <li {% if context == 'frais' %} class="active" {% endif %}>
+      <a href="{{ url_for('frais_tache.index', tache_id=tache_id) }}">Frais de la semaine</a>
+  </li>
+    {% if current_user.has_roles([('super_admin', 'tache_temps')]) %}
+      <li>
+          <a href="#">Toutes les feuilles de temps</a>
+      </li>
+    {% endif %}
+    {% if current_user.has_roles([('super_admin', 'tache_frais')]) %}
+      <li>
+          <a href="#">Tous les frais</a>
+      </li>
+    {% endif %}
+</ul>

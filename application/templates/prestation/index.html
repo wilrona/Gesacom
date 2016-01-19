@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Liste des Prestations </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('prestation.edit') }}" class="btn btn-primary {% if not current_user.has_roles([('super_admin', 'prestation')], ['edit']) %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th width="35%">libelle</th>
+                <th width="35%">facturable</th>
+                <th width="25%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ data.libelle }}</td>
+                    <td>
+                        {% if data.factu and not data.nfactu %}
+                            Fact
+                        {% elif data.nfactu and not data.factu %}
+                            NFact
+                        {% elif data.nfactu and data.factu %}
+                            Fact/NFact
+                        {% endif %}
+                    </td>
+                    <td>
+{#                        <a href="{{ url_for('prestation.delete', prestation_id=data.key.id()) }}" class="btn btn-link"><i class="fa fa-trash"></i></a>#}
+
+                        {% if current_user.has_roles([('super_admin', 'prestation')], ['edit']) %}
+                            <a href="{{ url_for('prestation.edit', prestation_id=data.key.id()) }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static"><i class="fa fa-pencil-square-o"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_param.html' %}
+    </div>
+
+{% endblock %}

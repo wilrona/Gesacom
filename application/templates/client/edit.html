@@ -1,0 +1,103 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Creation d'un client</h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire">
+
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+      <div class="form-group">
+        {{ form.ref.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.ref(class_='form-control', id="enter") }}
+        {% for message in form.ref.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.name.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.name(class_='form-control', id="enter") }}
+        {% for message in form.name.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.bp.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.bp(class_='form-control', id="enter") }}
+        {% for message in form.bp.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.adresse.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.adresse(class_='form-control', id="enter", style="resize:none;", row="10", col="20") }}
+        {% for message in form.adresse.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.ville.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.ville(class_='form-control', id="enter") }}
+        {% for message in form.ville.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    <div class="form-group">
+        {{ form.pays.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.pays(class_='form-control', id="enter") }}
+        {% for message in form.pays.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    <div class="form-group">
+        {{ form.email.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.email(class_='form-control', id="enter") }}
+        {% for message in form.email.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    <div class="form-group">
+        {{ form.phone.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.phone(class_='form-control', id="enter") }}
+        {% for message in form.phone.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{{ url_for('client.edit', client_id=client_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{{ url_for('client.index') }}").delay();
+    {% endif %}
+</script>

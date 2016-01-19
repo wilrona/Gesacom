@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+         <div class="page-header">
+          <h1>Taux Horaires : <small>{{ user.first_name }} {{ user.last_name }} </small> <i class="fa fa-power-off pull-right {% if user.logged %} text-success {% else %} text-danger {% endif %}" title="{% if user.logged %} connecte {% else %} deconnecte {% endif %}"></i></h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('user_param.horaire_edit', user_id=user_id) }}" class="btn btn-primary {% if not current_user.has_roles([('super_admin', 'user_horaire')], ['edit']) %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th width="35%">Date d'application</th>
+                <th width="35%">Montant</th>
+                <th width="25%">Etat</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                  <tr {% if user.tauxHApp == data.key.id() %} class="success" {% endif %}>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ data.date_start|format_date('%d/%m/%Y') }}</td>
+                    <td>{{ data.montant|format_price() }}</td>
+                    <td>
+                        {% if user.tauxHApp == data.key.id() %}
+                            <span class="text-success">Taux en application</span>
+                        {% endif %}
+
+                        {% if data.date_start > date_auto_nows.date() and current_user.has_roles([('super_admin', 'user_horaire')], ['delete']) %}
+                            <a class="btn btn-link btn-xs" href="{{ url_for('user_param.delete_horaire', horaire_id=data.key.id(), user_id=user_id) }}"><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_user.html' %}
+    </div>
+
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Budget des collaborateurs </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="pull-left">
+                 <ul class="nav nav-pills nav-tabs-google nav-tabs-perso">
+                     {% if current_user.has_roles([('super_admin', 'budget_userH')]) %}
+                  <li class="active"><a href="{{ url_for('budget.index') }}">Budget en heure</a></li>
+                     {% endif %}
+                     {% if current_user.has_roles([('super_admin', 'budget_userV')]) %}
+                  <li><a href="{{ url_for('budget.valeur') }}">Valeur production attendue</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <form class="navbar-form navbar-left" role="search" method="get" action="{{ url_for('budget.index', page=page, year=current_year) }}">
+                  <div class="form-group">
+                      <label for="">Exercice en cours :</label>
+                      <select name="year" id="" class="form-control g-select input-lg">
+                          <option value="">Annee en cours</option>
+                          {% for year in list_year %}
+                            <option value="{{ year }}" {% if year == current_year %} selected {% endif %}>{{ year }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <button type="submit" class="btn btn-info">OK</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nom Employe</th>
+                    <th class="text-center">Disponible</th>
+                    <th class="text-center">Production</th>
+                    <th class="text-center">Developpement</th>
+                    <th class="text-center">Formation</th>
+                    <th class="text-center">Administration</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            {% for data in list_budget %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        {% if now_year <= current_year and current_user.has_roles([('super_admin', 'budget_userH')], ['edit']) %}
+                            <a href="{{ url_for('budget.edit', user_id=data.id, page=page, current_year=current_year, budget_id=data.budget_id) }}" data-toggle="modal" data-target="#myModal" data-backdrop="static">{{ data.full_name }}</a>
+                        {% else %}
+                            {{ data.full_name }}
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ data.disponible }}</td>
+                    {% for prestation in data.budget_prestation %}
+                        {% if prestation.sigle == 'PRO' %}
+                            <td class="text-center">{{ prestation.time }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td class="text-center">0</td>
+                    {% endfor %}
+                    {% for prestation in data.budget_prestation %}
+                        {% if prestation.sigle == 'DEV' %}
+                            <td class="text-center">{{ prestation.time }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td class="text-center">0</td>
+                    {% endfor %}
+                    {% for prestation in data.budget_prestation %}
+                        {% if prestation.sigle == 'FOR' %}
+                            <td class="text-center">{{ prestation.time }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td class="text-center">0</td>
+                    {% endfor %}
+                    {% for prestation in data.budget_prestation %}
+                        {% if prestation.sigle == 'ADM' %}
+                            <td class="text-center">{{ prestation.time }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td class="text-center">0</td>
+                    {% endfor %}
+                  </tr>
+            {% else %}
+
+                <tr>
+                    <td colspan="7">
+                         <h4 class="text-center">Aucune information</h4>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_budget.html' %}
+    </div>
+
+{% endblock %}

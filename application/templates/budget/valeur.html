@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Budget des collaborateurs </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="pull-left">
+                 <ul class="nav nav-pills nav-tabs-google nav-tabs-perso">
+                     {% if current_user.has_roles([('super_admin', 'budget_userH')]) %}
+                  <li><a href="{{ url_for('budget.index') }}">Budget en heure</a></li>
+                     {% endif %}
+                    {% if current_user.has_roles([('super_admin', 'budget_userV')]) %}
+                  <li  class="active"><a href="{{ url_for('budget.valeur') }}">Valeur production attendue</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <form class="navbar-form navbar-left" role="search" method="get">
+                  <div class="form-group">
+                      <label for="">Exercice en cours :</label>
+                      <select name="year" id="" class="form-control g-select input-lg">
+                          <option value="">Annee en cours</option>
+                          {% for year in list_year %}
+                            <option value="{{ year }}" {% if year == current_year %} selected {% endif %}>{{ year }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <button type="submit" class="btn btn-info">OK</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nom Employe</th>
+                    <th class="text-center">Taux horaire</th>
+                    <th class="text-center">Production en H</th>
+                    <th class="text-center">valeur brute</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            {% for data in list_budget %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        {{ data.full_name }}
+                    </td>
+                    <td class="text-center">{{ data.taux|format_price() }}</td>
+                    <td class="text-center">{{ data.heure }}</td>
+                    <td class="text-center">
+                        {{ (data.taux * data.heure)|format_price() }}
+                    </td>
+                  </tr>
+            {% else %}
+
+                <tr>
+                    <td colspan="7">
+                         <h4 class="text-center">Aucune information</h4>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_budget.html' %}
+    </div>
+
+{% endblock %}

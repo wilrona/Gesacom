@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Liste des domaines </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('domaine.edit') }}" class="btn btn-primary {% if not current_user.has_roles([('super_admin', 'domaine')], ['edit']) %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th width="35%">code</th>
+                <th width="35%">libelle</th>
+                <th width="25%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ data.code }}</td>
+                    <td>{{ data.libelle }}</td>
+                    <td>
+                        {% if current_user.has_roles([('super_admin', 'ligne')])  %}
+                            <a href="{{ url_for('domaine.domaine_service', domaine_id=data.key.id()) }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static"><i class="fa fa-list"></i> {% if data.count_service() %} ({{ data.count_service() }}) {% endif %} </a>
+                        {% endif %}
+                        {% if current_user.has_roles([('super_admin', 'domaine')], ['edit']) %}
+                            <a href="{{ url_for('domaine.edit', domaine_id=data.key.id()) }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static"><i class="fa fa-pencil-square-o"></i></a>
+                        {% endif %}
+                        {% if not data.count_service() and current_user.has_roles([('super_admin', 'domaine')], ['delete']) %}
+                            <a href="{{ url_for('domaine.delete', domaine_id=data.key.id()) }}" class="btn btn-link btn-xs"><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_param.html' %}
+    </div>
+
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+         <div class="page-header">
+          <h1>Historiques des Budgets : <small>{{ user.first_name }} {{ user.last_name }} </small> <i class="fa fa-power-off pull-right {% if user.logged %} text-success {% else %} text-danger {% endif %}" title="{% if user.logged %} connecte {% else %} deconnecte {% endif %}"></i></h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <table class="table table-condensed table-hover">
+            <thead>
+                <tr>
+                    <th>Annee</th>
+                    <th class="text-center">Disponible</th>
+                    <th class="text-center">Production</th>
+                    <th class="text-center">Developpement</th>
+                    <th class="text-center">Formation</th>
+                    <th class="text-center">Administration</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in list_budget %}
+                <tr>
+                    <td>
+                        {{ data.year }}
+                    </td>
+                    <td class="text-center">{{ data.disponible }}</td>
+                    {% for prestation in data.budget_prestation %}
+                        {% if prestation.sigle == 'PRO' %}
+                            <td class="text-center">{{ prestation.time }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td class="text-center">0</td>
+                    {% endfor %}
+                    {% for prestation in data.budget_prestation %}
+                        {% if prestation.sigle == 'DEV' %}
+                            <td class="text-center">{{ prestation.time }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td class="text-center">0</td>
+                    {% endfor %}
+                    {% for prestation in data.budget_prestation %}
+                        {% if prestation.sigle == 'FOR' %}
+                            <td class="text-center">{{ prestation.time }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td class="text-center">0</td>
+                    {% endfor %}
+                    {% for prestation in data.budget_prestation %}
+                        {% if prestation.sigle == 'ADM' %}
+                            <td class="text-center">{{ prestation.time }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td class="text-center">0</td>
+                    {% endfor %}
+                  </tr>
+            {% else %}
+
+                <tr>
+                    <td colspan="6">
+                         <h4 class="text-center">Aucune information</h4>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_user.html' %}
+    </div>
+
+{% endblock %}

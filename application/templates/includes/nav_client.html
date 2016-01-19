@@ -1,0 +1,19 @@
+<ul class="nav nav-tabs-google nav-stacked myitems" data-spy="affix" data-offset-top="60">
+  <li>
+    <a href="{{ url_for('client.index', prospect=prospect) }}"> Retour a la liste</a>
+  </li>
+  <li {% if context == 'information' %} class="active" {% endif %}>
+    <a href="{{ url_for('client.edit', client_id=client_id, prospect=prospect) }}"> Information</a>
+  </li>
+{% if client_id %}
+    {% if current_user.has_roles([('super_admin', 'client_contact')]) %}
+  <li {% if context == 'contact' %} class="active" {% endif %}>
+    <a href="{{ url_for('client.contact', client_id=client_id, prospect=prospect) }}"> Contact</a>
+  </li>
+    {% endif %}
+  <li>
+    <a href="#">Budgets</a>
+  </li>
+{% endif %}
+
+</ul>

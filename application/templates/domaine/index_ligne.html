@@ -1,0 +1,60 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Ligne de service</h4>
+</div>
+
+<div class="modal-body">
+        <a href="{{ url_for('domaine.domaine_service_edit', domaine_id=domaine_id) }}" class="btn btn-default pull-right edit {% if not current_user.has_roles([('super_admin', 'ligne')], ['edit']) %} disabled {% endif %}">Ajouter une ligne de service</a>
+        <h3>Domaine : <small>{{ domaines.libelle }}</small></h3>
+        <hr/>
+        {% include 'includes/flash_message.html' %}
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th width="35%">code</th>
+                <th width="35%">libelle</th>
+                <th width="25%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for data in data_service %}
+                <tr>
+                    <td>{{ loop.index }} </td>
+                    <td>{{ data.code }}</td>
+                    <td>{{ data.libelle }}</td>
+                    <td>
+                        {% if current_user.has_roles([('super_admin', 'ligne')], ['edit']) %}
+                        <a href="{{ url_for('domaine.domaine_service_edit', domaine_id=domaine_id, service_id=data.key.id()) }}" class="btn btn-link btn-xs edit"><i class="fa fa-pencil-square-o"></i></a>
+                        {% endif %}
+                        {% if current_user.has_roles([('super_admin', 'ligne')], ['delete']) %}
+                            <a href="{{ url_for('domaine.domaine_service_delete', domaine_id=domaine_id, service_id=data.key.id()) }}" class="btn btn-link btn-xs delete"><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">
+                    <h4 class="text-center">Aucune information</h4>
+                    </td>
+                </tr>
+            {% endfor %}
+
+
+            </tbody>
+        </table>
+</div>
+ <div class="modal-footer">
+        <a href="{{ url_for('domaine.index') }}" class="btn btn-default">Fermer</a>
+ </div>
+<script>
+    $('.edit, .delete').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: $(this).attr('href'),
+                type: 'GET',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+</script>

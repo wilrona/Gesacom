@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Entreprise | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+    <div class="col-lg-9">
+    <div class="page-header">
+      <h1>Information Entreprise </h1>
+      {% include 'includes/flash_message.html' %}
+    </div>
+
+    <div class="col-lg-9">
+        <form role="form" method="post">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            {{ form.typEnt.label(class_='control-label') }}
+            <select name="typEnt" id="" class="form-control g-select input-lg">
+                <option value="">Selectionnez votre type d'entreprise</option>
+                <option value="LT" {% if form.typEnt.data == 'LT' %} selected {% endif %}>Etablissement</option>
+                <option value="SARL" {% if form.typEnt.data == 'SARL' %} selected {% endif %}>SARL (Société à responsabilité limitée)</option>
+                <option value="SA" {% if form.typEnt.data == 'SA' %} selected {% endif %}>SA (Société Anonyme)</option>
+            </select>
+          {% for message in form.typEnt.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+          {% endfor %}
+          </div>
+          <div class="form-group">
+            {{ form.name.label(class_='control-label') }}
+            {{ form.name(class_='form-control') }}
+              {% for message in form.name.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+              {% endfor %}
+          </div>
+          <div class="form-group">
+            {{ form.slogan.label(class_='control-label') }}
+            {{ form.slogan(class_='form-control') }}
+              {% for message in form.slogan.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+              {% endfor %}
+          </div>
+          <div class="form-group">
+            {{ form.bp.label(class_='control-label') }}
+            {{ form.bp(class_='form-control') }}
+              {% for message in form.bp.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+              {% endfor %}
+          </div>
+        <div class="form-group">
+            {{ form.adress.label(class_='control-label') }}
+            {{ form.adress(class_='form-control') }}
+              {% for message in form.adress.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+              {% endfor %}
+          </div>
+          <div class="form-group">
+            {{ form.pays.label(class_='control-label') }}
+            <select name="pays" id="" class="form-control g-select input-lg">
+                <option value="">Selectionnez votre pays</option>
+                {% for key, val in list_contry.items() %}
+                    <option value="{{ key }}" {% if form.pays.data == key %} selected {% endif %}>{{ val }}</option>
+                {% endfor %}
+            </select>
+          {% for message in form.pays.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+          {% endfor %}
+          </div>
+          <div class="form-group">
+            {{ form.ville.label(class_='control-label') }}
+            {{ form.ville(class_='form-control') }}
+          {% for message in form.ville.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+          {% endfor %}
+          </div>
+         <div class="form-group">
+            {{ form.phone.label(class_='control-label') }}
+            {{ form.phone(class_='form-control') }}
+             {% for message in form.phone.errors %}
+             <div class="alert alert-danger form-validator">{{ message }}</div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            {{ form.capital.label(class_='control-label') }}
+            {{ form.capital(class_='form-control') }}
+            {% for message in form.capital.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+          {% endfor %}
+          </div>
+           <div class="form-group">
+            {{ form.numcontr.label(class_='control-label') }}
+            {{ form.numcontr(class_='form-control') }}
+            {% for message in form.numcontr.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+          {% endfor %}
+          </div>
+          <div class="form-group">
+            {{ form.registcom.label(class_='control-label') }}
+            {{ form.registcom(class_='form-control') }}
+            {% for message in form.registcom.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+          {% endfor %}
+          </div>
+          <div class="form-group">
+            {{ form.email.label(class_='control-label') }}
+            {{ form.email(class_='form-control') }}
+            {% for message in form.email.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+          {% endfor %}
+          </div>
+          <div class="form-group">
+            {{ form.siteweb.label(class_='control-label') }}
+            {{ form.siteweb(class_='form-control') }}
+            {% for message in form.siteweb.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+          {% endfor %}
+          </div>
+          <div class="form-group">
+                <hr/>
+              {% if current_user.has_roles([('super_admin','entreprise')], ['edit']) %}
+                 <button type="submit" class="btn btn-primary">Enregistrer</button>
+              {% endif %}
+          </div>
+    </form>
+    </div>
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_param.html' %}
+    </div>
+{% endblock %}

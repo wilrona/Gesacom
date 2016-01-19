@@ -1,0 +1,87 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Creation/Modification d'un domaine</h4>
+</div>
+
+
+
+
+    <div class="modal-body">
+        <form class="form-horizontal" role="form" id="formulaire">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            {{ form.code.label(class_='col-sm-3 control-label') }}
+            <div class="col-sm-9">
+            {{ form.code(class_='form-control', id="enter") }}
+            {% for message in form.code.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+            {% endfor %}
+            </div>
+          </div>
+          <div class="form-group">
+            {{ form.libelle.label(class_='col-sm-3 control-label') }}
+            <div class="col-sm-9">
+            {{ form.libelle(class_='form-control', id="enter") }}
+            {% for message in form.libelle.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+            {% endfor %}
+            </div>
+          </div>
+        </form>
+{#        <hr/>#}
+{#        <a href="" class="btn btn-default pull-right">Ajouter une ligne de service</a>#}
+{#        <h3><small>Ligne de service</small></h3>#}
+{#        <hr/>#}
+{#        <table class="table table-condensed table-hover">#}
+{#            <thead>#}
+{#            <tr>#}
+{#                <th>#</th>#}
+{#                <th>code</th>#}
+{#                <th>libelle</th>#}
+{#                <th>Action</th>#}
+{#            </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#            <tr>#}
+{#                <td colspan="4">#}
+{#                <h4 class="text-center">Aucune information</h4>#}
+{#                </td>#}
+{#            </tr>#}
+{#            </tbody>#}
+{#        </table>#}
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{{ url_for('domaine.edit', domaine_id=domaine_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+    $('#enter').keypress(function(e) {
+        if (e.which == 13){
+            e.preventDefault();
+            $.ajax({
+                url: "{{ url_for('domaine.edit', domaine_id=domaine_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+        }
+    });
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{{ url_for('domaine.index') }}").delay();
+    {% endif %}
+</script>

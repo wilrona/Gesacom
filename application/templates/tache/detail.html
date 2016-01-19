@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %} Taches | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Tache  : <small>{{ tache.titre }}</small></h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="pull-right">
+{#                <a href="{{ url_for('tache.edit', tache_id=tache_id) }}" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-backdrop="static">Modifier</a>#}
+                {% if tache.user_id.get().key.id() == session.get('user_id') %}
+                    {% if not tache.end %}
+                       <a href="{{ url_for('tache.end', tache_id=tache_id) }}" class="btn btn-danger">Terminer la tache</a>
+                    {% elif tache.end and tache.closed %}
+                        <a class="btn btn-info disabled">Tache Cloturee</a>
+                    {% elif tache.end and not tache.closed %}
+                        <a href="{{ url_for('tache.end', tache_id=tache_id) }}" class="btn btn-warning">En attente de cloture</a>
+                    {% endif %}
+                {% endif %}
+
+                {% if tache.projet_id and tache.projet_id.get().responsable_id.get().key.id() == session.get('user_id') %}
+                    {% if not tache.closed and tache.end %}
+                       <a href="{{ url_for('tache.closed', tache_id=tache_id) }}" class="btn btn-danger">Cloturer</a>
+                    {% elif tache.closed and tache.end %}
+                        <a href="{{ url_for('tache.closed', tache_id=tache_id) }}" class="btn btn-warning">Annuler la cloture</a>
+                    {% endif %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Projet :</label>
+            <div class="col-sm-8">
+              <p class="form-control-static">{% if tache.projet_id %}{{ tache.projet_id.get().titre }} {% else %} Aucun {% endif %}</p>
+            </div>
+          </div>
+         <div class="form-group">
+            <label class="col-sm-4 control-label">Code du client :</label>
+            <div class="col-sm-8">
+              <p class="form-control-static">{% if tache.projet_id %} {{ tache.projet_id.get().code }} {% else %} Aucun {% endif %}</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Titre :</label>
+            <div class="col-sm-8">
+              <p class="form-control-static">{{ tache.titre }}</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Description :</label>
+            <div class="col-sm-8">
+              <p class="form-control-static">
+                  {% if tache.description %}
+                    {{ tache.description }}
+                  {% else %}
+                    Aucune
+                  {% endif %}
+              </p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Nbre d'heure :</label>
+            <div class="col-sm-8">
+              <p class="form-control-static">{{ tache.heure }}</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Facturation :</label>
+            <div class="col-sm-8">
+              <p class="form-control-static">
+                  {% if tache.facturable %}
+                    Facturable
+                  {% else %}
+                    Non Facturable
+                  {% endif %}
+              </p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Date de debut :</label>
+            <div class="col-sm-8">
+              <p class="form-control-static">{{ tache.date_start|format_date('%d/%m/%Y') }}</p>
+            </div>
+          </div>
+        </div>
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_tache.html' %}
+    </div>
+
+{% endblock %}

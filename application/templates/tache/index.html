@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %} Taches | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Listes des taches {{ small_title }}</h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="pull-left">
+              <ul class="nav nav-pills nav-tabs-google nav-tabs-perso">
+                  <li {% if not request.args.get('filtre') %} class="active" {% endif %}><a href="{{ url_for('tache.index') }}">En cours</a></li>
+                  <li {% if request.args.get('filtre') and request.args.get('filtre') == 'end' %} class="active" {% endif %}><a href="{{ url_for('tache.index', filtre='end') }}">Terminee</a></li>
+                  <li {% if request.args.get('filtre') and request.args.get('filtre') == 'cloture' %} class="active" {% endif %}><a href="{{ url_for('tache.index', filtre='cloture') }}">Cloturee</a></li>
+              </ul>
+            </div>
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('tache.hors_projet') }}" class="btn btn-primary {% if not current_user.has_roles([('super_admin', 'tache')], ['edit']) %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer tache hors projet</a>
+              </div>
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('tache.edit') }}" class="btn btn-primary {% if not current_user.has_roles([('super_admin', 'tache')], ['edit']) %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th width="20%">Titre</th>
+                <th width="20%">Projet</th>
+                <th width="10%">Client</th>
+                <th width="15%">Utilisateur</th>
+                <th width="15%">Prestation</th>
+                <th width="15%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                    {% if data.projet_id %}
+                           <tr {% if data.projet_id.get().suspend %} class="warning" {% endif %}>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ data.titre }}</td>
+                            <td>
+                                {{ data.projet_id.get().titre }}
+                            </td>
+                            <td>
+                                {{ data.projet_id.get().code }}
+                            </td>
+                            <td>{{ data.user_id.get().last_name }}</td>
+                            <td>{{ data.prestation_id.get().libelle }}</td>
+                            <td>
+                                {% if current_user.has_roles([('super_admin', 'tache')], ['edit']) and data.projet_id and not data.end and not data.closed %}
+                                    <a href="{{ url_for('tache.edit', tache_id=data.key.id() )}}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static" ><i class="fa fa-pencil-square-o"></i></a>
+                                {% endif %}
+                                {% if current_user.has_roles([('super_admin', 'tache')], ['edit']) and not data.projet_id and not data.end and not data.closed %}
+                                    <a href="{{ url_for('tache.hors_projet', tache_id=data.key.id() )}}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static" ><i class="fa fa-pencil-square-o"></i></a>
+                                {% endif %}
+
+                                <a href="{{ url_for('tache.detail', tache_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs"><i class="glyphicon glyphicon-eye-open"></i></a>
+                            </td>
+                          </tr>
+                    {% else %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ data.titre }}</td>
+                        <td>
+                            Aucun
+                        </td>
+                        <td>
+                            Aucun
+                        </td>
+                        <td>{{ data.user_id.get().last_name }}</td>
+                        <td>{{ data.prestation_id.get().libelle }}</td>
+                        <td>
+                            {% if current_user.has_roles([('super_admin', 'tache')], ['edit']) and data.projet_id and not data.end and not data.closed %}
+                                <a href="{{ url_for('tache.edit', tache_id=data.key.id() )}}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static" ><i class="fa fa-pencil-square-o"></i></a>
+                            {% endif %}
+                            {% if current_user.has_roles([('super_admin', 'tache')], ['edit']) and not data.projet_id and not data.end and not data.closed %}
+                                <a href="{{ url_for('tache.hors_projet', tache_id=data.key.id() )}}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static" ><i class="fa fa-pencil-square-o"></i></a>
+                            {% endif %}
+
+                            <a href="{{ url_for('tache.detail', tache_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs"><i class="glyphicon glyphicon-eye-open"></i></a>
+                        </td>
+                      </tr>
+                    {% endif %}
+                {% else %}
+                    <tr>
+                        <td colspan="7">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="fa fa-pencil-square-o"></i> " pour effectuer les modifications sur une tache</small>
+        </p>
+    </div>
+
+{% endblock %}

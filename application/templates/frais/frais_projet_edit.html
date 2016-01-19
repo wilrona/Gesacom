@@ -1,0 +1,122 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Edition d'un frais <span class="pull-right">{{ projet.titre }}</span></h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire" action="">
+
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+      <div class="form-group">
+        {{ form.frais_id.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.frais_id(class_='form-control g-select', id="frais") }}
+        {% for message in form.frais_id.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+     <div class="form-group">
+        {{ form.montant.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.montant(class_='form-control numeric') }}
+        {% for message in form.montant.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.facturable.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+         <select name="facturable" class="form-control" id="facturation">
+            <option value="">Selection de la facturation</option>
+             {% for key in list_factu %}
+                <option value="{{ key }}" {% if form.facturable.data|int == key|int %} selected {% endif %}>{{ list_factu[key] }}</option>
+             {% endfor %}
+          </select>
+        {% for message in form.facturable.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    $('#submit').on('click', function(e){
+
+        e.preventDefault();
+        var number = $('.numeric').val();
+        var number_split = number.split(" ");
+        var amount = "";
+        for (i = 0; i < number_split.length; i++){
+            amount += number_split[i];
+        }
+
+        $('.numeric').val(parseFloat(amount));
+
+        $.ajax({
+                url: "{{ url_for('frais_projet.edit', projet_id=projet_id, frais_projet_id=frais_projet_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+    $('#frais').on('change', function(e){
+            e.preventDefault();
+
+            $.ajax({
+                url: "{{ url_for('frais_projet.facturations') }}/"+$(this).val(),
+                type: 'GET',
+                success: function(data) {
+                    var datas = [];
+                    var valeur;
+                    if(data['fact'] != 0){
+                        valeur = {};
+                        valeur['id'] = 1;
+                        valeur['text'] = 'Facturable';
+                        datas.push(valeur);
+                    }
+
+                    if(data['nfact'] != 0){
+                        valeur = {};
+                        valeur['id'] = 2;
+                        valeur['text'] = 'Non Facturable';
+                        datas.push(valeur);
+                    }
+                    var $options = $();
+                    $options = $options.add(
+                            $('<option>').attr('value', 0).html('Selection de la facturation')
+                    );
+                    for (var i in datas) {
+                        $options = $options.add(
+                            $('<option>').attr('value', datas[i]['id']).html(datas[i]['text'])
+                        );
+                    }
+                    $('#facturation').html($options);
+                    console.log('ok');
+{#                    $("#facturation").select2();#}
+                }
+            });
+
+        });
+
+    // Google styled selects
+    $("select.g-select").each(function() {
+        var e = $(this)
+        e.select2()
+    });
+
+    $('.numeric').autoNumeric("init",{
+            aSep: ' ',
+            aDec: '.'
+    });
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{{ url_for('frais_projet.index', projet_id=projet_id) }}").delay();
+    {% endif %}
+</script>

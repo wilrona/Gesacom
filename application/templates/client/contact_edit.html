@@ -1,0 +1,113 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Creation d'un contact</h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire">
+
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+      <div class="form-group">
+        {{ form.first_name.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.first_name(class_='form-control') }}
+        {% for message in form.first_name.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.last_name.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.last_name(class_='form-control') }}
+        {% for message in form.last_name.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    <div class="form-group">
+        {{ form.email.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.email(class_='form-control') }}
+        {% for message in form.email.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.phone1.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.phone1(class_='form-control') }}
+        {% for message in form.phone1.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.phone2.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.phone2(class_='form-control') }}
+        {% for message in form.phone2.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+        {% if not client_id %}
+            <div class="form-group">
+            {{ form.client_id.label(class_='col-sm-3 control-label') }}
+                <div class="col-sm-9">
+                  {{ form.client_id(class_='form-control g-select input-lg') }}
+                  {% for message in form.client_id.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            {{ form.client_id(class_='hidden') }}
+        {% endif %}
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    {% if client_id  %}
+        $('#submit').on('click', function(e){
+            e.preventDefault();
+            $.ajax({
+                    url: "{{ url_for('client.contact_edit', client_id=client_id, contact_id=contact_id) }}",
+                    data: $('#formulaire').serialize(),
+                    type: 'POST',
+                    success: function(data) {
+                        $('.modal-content').html(data);
+                    }
+                });
+        });
+    {% else %}
+        $('#submit').on('click', function(e){
+            e.preventDefault();
+            $.ajax({
+                    url: "{{ url_for('contact.contact_edit', contact_id=contact_id) }}",
+                    data: $('#formulaire').serialize(),
+                    type: 'POST',
+                    success: function(data) {
+                        $('.modal-content').html(data);
+                    }
+                });
+        });
+            // Google styled selects
+        $("select.g-select").each(function() {
+            var e = $(this);
+            e.select2();
+        });
+    {% endif %}
+
+    {% if success %}
+        {% if client_id %}
+            window.location.replace(window.location.origin+"{{ url_for('client.contact', client_id=client_id) }}").delay();
+        {% else %}
+            window.location.replace(window.location.origin+"{{ url_for('contact.index') }}").delay();
+        {% endif %}
+    {% endif %}
+</script>

@@ -1,0 +1,4 @@
+cron:
+- description: Active les taux horaires des utilisateurs tous les jours
+  url: /user/horaire/refresh
+  schedule: every day 00:00

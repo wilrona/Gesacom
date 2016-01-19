@@ -1,0 +1,29 @@
+
+<ul class="nav nav-tabs-google nav-stacked myitems" data-spy="affix" data-offset-top="60">
+  <li>
+    <a href="{{ url_for('user_param.index') }}"> Retour à la liste</a>
+  </li>
+  {% if current_user.has_roles([('super_admin', 'user_infos')]) %}
+      <li {% if context == 'information' %} class="active" {% endif %}>
+        <a href="{{ url_for('user_param.infos', user_id=user_id) }}"> Informations</a>
+      </li>
+  {% endif %}
+  {% if current_user.has_roles([('super_admin', 'user_permission')]) %}
+  <li {% if context == 'permission' %} class="active" {% endif %}>
+    <a href="{{ url_for('user_param.permission', user_id=user_id) }}"> Permissions</a>
+  </li>
+{% endif %}
+{% if current_user.has_roles([('super_admin', 'user_horaire')]) %}
+   <li {% if context == 'horaire' %} class="active" {% endif %}>
+    <a href="{{ url_for('user_param.horaire', user_id=user_id) }}"> Taux Horaires</a>
+  </li>
+{% endif %}
+{% if current_user.has_roles([('super_admin', 'user_budget')]) %}
+ <li {% if context == 'budget' %} class="active" {% endif %}>
+    <a href="{{ url_for('user_param.budget', user_id=user_id) }}"> Budget</a>
+  </li>
+{% endif %}
+
+
+
+</ul>

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %} Client | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>{% if prospect %} Prospect {% else %} Client {% endif %} : <small>{{ client.name }} </small>
+              {% if view_accent %}
+                  <a class="btn btn-info pull-right" href="{{ url_for('client.accent_com', client_id=client_id) }}">C'est l'entreprise !</a>
+              {% endif %}
+              {% if client.prospect and client_id %}
+                  <a href="{{ url_for('client.prospect_client', client_id=client_id) }}" class="btn btn-info pull-right">Prospect -> Client</a>
+              {% endif %}
+          </h1>
+
+          {% include 'includes/flash_message.html' %}
+        </div>
+
+
+        <form role="form" method="post" class="form-horizontal">
+
+            {{ form.hidden_tag() }}
+             <div class="form-group">
+                 {{ form.ref.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                    {% if client_id %}
+                        {{ form.ref.data }}
+                        <input type="hidden" name="ref" value="{{ client.ref }}"/>
+                    {% else %}
+                         {{ form.ref(class_='form-control') }}
+                    {% endif %}
+                    {% for message in form.ref.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+               {{ form.name.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.name(class_='form-control') }}
+                {% for message in form.name.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.bp.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.bp(class_='form-control') }}
+                    {% for message in form.bp.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.adresse.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.adresse(class_='form-control', style="resize:none;", row="50", col="50") }}
+                    {% for message in form.adresse.errors %}
+                        <div class="alert alert-danger form-validator">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.ville.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.ville(class_='form-control g-select input-lg') }}
+                {% for message in form.ville.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.pays.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.pays(class_='form-control g-select input-lg') }}
+                {% for message in form.pays.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.email.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.email(class_='form-control g-select input-lg') }}
+                  {% for message in form.email.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.phone.label(class_='col-sm-4 control-label') }}
+                <div class="col-sm-8">
+                  {{ form.phone(class_='form-control g-select input-lg') }}
+                  {% for message in form.phone.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+                </div>
+            </div>
+         {% if current_user.has_roles([('super_admin', 'client')], ['edit']) %}
+            <div class="form-group">
+                <div class="col-sm-offset-4 col-sm-8">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </div>
+         {% endif %}
+
+        </form>
+
+
+
+    </div>
+    <div class="col-lg-3">
+        {% include 'includes/nav_client.html' %}
+    </div>
+
+{% endblock %}

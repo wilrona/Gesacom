@@ -1,0 +1,192 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Edition d'une tache</h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire" action="">
+
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+
+        <div class="form-group {% if hors_projet %} hidden {% endif %}">
+            {{ form.projet_id.label(class_='col-sm-3 control-label') }}
+            <div class="col-sm-9">
+                {{ form.projet_id(class_='form-control g-select') }}
+                {% for message in form.projet_id.errors %}
+                    <div class="alert alert-danger form-validator">{{ message }}</div>
+                {% endfor %}
+            </div>
+        </div>
+      <div class="form-group">
+        {{ form.titre.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.titre(class_='form-control') }}
+        {% for message in form.titre.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+     <div class="form-group">
+        {{ form.description.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.description(class_='form-control') }}
+        {% for message in form.description.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+     <div class="form-group">
+        {{ form.heure.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.heure(class_='form-control') }}
+        {% for message in form.heure.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.date_start.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.date_start(class_='form-control', id="datepicker") }}
+        {% for message in form.date_start.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.user_id.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {% if tache_id %}
+            {{ tache.user_id.get().last_name }}
+            {{ tache.user_id.get().first_name }}
+            <input type="hidden" name="user_id" value="{{ tache.user_id.get().key.id() }}"/>
+        {% else %}
+            {{ form.user_id(class_='form-control g-select') }}
+            {% for message in form.user_id.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        </div>
+      </div>
+     <div class="form-group">
+        {{ form.prestation_id.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+         {% if tache_id %}
+            {{ tache.prestation_id.get().libelle }}
+            <input type="hidden" name="prestation_id" value="{{ tache.prestation_id.get().key.id() }}"/>
+         {% else %}
+             <select name="prestation_id" class="form-control g-select" id="prestation">
+                <option value="">Selection de la prestation</option>
+                {% for prestation in list_prestation %}
+                    <option value="{{ prestation.key.id() }}" {% if form.prestation_id.data == prestation.key or form.prestation_id.data|int == prestation.key.id() %} selected {% endif %}>{{ prestation.libelle }}</option>
+                {% endfor %}
+              </select>
+            {% for message in form.prestation_id.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+            {% endfor %}
+         {% endif %}
+        </div>
+      </div>
+        <div class="form-group">
+        {{ form.facturable.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+         {% if tache_id %}
+            {% if form.facturable.data|int == 1 %}
+                Facturable
+            {% else %}
+                Non Facturable
+            {% endif %}
+
+            <input type="hidden" value="{{ form.facturable.data }}" name="facturable"/>
+         {% else %}
+             <select name="facturable" class="form-control" id="facturation">
+                <option value="">Selection de la facturation</option>
+                 {% for key in list_factu %}
+                    <option value="{{ key }}" {% if form.facturable.data|int == key|int %} selected {% endif %}>{{ list_factu[key] }}</option>
+                 {% endfor %}
+              </select>
+            {% for message in form.facturable.errors %}
+                <div class="alert alert-danger form-validator">{{ message }}</div>
+            {% endfor %}
+         {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+            {% if not hors_projet %}
+                url: "{{ url_for('tache.edit', tache_id=tache_id) }}",
+            {% else %}
+                url: "{{ url_for('tache.hors_projet', tache_id=tache_id) }}",
+            {% endif %}
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+    $('#prestation').on('change', function(e){
+            e.preventDefault();
+
+            $.ajax({
+                url: "{{ url_for('tache_projet.facturations') }}/"+$(this).val(),
+                type: 'GET',
+                success: function(data) {
+                    var datas = [];
+                    var valeur;
+                    if(data['fact'] != 0){
+                        valeur = {};
+                        valeur['id'] = 1;
+                        valeur['text'] = 'Facturable';
+                        datas.push(valeur);
+                    }
+
+                    if(data['nfact'] != 0){
+                        valeur = {};
+                        valeur['id'] = 2;
+                        valeur['text'] = 'Non Facturable';
+                        datas.push(valeur);
+                    }
+                    var $options = $();
+                    $options = $options.add(
+                            $('<option>').attr('value', 0).html('Selection de la facturation')
+                    );
+                    for (var i in datas) {
+                        $options = $options.add(
+                            $('<option>').attr('value', datas[i]['id']).html(datas[i]['text'])
+                        );
+                    }
+                    $('#facturation').html($options);
+{#                    $("#facturation").select2();#}
+                }
+            });
+
+        });
+
+    // Google styled selects
+    $("select.g-select").each(function() {
+        var e = $(this)
+        e.select2()
+    });
+
+     $('#datepicker').datepicker({
+        format: "dd/mm/yyyy",
+        weekStart: 1,
+        todayBtn: "linked",
+        orientation: "top auto",
+        todayHighlight: true
+    });
+
+    $('#datepicker').inputmask("date", { placeholder:"__/__/____"});
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{{ url_for('tache.index') }}").delay();
+    {% endif %}
+</script>

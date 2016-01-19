@@ -1,0 +1,32 @@
+<nav class="navbar nav-menu navbar-masthead navbar-default navbar-fixed-top" style="background-color: white;">  
+
+         <div class="container-fluid">
+          <div class="navbar-header" style="margin-left:20px; padding-top:5px;">
+            <span class="navbar-brand">
+                <!--<img alt="Brand" src="img/logoBarre.png">-->
+                <a class="navbar-link" style="text-decoration:none; color:#a94442; font-weight:bold;">{{ title_page }}</a>
+            </span>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+            <div id="navbar" class="navbar-collapse collapse">
+              <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown"> <a href="#"><span class="glyphicon glyphicon-bell" aria-hidden="true"></span><span class="badge" style="background-color:  #CB7575;">2</span></a></li>
+
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="margin-top: 3px;"> {{ current_user.last_name }} <span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#">Profil</a></li>
+                    <li><a href="{{ url_for('dashboard.index') }}">Tableau de Bord</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><a class="btn btn-danger btn-log" href="{{ url_for('user.logout') }}">D&eacute;connexion</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+    </nav>

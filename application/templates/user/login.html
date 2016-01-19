@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %} Login | {{ super() }}  {% endblock %}
+
+{% block style_block %}{# page-specific CSS #}
+        <link href="/static/css/signin.css" rel="stylesheet" />
+{% endblock %}
+
+{% block layout_body %}
+
+    <div class="container-fluid">
+        <h2 class="form-signin-heading text-center">Utilisez votre compte professionnel Accent Com</h2>
+
+        <div class="row">
+            <div class="col-lg-6 col-lg-offset-3 text-center">
+                {% include 'includes/flash_message.html' %}
+            </div>
+      </div>
+        <div class="card card-signin">
+              <img class="img-responsive" src="/static/img/logo_accentCom.png" alt=""><br/>
+              <form class="form-signin">
+                {% if exist %}
+                    <a class="btn btn-lg btn-danger btn-block" href="{{ google_url }}">Connexion</a>
+                {% else %}
+                    <a class="btn btn-block" href="{{ google_url }}">Creer le compte super admin</a>
+                {% endif %}
+              </form>
+            </div>
+    </div> <!-- /container -->
+
+{% endblock %}
