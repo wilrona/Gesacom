@@ -412,7 +412,7 @@ def etat_conso():
 def etat_conso_prod():
     menu = 'stat'
     submenu = 'etat_conso_prod'
-    title_page = 'Consommation des heures productions'
+    title_page = 'Solde des heures productions'
 
     time_zones = pytz.timezone('Africa/Douala')
     current_year = datetime.datetime.now(time_zones).year
