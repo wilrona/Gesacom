@@ -665,9 +665,9 @@ def taux_mali_global():
         total_bud += temp_dict['budget']
         total_facturable += temp_dict['HFacturable']
         total_facturee += temp_dict['HFacturee']
-        total_mali_tech += temp_dict['mali_tech']
-        total_mali_com += temp_dict['mali_com']
-        total_global += temp_dict['mali_global']
+        total_mali_tech = 1 - (total_facturable / total_bud)
+        total_mali_com = 1 - (total_facturee / total_facturable)
+        total_global = total_mali_com + total_mali_tech
 
         analyses.append(temp_dict)
 
