@@ -656,7 +656,7 @@ def taux_mali_global():
                     HFacturee += item['time'] * taux_horaire_moyen
 
         temp_dict['mali_tech'] = 1 - (temp_dict['HFacturable'] / temp_dict['budget'])
-        temp_dict['mali_com'] = 0
+        temp_dict['mali_com'] = 1
         if temp_dict['HFacturee']:
             temp_dict['mali_com'] = 1 - (temp_dict['HFacturee'] / temp_dict['HFacturable'])
         temp_dict['mali_global'] = temp_dict['mali_tech'] + temp_dict['mali_com']

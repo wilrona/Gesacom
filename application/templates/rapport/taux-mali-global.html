@@ -50,12 +50,12 @@
                     <tr>
                         <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
                         <td>{{ datas.user.get().fonction_id.get().libelle }}</td>
-                        <td class="text-center">{{ datas.budget }} </td>
-                        <td class="text-center">{{ datas.HFacturable|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.HFacturee|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.mali_tech * 100 }}</td>
-                        <td class="text-center">{{ datas.mali_com * 100 }}</td>
-                        <td class="text-center">{{ datas.mali_global * 100 }}</td>
+                        <td class="text-center">{{ datas.budget|format_price() }} </td>
+                        <td class="text-center">{{ datas.HFacturable|round(3, 'floor')|format_price() }}</td>
+                        <td class="text-center">{{ datas.HFacturee|round(3, 'floor')|format_price() }}</td>
+                        <td class="text-center">{{ (datas.mali_tech * 100)|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ (datas.mali_com * 100)|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ (datas.mali_global * 100)|round(3, 'floor') }}</td>
                     </tr>
                 {% else %}
 
@@ -70,12 +70,12 @@
             <tfooter>
                 <tr class="active">
                     <td colspan="2" class="text-center"> <strong>Total</strong></td>
-                    <td class="text-center">{{ total_bud }}</td>
-                    <td class="text-center">{{ total_facturable|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_facturee|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_mali_tech * 100 }}</td>
-                    <td class="text-center">{{ total_mali_com * 100 }}</td>
-                    <td class="text-center">{{ total_global * 100 }}</td>
+                    <td class="text-center">{{ total_bud|format_price() }}</td>
+                    <td class="text-center">{{ total_facturable|round(3, 'floor')|format_price() }}</td>
+                    <td class="text-center">{{ total_facturee|round(3, 'floor')|format_price() }}</td>
+                    <td class="text-center">{{ (total_mali_tech * 100)|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ (total_mali_com * 100)|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ (total_global * 100)|round(3, 'floor') }}</td>
                 </tr>
 
             </tfooter>
