@@ -98,7 +98,7 @@ def me():
         if request.args.get('filtre') == 'cloture':
             datas = Tache.query(
                 Tache.closed == True,
-                Tache.end == False,
+                Tache.end == True,
                 Tache.user_id == user.key
             )
             small_title = 'cloturees'
@@ -343,6 +343,7 @@ def end(tache_id):
         tache.end = False
         tache.put()
     else:
+        tache.end = True
         if not tache.projet_id:
             from ..temps.models_temps import Temps
             day = datetime.date.today().strftime('%d/%m/%Y')
@@ -362,7 +363,7 @@ def end(tache_id):
                 tache.closed = True
                 tache.put()
         else:
-            tache.end = True
+
             tache.put()
     return redirect(url_for('tache.detail', tache_id=tache_id))
 

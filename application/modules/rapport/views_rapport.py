@@ -551,7 +551,7 @@ def etat_dev_charge():
 
         temp_dict['clients'] = []
         under_grouper = itemgetter("ref_client", "client", "client_infos")
-
+        temp_dict['total'] = 0
         for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
             temp_dict_under = dict(zip(["ref_client", "client", "client_infos"], key))
             temp_dict_under['time'] = 0
@@ -562,6 +562,111 @@ def etat_dev_charge():
                     if item['prospect']:
                         temp_dict_under['prospect'] = item['prospect']
             temp_dict['clients'].append(temp_dict_under)
+            temp_dict['total'] += temp_dict_under['time']
         analyses.append(temp_dict)
 
     return render_template('rapport/heure-de-developpement-chargee.html', **locals())
+
+
+@prefix.route('/taux-mali-global')
+@login_required
+@roles_required([('super_admin', 'stat')])
+def taux_mali_global():
+    menu = 'stat'
+    submenu = 'taux_mali'
+    title_page = 'Taux de mali global'
+
+    time_zones = pytz.timezone('Africa/Douala')
+    current_year = datetime.datetime.now(time_zones).year
+    now_year = datetime.datetime.now(time_zones).year
+
+    #Traitement du formulaire d'affichage de la liste des annees
+    years = []
+    temps_year = DetailTemps.query()
+    for bud in temps_year:
+        year = {}
+        year['date'] = bud.date.year
+        years.append(year)
+
+    list_year = []
+    for key, group in groupby(years, lambda item: item["date"]):
+        if key != now_year:
+            if key not in list_year:
+                list_year.append(key)
+
+    for i in range(now_year, now_year+2):
+        if i not in list_year:
+            list_year.append(i)
+
+    analyse = []
+    for detail in temps_year:
+        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'PRO':
+            infos = {}
+            infos['user'] = detail.temps_id.get().user_id
+            infos['user_infos'] = 1
+            if detail.temps_id.get().tache_id.get().facturable:
+                infos['facturable'] = 1
+            else:
+                infos['facturable'] = 0
+            infos['time'] = detail.conversion
+            infos['end'] = detail.temps_id.get().tache_id.get().end
+            analyse.append(infos)
+
+    grouper = itemgetter("user", "user_infos")
+
+    analyses = []
+    total_bud = 0
+    total_facturable = 0
+    total_facturee = 0
+    total_mali_tech = 0
+    total_mali_com = 0
+    total_global = 0
+
+    taux_horaire_moyen = 27000
+    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
+        temp_dict = dict(zip(["user", "user_infos"], key))
+
+        budget = Budget.query(
+            Budget.user_id == temp_dict['user'].get().key,
+            Budget.date_start == datetime.date(now_year, 1, 1)
+        ).get()
+
+        prest_prod = Prestation.query(
+            Prestation.sigle == 'PRO'
+        ).get()
+
+        budget_prod = BudgetPrestation.query(
+            BudgetPrestation.budget_id == budget.key,
+            BudgetPrestation.prestation_id == prest_prod.key
+        ).get()
+
+        temp_dict['budget'] = budget_prod.heure * taux_horaire_moyen
+        temp_dict['HFacturable'] = 0
+        temp_dict['HFacturee'] = 0
+
+        HFacturable = 0
+        HFacturee = 0
+
+        for item in grp:
+            if item['facturable']:
+                temp_dict['HFacturable'] += item['time'] * taux_horaire_moyen
+                HFacturable += item['time'] * taux_horaire_moyen
+                if item['end']:
+                    temp_dict['HFacturee'] += item['time'] * taux_horaire_moyen
+                    HFacturee += item['time'] * taux_horaire_moyen
+
+        temp_dict['mali_tech'] = 1 - (temp_dict['HFacturable'] / temp_dict['budget'])
+        temp_dict['mali_com'] = 1 - (temp_dict['HFacturee'] / temp_dict['budget'])
+        temp_dict['mali_global'] = temp_dict['mali_tech'] + temp_dict['mali_com']
+
+
+        total_bud += temp_dict['budget']
+        total_facturable += temp_dict['HFacturable']
+        total_facturee += temp_dict['HFacturee']
+        total_mali_tech += temp_dict['mali_tech']
+        total_mali_com += temp_dict['mali_com']
+        total_global += temp_dict['mali_global']
+
+        analyses.append(temp_dict)
+
+    return render_template('rapport/taux-mali-global.html', **locals())

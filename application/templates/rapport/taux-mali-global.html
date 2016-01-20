@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %} Statistique | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+    <div class="col-lg-12">
+        <div class="page-header">
+          <h1>Taux de mali global </h1>
+        </div>
+         <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+            <div class="btn-group">
+                  <h2 class="text-center" style="margin-top: 0;">Periode <small>01/01/{{ now_year }}</small> au <small> 31/12/{{ now_year }}</small> </h2>
+              </div>
+              <div class="btn-group pull-right">
+                <form class="navbar-form navbar-left" role="search" method="get" action="">
+                  <div class="form-group">
+                      <label for="">Exercice en cours :</label>
+                      <select name="year" id="" class="form-control g-select input-lg">
+                          <option value="">Annee en cours</option>
+                          {% for year in list_year %}
+                            <option value="{{ year }}" {% if year == current_year %} selected {% endif %}>{{ year }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <button type="submit" class="btn btn-info">OK</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="15%">Collaborateur</th>
+                <th width="15%">Fonction</th>
+                <th width="10%" class="text-center">Prod. Brute</th>
+                <th width="10%" class="text-center">Prod. Brute Facturable</th>
+                <th width="10%" class="text-center">Prod. Brute Facturee</th>
+                <th width="10%" class="text-center">Taux Mali Tech.</th>
+                <th width="10%" class="text-center">Taux Mali Com.</th>
+                <th width="10%" class="text-center">Taux Mali Global</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for datas in analyses %}
+                    <tr>
+                        <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                        <td>{{ datas.user.get().fonction_id.get().libelle }}</td>
+                        <td class="text-center">{{ datas.budget }} </td>
+                        <td class="text-center">{{ datas.HFacturable|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ datas.HFacturee|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ datas.mali_tech * 100 }}</td>
+                        <td class="text-center">{{ datas.mali_com * 100 }}</td>
+                        <td class="text-center">{{ datas.mali_global * 100 }}</td>
+                    </tr>
+                {% else %}
+
+                    <tr>
+                        <td colspan="8">
+                            <h3 class="text-center">Aucune Information</h3>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </tbody>
+            <tfooter>
+                <tr class="active">
+                    <td colspan="2" class="text-center"> <strong>Total</strong></td>
+                    <td class="text-center">{{ total_bud }}</td>
+                    <td class="text-center">{{ total_facturable|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ total_facturee|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ total_mali_tech * 100 }}</td>
+                    <td class="text-center">{{ total_mali_com * 100 }}</td>
+                    <td class="text-center">{{ total_global * 100 }}</td>
+                </tr>
+
+            </tfooter>
+        </table>
+
+    </div>
+
+{% endblock %}

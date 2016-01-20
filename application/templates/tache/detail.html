@@ -17,7 +17,7 @@
               <div class="pull-right">
 {#                <a href="{{ url_for('tache.edit', tache_id=tache_id) }}" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-backdrop="static">Modifier</a>#}
                 {% if tache.user_id.get().key.id() == session.get('user_id') %}
-                    {% if not tache.end %}
+                    {% if not tache.end and not tache.closed %}
                        <a href="{{ url_for('tache.end', tache_id=tache_id) }}" class="btn btn-danger">Terminer la tache</a>
                     {% elif tache.end and tache.closed %}
                         <a class="btn btn-info disabled">Tache Cloturee</a>
