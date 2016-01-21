@@ -20,7 +20,7 @@ def control_date(form, field):
 def control_heure(form, field):
     time = str(field.data)
     time = time.split(':')
-    if int(time[0]) == 8 and  int(time[1] > 0):
+    if int(time[0]) == 8 and int(time[1]) > 0:
         raise wtf.ValidationError('L\'heure est superieure a la periode de travail')
 
     if int(time[0]) > 8:
