@@ -101,7 +101,6 @@
                 <div class="form-group">
                      {{ form.prospect_id.label(class_='col-sm-4 control-label') }}
                     <div class="col-sm-8">
-                    {{ test }}
                     {% if projet_id %}
                         <p class="form-control-static">
                             {% if projet.prospect_id %}
@@ -113,7 +112,7 @@
                         <input type="hidden" name="prospect_id" value="{% if projet.prospect_id %} {{ projet.prospect_id.get().key.id() }} {% endif %}"/>
                     {% else %}
                           <select name="prospect_id" class="form-control g-select" id="prospect">
-                            <option value="">Selection du prospect</option>
+                            <option value="0">Selection du prospect</option>
                             {% for prospect in prospects %}
                                 <option value="{{ prospect.key.id() }}" {% if form.prospect_id.data == prospect.key or form.prospect_id.data|int == prospect.key.id() %} selected {% endif %}>{{ prospect.name }}</option>
                             {% endfor %}

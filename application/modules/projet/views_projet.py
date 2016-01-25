@@ -233,7 +233,7 @@ def edit(projet_id=None):
         projet.date_end = function.date_convert(form.date_end.data)
         projet.client_id = client_code.key
 
-        if client_code.myself and form.prospect_id.data:
+        if client_code.myself and int(form.prospect_id.data):
             pros = Client.get_by_id(int(form.prospect_id.data))
             projet.prospect_id = pros.key
 
