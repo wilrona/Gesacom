@@ -24,7 +24,7 @@
                     <td>{{ data.libelle }}</td>
                     <td>
                         {% if current_user.has_roles([('super_admin', 'ligne')], ['edit']) %}
-                        <a href="{{ url_for('domaine.domaine_service_edit', domaine_id=domaine_id, service_id=data.key.id()) }}" class="btn btn-link btn-xs edit"><i class="fa fa-pencil-square-o"></i></a>
+                            <a href="{{ url_for('domaine.domaine_service_edit', domaine_id=domaine_id, service_id=data.key.id()) }}" class="btn btn-link btn-xs edit"><i class="fa fa-pencil-square-o"></i></a>
                         {% endif %}
                         {% if current_user.has_roles([('super_admin', 'ligne')], ['delete']) %}
                             <a href="{{ url_for('domaine.domaine_service_delete', domaine_id=domaine_id, service_id=data.key.id()) }}" class="btn btn-link btn-xs delete"><i class="fa fa-trash"></i></a>

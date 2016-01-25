@@ -1,7 +1,7 @@
 __author__ = 'Ronald'
 
 from ...modules import *
-from ..temps.models_temps import Temps, Tache, DetailTemps, DetailFrais
+from ..temps.models_temps import Temps, Tache, DetailTemps, DetailFrais, Users
 from forms_temps import FormTemps
 
 
@@ -27,48 +27,129 @@ def index():
     except ValueError:
         page = 1
 
-    datas = Temps.query()
-    pagination = Pagination(css_framework='bootstrap3', page=page, total=datas.count(), search=search, record_name='frais')
+    time_zones = pytz.timezone('Africa/Douala')
+    current_year = datetime.datetime.now(time_zones).year
+    now_year = datetime.datetime.now(time_zones).year
 
-    if datas.count() > 10:
+    user = Users.get_by_id(int(session.get('user_id')))
+
+    #Traitement du formulaire d'affichage de la liste des annees
+    years = []
+    temps_year = Temps.query(
+        Temps.user_id == user.key
+    )
+    for bud in temps_year:
+        year = {}
+        year['date'] = bud.date_start.year
+        years.append(year)
+
+    list_year = []
+    for key, group in groupby(years, lambda item: item["date"]):
+        if key != now_year:
+            if key not in list_year:
+                list_year.append(key)
+
+    for i in range(now_year, now_year+2):
+        if i not in list_year:
+            list_year.append(i)
+
+    temps = temps_year
+    if temps_year.count() > 10:
         if page == 1:
             offset = 0
         else:
-            page -= 1
-            offset = page * 10
-        datas = datas.fetch(limit=10, offset=offset)
+            pages = page
+            pages -= 1
+            offset = pages * 10
+        temps = temps_year.fetch(limit=10, offset=offset)
+
+    analyse = []
+    for detail in temps:
+        infos = {}
+        infos['date_start'] = detail.date_start
+        infos['date_end'] = detail.date_end
+        analyse.append(infos)
+
+    grouper = itemgetter("date_start", "date_end")
+
+    datas = []
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["date_start", "date_end"], key))
+        datas.append(temp_dict)
+
+    pagination = Pagination(css_framework='bootstrap3', page=page, total=temps_year.count(), search=search, record_name='Feuille de temps')
 
     return render_template('temps/index.html', **locals())
 
 
-@prefix.route('/temps/<int:temps_id>')
+@prefix.route('/periode-details/<date_start>/<date_end>')
 @login_required
-def view(temps_id):
+def view(date_start, date_end):
 
-    temps = Temps.get_by_id(temps_id)
+    date_start = function.date_convert(date_start)
+    date_end = function.date_convert(date_end)
 
-    search = False
-    q = request.args.get('q')
-    if q:
-        search = True
-    try:
-        page = int(request.args.get('page', 1))
-    except ValueError:
-        page = 1
+    user = Users.get_by_id(int(session.get('user_id')))
 
-    datas = DetailTemps.query(DetailTemps.temps_id == temps.key).order(-DetailTemps.date)
-    pagination = Pagination(css_framework='bootstrap3', page=page, total=datas.count(), search=search, record_name='Feuille de temps')
+    temps_day = DetailTemps.query()
 
-    if datas.count() > 10:
-        if page == 1:
-            offset = 0
-        else:
-            page -= 1
-            offset = page * 10
-        datas = datas.fetch(limit=10, offset=offset)
+    analyse = []
+    for temps in temps_day:
+        if temps.temps_id.get().date_start == date_start and temps.temps_id.get().date_end == date_end and temps.temps_id.get().user_id == user.key:
+            infos = {}
+            infos['identique'] = 1
+            infos['date'] = temps.date
+            infos['heure'] = temps.heure
+            infos['conversion'] = temps.conversion
+            analyse.append(infos)
 
-    return render_template('temps/edit.html', **locals())
+    grouper = itemgetter("date", "identique")
 
+    datas = []
+    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
+        temp_dict = dict(zip(["date", "identique"], key))
+        temp_dict['conversion'] = 0
+        temp_dict['heure'] = timedelta(hours=00, minutes=00)
+        for item in grp:
+            temp_dict['conversion'] += item['conversion']
+            temp_dict['heure'] += timedelta(hours=item['conversion'])
+        datas.append(temp_dict)
+
+    return render_template('temps/periode_detail.html', **locals())
+
+
+@prefix.route('/jour-detail/<date>')
+@login_required
+def view_day(date):
+
+    date = function.date_convert(date)
+
+    day = date.today().strftime('%d/%m/%Y')
+    dt = datetime.datetime.strptime(day, '%d/%m/%Y')
+    start = dt - timedelta(days=dt.weekday())
+    end = start + timedelta(days=6)
+
+    user = Users.get_by_id(int(session.get('user_id')))
+
+    temps_day = DetailTemps.query(
+        DetailTemps.date == date
+    )
+
+    datas = []
+    total = timedelta(hours=00, minutes=00)
+    for temps in temps_day:
+        if temps.temps_id.get().user_id == user.key:
+            infos = {}
+            infos['tache'] = temps.temps_id.get().tache_id.get().titre
+            infos['projet'] = "Aucun"
+            if temps.temps_id.get().tache_id.get().projet_id :
+                infos['projet'] = temps.temps_id.get().tache_id.get().projet_id.get().titre
+            infos['details'] = temps.description
+            infos['heure'] = temps.heure
+            total += timedelta(hours=temps.conversion)
+            datas.append(infos)
+
+    return render_template("temps/jour_detail.html", **locals())
 
 
 @prefix_tache.route('/temps/<int:tache_id>')

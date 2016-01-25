@@ -1,0 +1,67 @@
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Feuille de temps du
+        {{ ['Lundi', 'Mardi', 'Mercredi', 'Jeudi',
+                                                'Vendredi', 'Samedi', 'Dimanche'][(date|format_date('%w')|int - 1)] }}
+
+        {{ date|format_date('%d') }}
+
+        {{ ['Janvier', 'Fevrier', 'Mars', 'Avril',
+                                'Mai', 'Juin', 'Jullet', 'Aout',
+                                'Septembrer', 'Octobre', 'Novembre', 'Decembre'][(date|format_date_month('%m')|int - 1)] }}
+    </h4>
+</div>
+
+    <div class="modal-body">
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="40%">Tache</th>
+                <th width="40%">Description</th>
+                <th width="20%">Nbr. Heure</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                   <tr>
+                    <td><strong>{{ data.projet }}</strong> <br/> {{ data.tache }} </td>
+                    <td>{{ data.details }}</td>
+                    <td>{{ data.heure }}</td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfooter>
+                <tr>
+                    <td colspan="2" class="active">
+                        Total
+                    </td>
+                    <td>
+                        {{ total }}
+                    </td>
+                </tr>
+            </tfooter>
+        </table>
+
+    </div>
+    <div class="modal-footer">
+        <a href="{{ url_for('temps.view', date_start=start,  date_end=end) }}" class="btn btn-info" id="return">Retour</a>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+    </div>
+<script>
+
+    $('#return').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: $(this).attr('href'),
+                type: 'GET',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+</script>

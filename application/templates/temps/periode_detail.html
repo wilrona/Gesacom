@@ -1,0 +1,75 @@
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Feuille de temps</h4>
+    <h5>Periode : {{ date_start|format_date('%d-%m-%Y') }} au {{ date_end|format_date('%d-%m-%Y') }}</h5>
+</div>
+
+    <div class="modal-body">
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="40%">Jour de la semaine</th>
+                <th width="40%">Nbr Heure</th>
+                <th width="20%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                   <tr>
+                    <td>{{ ['Lundi', 'Mardi', 'Mercredi', 'Jeudi',
+                                                'Vendredi', 'Samedi', 'Dimanche'][(data.date|format_date('%w')|int - 1)] }}
+
+                        {{ data.date|format_date('%d') }}
+
+                        {{ ['Janvier', 'Fevrier', 'Mars', 'Avril',
+                                                'Mai', 'Juin', 'Jullet', 'Aout',
+                                                'Septembrer', 'Octobre', 'Novembre', 'Decembre'][(data.date|format_date_month('%m')|int - 1)] }}
+
+
+                    </td>
+                    <td>{{ data.heure }}</td>
+                    <td>
+                        <a href="{{ url_for('temps.view_day',  date=data.date|format_date('%d-%m-%Y')) }}" class="btn btn-link btn-xs details"><i class="fa fa-list"></i> Details</a>
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    <div class="modal-footer">
+        <div class="pull-left">
+
+        </div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+    </div>
+<script>
+{#    $('.pagination > li > a').on('click', function(e){#}
+{#        e.preventDefault();#}
+{#        href = $(this).attr('href');#}
+{#        if(href){#}
+{#            $.ajax({#}
+{#                url: "",#}
+{#                type: 'GET',#}
+{#                success: function(data) {#}
+{#                    $('.modal-content').html(data);#}
+{#                }#}
+{#            });#}
+{#        }#}
+{#    })#}
+$('.details').on('click', function(e){
+    e.preventDefault();
+    $.ajax({
+            url: $(this).attr('href'),
+            type: 'GET',
+            success: function(data) {
+                $('.modal-content').html(data);
+            }
+        });
+});
+</script>

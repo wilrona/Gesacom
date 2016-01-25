@@ -56,6 +56,10 @@ def format_date(date, format=None):
     newdate = date.strftime(format)
     return newdate
 
+def format_date_month(date, format=None):
+    newdate = date.strftime(format).lstrip("0").replace(" 0", " ")
+    return newdate
+
 
 def time_convert(time): # Convertis time sous la forme HH:MM:SS
     _time = str(time)
@@ -148,5 +152,6 @@ def convert_timedelta(duration):
     return hours, minutes, seconds
 
 app.jinja_env.filters['format_date'] = format_date
+app.jinja_env.filters['format_date_month'] = format_date_month
 app.jinja_env.filters['add_time'] = add_time
 app.jinja_env.filters['format_price'] = format_price
