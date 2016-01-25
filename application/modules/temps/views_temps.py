@@ -53,18 +53,8 @@ def index():
         if i not in list_year:
             list_year.append(i)
 
-    temps = temps_year
-    if temps_year.count() > 10:
-        if page == 1:
-            offset = 0
-        else:
-            pages = page
-            pages -= 1
-            offset = pages * 10
-        temps = temps_year.fetch(limit=10, offset=offset)
-
     analyse = []
-    for detail in temps:
+    for detail in temps_year:
         infos = {}
         infos['date_start'] = detail.date_start
         infos['date_end'] = detail.date_end
@@ -77,7 +67,13 @@ def index():
         temp_dict = dict(zip(["date_start", "date_end"], key))
         datas.append(temp_dict)
 
-    pagination = Pagination(css_framework='bootstrap3', page=page, total=temps_year.count(), search=search, record_name='Feuille de temps')
+    pagination = Pagination(css_framework='bootstrap3', page=page, total=len(datas), search=search, record_name='Feuille de temps')
+
+    if len(datas) > 10:
+        offset_start = (page - 1) * 10
+        offset_end = page * 10
+        datas = datas[offset_start:offset_end]
+
 
     return render_template('temps/index.html', **locals())
 
@@ -124,7 +120,7 @@ def view_day(date):
 
     date = function.date_convert(date)
 
-    day = date.today().strftime('%d/%m/%Y')
+    day = date.strftime('%d/%m/%Y')
     dt = datetime.datetime.strptime(day, '%d/%m/%Y')
     start = dt - timedelta(days=dt.weekday())
     end = start + timedelta(days=6)
@@ -287,8 +283,7 @@ def delete(detail_fdt_id):
     temps_id = details_temps.temps_id.get().key.id()
 
     # id de la tache de la semaine
-    tache_id = Temps.get_by_id(temps_id)
-    tache_id = tache_id.tache_id.get().key.id()
+    tache_id = details_temps.temps_id.get().tache_id.get().key.id()
 
     # if il n'existe plus de details temps correspondant a la FDT de la semaine, on le supprime.
     if not temps_details_count.count() and not frais_temps_count.count():

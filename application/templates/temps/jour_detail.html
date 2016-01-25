@@ -23,7 +23,7 @@
             <tbody>
                 {% for data in datas %}
                    <tr>
-                    <td><strong>{{ data.projet }}</strong> <br/> {{ data.tache }} </td>
+                    <td><strong>Projet: {{ data.projet }}</strong> <br/> {{ data.tache }} </td>
                     <td>{{ data.details }}</td>
                     <td>{{ data.heure }}</td>
                   </tr>
@@ -49,7 +49,7 @@
 
     </div>
     <div class="modal-footer">
-        <a href="{{ url_for('temps.view', date_start=start,  date_end=end) }}" class="btn btn-info" id="return">Retour</a>
+        <a href="{{ url_for('temps.view', date_start=start|format_date("%d-%m-%Y"),  date_end=end|format_date("%d-%m-%Y")) }}" class="btn btn-info" id="return">Retour</a>
         <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
     </div>
 <script>
