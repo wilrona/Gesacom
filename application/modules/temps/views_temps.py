@@ -271,7 +271,8 @@ def delete(detail_fdt_id):
 
     # Recuperation des details taches correspondant a la meme FDT de la tache a supprimer
     temps_details_count = DetailTemps.query(
-        DetailTemps.temps_id == details_temps.temps_id
+        DetailTemps.temps_id == details_temps.temps_id,
+        DetailTemps.key != details_temps.key
     )
 
     # Recuperation des detaisl frais correspondant a la meme FDT de la tache a supprimer
@@ -285,13 +286,14 @@ def delete(detail_fdt_id):
     # id de la tache de la semaine
     tache_id = details_temps.temps_id.get().tache_id.get().key.id()
 
-    # if il n'existe plus de details temps correspondant a la FDT de la semaine, on le supprime.
+    # Si il n'existe plus de details temps correspondant a la FDT de la semaine, on le supprime.
     if not temps_details_count.count() and not frais_temps_count.count():
         temps = Temps.get_by_id(temps_id)
         temps.key.delete()
-
+    #
     details_temps.key.delete()
     flash('Suppression reussie', 'success')
     return redirect(url_for('temps_tache.index', tache_id=tache_id))
 
+    # return render_template('index/test.html', **locals())
 

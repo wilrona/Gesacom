@@ -335,7 +335,8 @@ def delete(detail_frais_id):
 
     # Recuperation des details des frais correspondant a la meme FDT du frais a supprimer
     frais_detail_count = DetailFrais.query(
-        details_temps.temps_id == details_temps.temps_id
+        details_temps.temps_id == details_temps.temps_id,
+        details_temps.key != details_temps.key
     )
 
     temps_detail_count = DetailFrais.query(
@@ -346,8 +347,7 @@ def delete(detail_frais_id):
     temps_id = details_temps.temps_id.get().key.id()
 
     # id de la tache de la semaine
-    tache_id = Temps.get_by_id(temps_id)
-    tache_id = tache_id.tache_id.get().key.id()
+    tache_id = tache_id = details_temps.temps_id.get().tache_id.get().key.id()
 
     # if il n'existe plus de details temps correspondant a la FDT de la semaine, on le supprime.
     if not frais_detail_count.count() and not temps_detail_count.count():
