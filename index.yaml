@@ -21,6 +21,20 @@ indexes:
   - name: date
     direction: desc
 
+- kind: DetailTemps
+  properties:
+  - name: temps_id
+  - name: date
+    direction: desc
+  - name: ordre
+    direction: desc
+
+- kind: DetailTemps
+  properties:
+  - name: temps_id
+  - name: ordre
+    direction: desc
+
 - kind: Horaire
   properties:
   - name: user

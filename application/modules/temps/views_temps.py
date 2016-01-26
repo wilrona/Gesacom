@@ -183,14 +183,10 @@ def index(tache_id):
     datas = []
     pagination = None
     if temps:
-        datas = DetailTemps.query(
-            DetailTemps.temps_id == temps.key
-        ).order(
-            -DetailTemps.date,
-            DetailTemps.ordre
-        )
-
+        datas = DetailTemps.query(DetailTemps.temps_id == temps.key)
         pagination = Pagination(css_framework='bootstrap3', per_page=25, page=page, total=datas.count(), search=search, record_name='Feuille de temps')
+        datas = datas.order(-DetailTemps.date, -DetailTemps.ordre)
+
         if datas.count() > 25:
             if page == 1:
                 offset = 0
@@ -259,15 +255,16 @@ def edit(tache_id, detail_fdt_id=None):
             time = temps.put()
             detail_fdt.temps_id = time
 
-        ordre = 1
-        exist_temps = DetailTemps.query(
-            DetailTemps.temps_id == detail_fdt.temps_id
-        ).count()
+        if not detail_fdt_id:
+            ordre = 1
+            exist_temps = DetailTemps.query(
+                DetailTemps.temps_id == detail_fdt.temps_id
+            ).count()
 
-        if exist_temps:
-            ordre += exist_temps
+            if exist_temps:
+                ordre += exist_temps
 
-        detail_fdt.ordre = ordre
+            detail_fdt.ordre = ordre
 
         detail_fdt.put()
 
