@@ -27,7 +27,7 @@ def login(token, userinfo, **params):
 
     param = params.get('extra')
     if param:
-        if userinfo['hd'] == 'accentcom-cm.com':
+        if userinfo['hd'] and userinfo['hd'] == 'accentcom-cm.com':
             if param == 'superadmin':
                 admin_role = Roles.query(
                     Roles.valeur == 'super_admin'

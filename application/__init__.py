@@ -51,8 +51,8 @@ app.config.update(
     SECRET_KEY='AIzaSyBBT8JaFtFr2Gknpe5GxvhYMWdxkxULHSc',
     GOOGLE_LOGIN_CLIENT_ID='667156749456-lbd0uctkmb0vscjn2q0e1420f20fu435.apps.googleusercontent.com',
     GOOGLE_LOGIN_CLIENT_SECRET='TOTRxDbDVTyC-I3uZ0ATX3kJ',
-    # GOOGLE_LOGIN_REDIRECT_URI='http://localhost:8080/user/oauth2callback'
-    GOOGLE_LOGIN_REDIRECT_URI='http://accentcom-time.com/user/oauth2callback'
+    GOOGLE_LOGIN_REDIRECT_URI='http://localhost:8080/user/oauth2callback'
+    # GOOGLE_LOGIN_REDIRECT_URI='http://accentcom-time.com/user/oauth2callback'
 )
 
 google_login = GoogleLogin(app)
