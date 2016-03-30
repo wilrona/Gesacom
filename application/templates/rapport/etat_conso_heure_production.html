@@ -49,8 +49,8 @@
                         <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
                         <td>{{ datas.user.get().fonction_id.get().libelle }}</td>
                         <td class="text-center">{{ datas.budget }} </td>
-                        <td class="text-center">{{ datas.conso_prod|round(3, 'floor')  }} </td>
-                        <td class="text-center">{{ datas.solde|round(3, 'floor')  }}</td>
+                        <td class="text-center">{{ datas.conso_prod|round(1, 'floor')  }} </td>
+                        <td class="text-center">{{ datas.solde|round(1, 'floor')  }}</td>
                     </tr>
                 {% else %}
                     <tr>
@@ -66,8 +66,8 @@
                 <tr class="active">
                     <td colspan="2" class="text-center"> <strong>Total</strong></td>
                     <td class="text-center">{{ total_budget }}</td>
-                    <td class="text-center">{{ total_conso_prod|round(3, 'floor')  }}</td>
-                    <td class="text-center">{{ total_solde|round(3, 'floor')  }}</td>
+                    <td class="text-center">{{ total_conso_prod|round(1, 'floor')  }}</td>
+                    <td class="text-center">{{ total_solde|round(1, 'floor')  }}</td>
                 </tr>
             </tfooter>
         </table>

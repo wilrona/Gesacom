@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %} Taches | {{ super() }}  {% endblock %}
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+            <div class="row">
+                <div class="col-lg-4"><h1>FDT de la tache</h1></div>
+                <div class="col-lg-8">
+                    <div style="margin-top: 26px;margin-bottom: 14px;">
+                        <div class="form-horizontal">
+                          <div class="form-group">
+                            <div class="col-sm-10">
+                                <select class="form-control g-select input-lg" name="" id="input_tache" style="margin-top: 6px;">
+                                    <option value=""> Selectionnez une tache</option>
+                                    {% for tache in tache_users %}
+                                        <optgroup label="Projet : {{ tache.projet_code }} - {{ tache.projet }}">
+                                            {% for ta in tache.taches %}
+                                              <option value="{{ ta.tache_id }}" {% if tache_id == ta.tache_id|int  %} selected {% endif %}>{{ ta.tache }}</option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                              <div class="col-sm-2">
+                                <button type="button" class="btn btn-primary" id="submit_tache">OK</button>
+                              </div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            {% include 'includes/flash_message.html' %}
+            </div>
+        <hr style="margin-top: 0;"/>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('temps_tache_breack.temps_breack_edit', tache_id=tache_id, temps_id=tache_temps_id) }}" class="btn btn-primary {% if not tache_id %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="20%">Date</th>
+                <th width="50%">Description</th>
+                <th width="15%">Temps</th>
+                <th width="15%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for data in details_tache %}
+                   <tr>
+                    <td>{{ data.date|format_date('%d/%m/%Y') }}</td>
+                    <td>{{ data.description }}</td>
+                    <td>{{ data.heure|format_date('%H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('temps_tache_breack.temps_breack_edit', tache_id=tache_id, temps_id=tache_temps_id, detail_fdt_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static" ><i class="fa fa-pencil-square-o"></i></a>
+                        <a href="{{ url_for('temps_tache_breack.tache_breack_delete', tache_id=tache_id, temps_id=tache_temps_id, detail_fdt_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs"><i class="fa fa-trash"></i></a>
+
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+    </div>
+
+    <div class="col-lg-3">
+        <h2>Semaines des FDT</h2>
+
+        {% if temps_tache %}
+          <div class="list-group">
+            {% for data in temps_tache %}
+              <a class="list-group-item {% if tache_temps_id and tache_temps_id == data.id_temps|int %} active {% endif %}" href="{{ url_for('temps_tache_breack.temps_breack', tache_id=tache_id, tache_temps_id=data.id_temps) }}">{{ data.date_start|format_date('%d %b %Y') }} au {{ data.date_end|format_date('%d %b %Y') }}</a>
+            {% endfor %}
+          </div>
+        {% else %}
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    Aucune periode pour cette tache
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+{% block footer_script %}
+
+    <script>
+        $('#submit_tache').on('click', function(e){
+            e.preventDefault();
+            if($('#input_tache').val() != ""){
+                window.location.replace(window.location.origin+"{{ url_for('temps_tache_breack.temps_breack') }}/"+$('#input_tache').val()).delay();
+            }
+        })
+    </script>
+
+{% endblock %}

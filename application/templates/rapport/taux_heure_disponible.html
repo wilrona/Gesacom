@@ -51,12 +51,12 @@
                     <tr>
                         <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
                         <td>{{ datas.user.get().fonction_id.get().libelle }}</td>
-                        <td class="text-center">{{ datas.budget|round(3, 'floor') }} </td>
-                        <td class="text-center">{{ datas.HDispo|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.HFact|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.Pourc_HD|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.Pourc_Bubget|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.ecart|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ datas.budget|round(1, 'floor') }} </td>
+                        <td class="text-center">{{ datas.HDispo|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.HFact|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.Pourc_HD|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.Pourc_Bubget|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.ecart|round(1, 'floor') }}</td>
                     </tr>
                 {% else %}
 
@@ -71,11 +71,11 @@
             <tfooter>
                 <tr class="active">
                     <td colspan="2" class="text-center"> <strong>Total</strong></td>
-                    <td class="text-center">{{ total_bud|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_HDispo|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_HFact|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_pourc_c|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total__budget |round(3, 'floor')}} </td>
+                    <td class="text-center">{{ total_bud|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total_HDispo|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total_HFact|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total_pourc_c|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total__budget |round(1, 'floor')}} </td>
                     <td class="text-center"></td>
                 </tr>
 

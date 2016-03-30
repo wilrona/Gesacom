@@ -9,7 +9,7 @@ from ..client.models_client import Client
 
 
 class Budget(ndb.Model):
-    heure = ndb.IntegerProperty()
+    heure = ndb.FloatProperty()
     user_id = ndb.KeyProperty(kind=Users)
     date_start = ndb.DateProperty()
 
@@ -17,7 +17,7 @@ class Budget(ndb.Model):
 class BudgetPrestation(ndb.Model):
     prestation_id = ndb.KeyProperty(kind=Prestation)
     budget_id = ndb.KeyProperty(kind=Budget)
-    heure = ndb.IntegerProperty()
+    heure = ndb.FloatProperty()
 
 
 class ChargeBudget(ndb.Model):

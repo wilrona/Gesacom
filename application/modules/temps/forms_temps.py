@@ -13,8 +13,9 @@ def control_date(form, field):
 
     send_date = function.date_convert(field.data)
 
-    if send_date < function.date_convert(start) or send_date > function.date_convert(end):
-        raise wtf.ValidationError('La date doit etre comprise entre '+function.format_date(start, '%d/%m/%Y')+" et "+function.format_date(end, '%d/%m/%Y'))
+    if not form.derob.data:
+        if send_date < function.date_convert(start) or send_date > function.date_convert(end):
+            raise wtf.ValidationError('La date doit etre comprise entre '+function.format_date(start, '%d/%m/%Y')+" et "+function.format_date(end, '%d/%m/%Y'))
 
 
 def control_heure(form, field):
@@ -31,6 +32,7 @@ def control_heure(form, field):
 
 
 class FormTemps(wtf.Form):
+    derob = wtf.HiddenField()
     date = wtf.DateField(label='Date de debut :', format="%d/%m/%Y", validators=[validators.Required('Champ Obligatoire'), control_date])
     description = wtf.TextAreaField(label='Description :', validators=[validators.Required('Champ Obligatoire')])
     heure = wtf.StringField(label='Nbre d\'Heure :', validators=[validators.Required('Champ Obligatoire'), control_heure])

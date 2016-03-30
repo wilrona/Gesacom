@@ -52,11 +52,11 @@
                         <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
                         <td>{{ datas.user.get().fonction_id.get().libelle }}</td>
                         <td class="text-center">{{ datas.budget }} </td>
-                        <td class="text-center">{{ datas.HProd_Charg|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.HProd_Fact|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.Pourc_Charg|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.Pourc_Bubget|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.ecart|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ datas.HProd_Charg|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.HProd_Fact|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.Pourc_Charg|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.Pourc_Bubget|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.ecart|round(1, 'floor') }}</td>
                     </tr>
                 {% else %}
 
@@ -72,10 +72,10 @@
                 <tr class="active">
                     <td colspan="2" class="text-center"> <strong>Total</strong></td>
                     <td class="text-center">{{ total_bud }}</td>
-                    <td class="text-center">{{ total_HP_charge|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_HP_fact|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_pourc_c|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total__budget|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ total_HP_charge|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total_HP_fact|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total_pourc_c|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total__budget|round(1, 'floor') }}</td>
                     <td class="text-center"></td>
                 </tr>
 

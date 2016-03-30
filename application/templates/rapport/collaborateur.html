@@ -51,12 +51,12 @@
                     <tr>
                         <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
                         <td>{{ datas.user.get().fonction_id.get().libelle }}</td>
-                        <td class="text-center">{{ datas.adm_time|round(3, 'floor') }} </td>
-                        <td class="text-center">{{ datas.form_time|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.dev_time|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.prod_time_nfact|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.prod_time_fact|round(3, 'floor') }}</td>
-                        <td class="text-center">{{ datas.total|round(3, 'floor') }}</td>
+                        <td class="text-center">{{ datas.adm_time|round(1, 'floor') }} </td>
+                        <td class="text-center">{{ datas.form_time|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.dev_time|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.prod_time_nfact|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.prod_time_fact|round(1, 'floor') }}</td>
+                        <td class="text-center">{{ datas.total|round(1, 'floor') }}</td>
                     </tr>
                 {% else %}
                     <tr>
@@ -71,12 +71,12 @@
             <tfooter>
                 <tr class="active">
                     <td colspan="2" class="text-center"> <strong>Total</strong></td>
-                    <td class="text-center">{{ total_adm|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_form|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_dev|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_prod_nfact|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total_prod_fact|round(3, 'floor') }}</td>
-                    <td class="text-center">{{ total|round(3, 'floor') }}</td>
+                    <td class="text-center">{{ total_adm|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total_form|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total_dev|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total_prod_nfact|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total_prod_fact|round(1, 'floor') }}</td>
+                    <td class="text-center">{{ total|round(1, 'floor') }}</td>
                 </tr>
 
             </tfooter>

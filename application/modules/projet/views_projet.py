@@ -202,7 +202,7 @@ def edit(projet_id=None):
             Service.domaine == domaine.key
         )
 
-    if form.prospect_id.data and not projet_id:
+    if not projet_id:
         prospects = Client.query(
             Client.prospect == True
         )

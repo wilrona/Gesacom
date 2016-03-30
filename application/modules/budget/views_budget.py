@@ -232,22 +232,28 @@ def edit(user_id, page, current_year, budget_id=None):
         budget = Budget()
 
     success = False
+    dispo = 0.0
+    dispo2 = 0.0
+
     if request.method == 'POST':
+
         disponible = request.form['disponible']
         production = request.form['production']
         formation = request.form['formation']
         developpement = request.form['developpement']
+        administration = request.form['administration']
 
-        dispo = int(request.form['disponible']) - int(request.form['administration'])
-        dispo -= int(request.form['production'])
-        dispo -= int(request.form['formation'])
-        dispo -= int(request.form['developpement'])
+        dispo = float(request.form['disponible']) - float(request.form['administration'])
+        dispo -= float(request.form['production'])
+        dispo -= float(request.form['formation'])
+        dispo -= float(request.form['developpement'])
+        dispo = round(dispo,1)
 
         error = False
-        if dispo > 0:
+        if dispo > 0.0:
             error = True
             message = 'La somme des heures de prestation n\'est pas egale aux heures disponibles'
-        if dispo < 0:
+        if dispo < 0.0:
             error = True
             message = 'La somme des heures de prestation est superieure aux heures disponibles '+str(dispo)
 
@@ -256,7 +262,7 @@ def edit(user_id, page, current_year, budget_id=None):
                 budget.date_start = datetime.date(current_year, 1, 1)
                 budget.user_id = user.key
 
-            budget.heure = int(request.form['disponible'])
+            budget.heure = float(request.form['disponible'])
             bud_id = budget.put()
 
             prest = Prestation.query(
@@ -273,13 +279,13 @@ def edit(user_id, page, current_year, budget_id=None):
                 if presti:
 
                     if pres.sigle == 'FOR':
-                        presti.heure = int(request.form['formation'])
+                        presti.heure = float(request.form['formation'])
                     if pres.sigle == 'DEV':
-                        presti.heure = int(request.form['developpement'])
+                        presti.heure = float(request.form['developpement'])
                     if pres.sigle == 'ADM':
-                        presti.heure = int(request.form['administration'])
+                        presti.heure = float(request.form['administration'])
                     if pres.sigle == 'PRO':
-                        presti.heure = int(request.form['production'])
+                        presti.heure = float(request.form['production'])
 
                     presti.budget_id = bud_id
                     presti.prestation_id = pres.key
@@ -290,13 +296,13 @@ def edit(user_id, page, current_year, budget_id=None):
                     prestis = BudgetPrestation()
 
                     if pres.sigle == 'FOR':
-                        prestis.heure = int(request.form['formation'])
+                        prestis.heure = float(request.form['formation'])
                     if pres.sigle == 'DEV':
-                        prestis.heure = int(request.form['developpement'])
+                        prestis.heure = float(request.form['developpement'])
                     if pres.sigle == 'ADM':
-                        prestis.heure = int(request.form['administration'])
+                        prestis.heure = float(request.form['administration'])
                     if pres.sigle == 'PRO':
-                        prestis.heure = int(request.form['production'])
+                        prestis.heure = float(request.form['production'])
 
                     prestis.budget_id = bud_id
                     prestis.prestation_id = pres.key
