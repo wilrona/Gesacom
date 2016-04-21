@@ -18,6 +18,7 @@ class DetailTemps(ndb.Model):
     date = ndb.DateProperty()
     description = ndb.TextProperty()
     heure = ndb.TimeProperty()
+    jour = ndb.IntegerProperty()
     conversion = ndb.FloatProperty()
     temps_id = ndb.KeyProperty(kind=Temps)
     ordre = ndb.IntegerProperty()

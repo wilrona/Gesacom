@@ -71,25 +71,14 @@
                   <a href="{{ url_for('temps.index') }}"><span class="glyphicon glyphicon-calendar"></span>&nbsp;&nbsp;Feuilles de Temps<span class="sr-only"></span></a>
                 </div>
             </li>
+            <li class="divider"></li>
+            <li class="list-group-item  {% if menu == 'conge' %} active  {% endif %}">
+               <div class="list-group-item-wrapper">
+                  <a href="{{ url_for('conge.index') }}"><span class="glyphicon glyphicon-warning-sign"></span>&nbsp;&nbsp;Absence/Congé<span class="sr-only"></span></a>
+                </div>
+
+             </li>
           {% endif %}
-{#            <li class="divider"></li>#}
-{#            <li class="list-group-item">#}
-{#               <div class="list-group-item-wrapper">#}
-{#                  <div class="dropdown pull-right">#}
-{#                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>#}
-{#                    <ul role="menu" class="dropdown-menu">#}
-{#                      <li><a href="#">Action</a></li>#}
-{#                      <li><a href="#">Another action</a></li>#}
-{#                      <li><a href="#">Something else here</a></li>#}
-{#                      <li class="divider"></li>#}
-{#                      <li><a href="#">Separated link</a></li>#}
-{#                    </ul>#}
-{#                  </div>#}
-{##}
-{#                  <a href="#"><span class="glyphicon glyphicon-folder-close"></span>&nbsp;&nbsp;Documents<span class="sr-only"></span></a>#}
-{#                </div>#}
-{##}
-{#             </li>#}
           {% if current_user.has_roles([('super_admin', 'client', 'contact')]) %}
              <li class="divider"></li>
              <li class="list-group-item {% if menu == 'client' %} active  {% endif %}">

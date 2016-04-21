@@ -1,0 +1,12 @@
+
+<ul class="nav nav-tabs-google nav-stacked myitems" data-spy="affix" data-offset-top="60">
+  <li>
+    <a href="{{ url_for('conge.index') }}"> Retour</a>
+  </li>
+  <li {% if context == 'conge' %} class="active" {% endif %}>
+      <a href="{{ url_for('conge.temps_conge', prestation_id=prestation_id) }}">Periode de conge</a>
+  </li>
+  <li {% if context == 'historique' %} class="active" {% endif %}>
+      <a href="">Historique</a>
+  </li>
+</ul>

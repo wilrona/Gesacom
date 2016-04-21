@@ -31,27 +31,96 @@ def collaborateur():
     title_page = 'Remplissage des feuilles de temps par collaborateur'
 
     time_zones = pytz.timezone('Africa/Douala')
-    current_year = datetime.datetime.now(time_zones).year
-    now_year = datetime.datetime.now(time_zones).year
+    current_month = datetime.datetime.now(time_zones).month
+    current_day = datetime.datetime.now(time_zones)
 
-    #Traitement du formulaire d'affichage de la liste des annees
-    years = []
     temps_year = DetailTemps.query()
-    for bud in temps_year:
-        year = {}
-        year['date'] = bud.date.year
-        years.append(year)
 
-    list_year = []
-    for key, group in groupby(years, lambda item: item["date"]):
-        if key != now_year:
-            if key not in list_year:
-                list_year.append(key)
+    analyse = []
+    for detail in temps_year:
+        if detail.date.month == current_month:
+            infos = {}
+            infos['user'] = detail.temps_id.get().user_id
+            infos['user_infos'] = 1
+            infos['tache'] = detail.temps_id.get().tache_id.get().key.id()
+            infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
+            if detail.temps_id.get().tache_id.get().facturable:
+                infos['facturable'] = 1
+            else:
+                infos['facturable'] = 0
 
-    for i in range(now_year, now_year+2):
-        if i not in list_year:
-            list_year.append(i)
+            infos['time'] = round(detail.conversion, 1)
+            analyse.append(infos)
 
+    grouper = itemgetter("user", "user_infos")
+
+    # REGROUPEMENT DES MONTANTS PAR DESTINATION
+    analyses = []
+    total_dev = 0
+    total_adm = 0
+    total_form = 0
+    total_prod_fact = 0
+    total_prod_nfact = 0
+    total = 0
+    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
+        temp_dict = dict(zip(["user", "user_infos"], key))
+        temp_dict['dev_time'] = 0
+        temp_dict['form_time'] = 0
+        temp_dict['prod_time_fact'] = 0
+        temp_dict['prod_time_nfact'] = 0
+        temp_dict['adm_time'] = 0
+        temp_dict['total'] = 0
+
+        dev_tot = 0
+        adm_tot = 0
+        prod_tot_fact = 0
+        prod_tot_nfact = 0
+        form_tot = 0
+        for item in grp:
+            if item['prestation'] == 'DEV':
+                temp_dict['dev_time'] += item['time']
+                dev_tot += item['time']
+            if item['prestation'] == 'FOR':
+                temp_dict['form_time'] += item['time']
+                form_tot += item['time']
+            if item['prestation'] == 'ADM':
+                temp_dict['adm_time'] += item['time']
+                adm_tot += item['time']
+            if item['prestation'] == 'PRO' and item['facturable']:
+                temp_dict['prod_time_fact'] += item['time']
+                prod_tot_fact += item['time']
+            if item['prestation'] == 'PRO' and not item['facturable']:
+                temp_dict['prod_time_nfact'] += item['time']
+                prod_tot_nfact += item['time']
+
+        temp_dict['total'] = temp_dict['prod_time_nfact']
+        temp_dict['total'] += temp_dict['prod_time_fact']
+        temp_dict['total'] += temp_dict['dev_time']
+        temp_dict['total'] += temp_dict['adm_time']
+        temp_dict['total'] += temp_dict['form_time']
+
+        total_dev += dev_tot
+        total_adm += adm_tot
+        total_prod_fact += prod_tot_fact
+        total_prod_nfact += prod_tot_nfact
+        total_form += form_tot
+        total += temp_dict['total']
+
+        analyses.append(temp_dict)
+
+    return render_template('rapport/collaborateur.html', **locals())
+
+
+@prefix.route('/collaborateur/refresh', methods=['POST'])
+def collaborateur_refresh():
+
+    date_start = function.date_convert(request.form['date_start'])
+    date_end = function.date_convert(request.form['date_end'])
+
+    temps_year = DetailTemps.query(
+        DetailTemps.date >= date_start,
+        DetailTemps.date <= date_end
+    )
 
     analyse = []
     for detail in temps_year:
@@ -65,7 +134,7 @@ def collaborateur():
         else:
             infos['facturable'] = 0
 
-        infos['time'] = detail.conversion
+        infos['time'] = round(detail.conversion, 1)
         analyse.append(infos)
 
     grouper = itemgetter("user", "user_infos")
@@ -100,7 +169,7 @@ def collaborateur():
                 temp_dict['form_time'] += item['time']
                 form_tot += item['time']
             if item['prestation'] == 'ADM':
-                temp_dict['adm_time'] = item['time']
+                temp_dict['adm_time'] += item['time']
                 adm_tot += item['time']
             if item['prestation'] == 'PRO' and item['facturable']:
                 temp_dict['prod_time_fact'] += item['time']
@@ -124,7 +193,7 @@ def collaborateur():
 
         analyses.append(temp_dict)
 
-    return render_template('rapport/collaborateur.html', **locals())
+    return render_template('rapport/collaborateur_refresh.html', **locals())
 
 
 @prefix.route('/taux-chargeabilite-heure-production')
@@ -167,7 +236,7 @@ def taux_HProd():
                 infos['facturable'] = 1
             else:
                 infos['facturable'] = 0
-            infos['time'] = detail.conversion
+            infos['time'] = round(detail.conversion, 1)
             infos['end'] = detail.temps_id.get().tache_id.get().end
             analyse.append(infos)
 
@@ -210,14 +279,14 @@ def taux_HProd():
                 temp_dict['HProd_Fact'] += item['time']
                 HProd_Fact += item['time']
 
-        temp_dict['Pourc_Charg'] = (temp_dict['HProd_Fact'] * 100) / temp_dict['HProd_Charg']
-        temp_dict['Pourc_Bubget'] = (temp_dict['HProd_Fact'] * 100) / temp_dict['budget']
-        temp_dict['ecart'] = temp_dict['Pourc_Charg'] - temp_dict['Pourc_Bubget']
+        temp_dict['Pourc_Charg'] = round((temp_dict['HProd_Fact'] * 100) / temp_dict['HProd_Charg'], 1)
+        temp_dict['Pourc_Bubget'] = round((temp_dict['HProd_Fact'] * 100) / temp_dict['budget'], 1)
+        temp_dict['ecart'] = round((temp_dict['Pourc_Charg'] - temp_dict['Pourc_Bubget']), 1)
 
 
         total_bud += temp_dict['budget']
-        total_HP_charge += HProd_Charg
-        total_HP_fact += HProd_Fact
+        total_HP_charge += round(HProd_Charg, 1)
+        total_HP_fact += round(HProd_Fact, 1)
         total_pourc_c += temp_dict['Pourc_Charg']
         total__budget += temp_dict['Pourc_Bubget']
 
@@ -265,7 +334,7 @@ def taux_HDispo():
             infos['facturable'] = 1
         else:
             infos['facturable'] = 0
-        infos['time'] = detail.conversion
+        infos['time'] = round(detail.conversion, 1)
         infos['end'] = detail.temps_id.get().tache_id.get().end
         analyse.append(infos)
 
@@ -299,14 +368,14 @@ def taux_HDispo():
                 temp_dict['HFact'] += item['time']
                 HFact += item['time']
 
-        temp_dict['Pourc_HD'] = (temp_dict['HFact'] * 100) / temp_dict['HDispo']
-        temp_dict['Pourc_Bubget'] = (temp_dict['HFact'] * 100) / temp_dict['budget']
-        temp_dict['ecart'] = temp_dict['Pourc_HD'] - temp_dict['Pourc_Bubget']
+        temp_dict['Pourc_HD'] = round(((temp_dict['HFact'] * 100) / temp_dict['HDispo']), 1)
+        temp_dict['Pourc_Bubget'] = round(((temp_dict['HFact'] * 100) / temp_dict['budget']), 1)
+        temp_dict['ecart'] = round((temp_dict['Pourc_HD'] - temp_dict['Pourc_Bubget']), 1)
 
 
         total_bud += temp_dict['budget']
-        total_HDispo += HDispo
-        total_HFact += HFact
+        total_HDispo += round(HDispo, 1)
+        total_HFact += round(HFact, 1)
         total_pourc_c += temp_dict['Pourc_HD']
         total__budget += temp_dict['Pourc_Bubget']
 

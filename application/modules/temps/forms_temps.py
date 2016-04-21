@@ -2,6 +2,7 @@ __author__ = 'Ronald'
 
 from lib.flaskext import wtf
 from lib.flaskext.wtf import validators
+from lib.flaskext.wtf.html5 import NumberInput
 from ...modules import *
 
 
@@ -19,20 +20,32 @@ def control_date(form, field):
 
 
 def control_heure(form, field):
-    time = str(field.data)
-    time = time.split(':')
-    if int(time[0]) == 8 and int(time[1]) > 0:
-        raise wtf.ValidationError('L\'heure est superieure a la periode de travail')
 
-    if int(time[0]) > 8:
-        raise wtf.ValidationError('L\'heure est superieure a la periode de travail')
+    if not form.derob_day.data and field.data:
+        time = str(field.data)
+        time = time.split(':')
+        if int(time[0]) == 8 and int(time[1]) > 0 and not form.derob_day.data:
+            raise wtf.ValidationError('L\'heure est superieure a la periode de travail')
 
-    if int(time[0]) == 0 and int(time[1]) == 0:
-        raise wtf.ValidationError('Impossible de sauvegarder un temps null ou egale a zero')
+        if int(time[0]) > 8 and not form.derob_day.data:
+            raise wtf.ValidationError('L\'heure est superieure a la periode de travail')
+
+        if int(time[0]) == 0 and int(time[1]) == 0 and not form.derob_day.data:
+            raise wtf.ValidationError('Impossible de sauvegarder un temps null ou egale a zero')
+
+    if not form.derob_day.data and not field.data:
+        raise wtf.ValidationError('Champ Obligatoire')
+
+
+def control_day(form, field):
+    if form.derob_day.data and not field.data:
+        raise wtf.ValidationError('Champ Obligatoire et vous devez au moin faire un jour')
 
 
 class FormTemps(wtf.Form):
     derob = wtf.HiddenField()
-    date = wtf.DateField(label='Date de debut :', format="%d/%m/%Y", validators=[validators.Required('Champ Obligatoire'), control_date])
+    derob_day = wtf.HiddenField()
+    date = wtf.DateField(label='Date d\'execution :', format="%d/%m/%Y", validators=[validators.Required('Champ Obligatoire'), control_date])
     description = wtf.TextAreaField(label='Description :', validators=[validators.Required('Champ Obligatoire')])
-    heure = wtf.StringField(label='Nbre d\'Heure :', validators=[validators.Required('Champ Obligatoire'), control_heure])
+    heure = wtf.StringField(label='Nbre d\'Heure :', validators=[control_heure], default='00:00')
+    jour = wtf.IntegerField(label='Nbre de jour :', default=0, widget=NumberInput(), validators=[control_day])

@@ -4,10 +4,8 @@
 
 
 {% block layout_content %}
-
-    Tableau de bord <br/>
-
-    {% for dial in dial %}
-        {{ dial }}<br/>
-    {% endfor %}
+    <div class="page-header">
+      <h1><small>Tableau de bord</small></h1>
+      {% include 'includes/flash_message.html' %}
+    </div>
 {% endblock %}

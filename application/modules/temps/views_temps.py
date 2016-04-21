@@ -296,7 +296,7 @@ def delete(detail_fdt_id):
     temps_id = details_temps.temps_id.get().key.id()
 
     # id de la tache de la semaine
-    tache_id = details_temps.temps_id.get().tache_id.get().key.id()
+    tache_id = details_temps.temps_id.get().tache_id
 
     # Si il n'existe plus de details temps correspondant a la FDT de la semaine, on le supprime.
     if not temps_details_count.count() and not frais_temps_count.count():
@@ -305,7 +305,23 @@ def delete(detail_fdt_id):
     #
     details_temps.key.delete()
     flash('Suppression reussie', 'success')
-    return redirect(url_for('temps_tache.index', tache_id=tache_id))
+
+    if request.args.get('conge'):
+
+        if request.args.get('conge') == '1':
+            return redirect(url_for('conge.temps_absence', prestation_id=tache_id.get().prestation_id.get().key.id()))
+        elif request.args.get('conge') == '2':
+            return redirect(url_for('conge.temps_conge', prestation_id=tache_id.get().prestation_id.get().key.id()))
+
+    else:
+        return redirect(url_for('temps_tache.index', tache_id=tache_id.get().key.id()))
 
     # return render_template('index/test.html', **locals())
+
+
+@prefix_tache.route('/historique/<int:tache_id>')
+@login_required
+def historique(tache_id):
+
+    pass
 

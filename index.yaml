@@ -51,6 +51,19 @@ indexes:
   - name: parent
   - name: valeur
 
+- kind: Tache
+  properties:
+  - name: closed
+  - name: end
+  - name: prestation_id
+
+- kind: Tache
+  properties:
+  - name: closed
+  - name: end
+  - name: user_id
+  - name: prestation_id
+
 - kind: roles
   properties:
   - name: class

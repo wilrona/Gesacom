@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %} Conges | {{ super() }}  {% endblock %}
+
+{% block layout_content %}
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Listes des congés/absence</h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="60%">Libelle</th>
+                <th width="30%">action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                    <tr>
+                        <td>{{ data.libelle }}</td>
+                        <td>
+                            {% if data.sigle == 'CONG' %}
+                            <a href="{{ url_for('conge.temps_conge', prestation_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs"><i class="glyphicon glyphicon-eye-open"></i></a>
+                            {% endif %}
+                            {% if data.sigle == 'ABS' %}
+                            <a href="{{ url_for('conge.temps_absence', prestation_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs"><i class="glyphicon glyphicon-eye-open"></i></a>
+                            {% endif %}
+                        </td>
+                      </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+{#        {{ pagination.links }}#}
+
+    </div>
+    <div class="col-lg-3">
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="glyphicon glyphicon-eye-open"></i> " pour acceder aux informations</small>
+        </p>
+    </div>
+
+{% endblock %}

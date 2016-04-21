@@ -24,5 +24,5 @@ class FormPrestation(wtf.Form):
     libelle = wtf.StringField(label='Nom prestation', validators=[validators.Required(message='Champ obligatoire')])
     factu = wtf.BooleanField(label='Facturable ?', validators=[verif_facturable])
     nfactu = wtf.BooleanField(label='Non Facturable ?')
-    sigle = wtf.SelectField(label='Selectionez un sigle', choices=[('', ''), ('ADM', 'Administration'), ('FOR', 'Formation'), ('DEV', 'Developpement'), ('PRO', 'Production')], coerce=str, validators=[verif_sigle])
+    sigle = wtf.SelectField(label='Selectionez un sigle', choices=[('', ''), ('ADM', 'Administration'), ('FOR', 'Formation'), ('DEV', 'Developpement'), ('PRO', 'Production'), ('CONG', 'Conge'), ('ABS', 'Absence'), ('FER', 'Ferier')], coerce=str, validators=[verif_sigle])
     id = wtf.HiddenField()

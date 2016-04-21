@@ -1,7 +1,7 @@
 __author__ = 'Ronald'
 
 from ...modules import *
-from ..tache.models_tache import Projet, Tache, Users, Prestation
+from ..tache.models_tache import Projet, Tache, Users, Prestation, ndb
 from forms_tache import FormTache
 
 
@@ -29,35 +29,64 @@ def index():
     except ValueError:
         page = 1
 
-    datas = Tache.query(
-        Tache.end == False,
-        Tache.closed == False
-    )
-    if request.args.get('filtre') and request.args.get('filtre') is not None:
+    #id Prestatation Ferier, Conge et Absence
 
-        if request.args.get('filtre') == 'end':
-            datas = Tache.query(
-                Tache.end == True,
-                Tache.closed == False
-            )
-            small_title = 'terminees'
+    prest_ferier = Prestation.query(Prestation.sigle == 'FER').get()
+    prest_conge = Prestation.query(Prestation.sigle == 'CONG').get()
+    prest_absence = Prestation.query(Prestation.sigle == 'ABS').get()
 
-        if request.args.get('filtre') == 'cloture':
-            datas = Tache.query(
-                Tache.closed == True,
-                Tache.end == False
-            )
-            small_title = 'cloturees'
+    if prest_absence and prest_conge and prest_ferier:
 
-    pagination = Pagination(css_framework='bootstrap3', per_page=25, page=page, total=datas.count(), search=search, record_name='Taches')
+        datas = Tache.query(
+            Tache.end == False,
+            Tache.closed == False,
+            Tache.prestation_id != prest_conge.key,
+            Tache.prestation_id != prest_absence.key,
+            Tache.prestation_id != prest_ferier.key
 
-    if datas.count() > 25:
-        if page == 1:
-            offset = 0
+        )
+
+        if request.args.get('filtre') and request.args.get('filtre') is not None:
+
+            if request.args.get('filtre') == 'end':
+                datas = Tache.query(
+                    Tache.end == True,
+                    Tache.closed == False,
+
+                    Tache.prestation_id != prest_conge.key,
+                    Tache.prestation_id != prest_absence.key,
+                    Tache.prestation_id != prest_ferier.key
+
+                )
+                small_title = 'terminees'
+
+            if request.args.get('filtre') == 'cloture':
+                datas = Tache.query(
+                    Tache.closed == True,
+                    Tache.end == False,
+                    Tache.prestation_id != prest_conge.key,
+                    Tache.prestation_id != prest_absence.key,
+                    Tache.prestation_id != prest_ferier.key
+
+                )
+                small_title = 'cloturees'
+
+        pagination = Pagination(css_framework='bootstrap3', per_page=25, page=page, total=datas.count(), search=search, record_name='Taches')
+
+        if datas.count() > 25:
+            if page == 1:
+                offset = 0
+            else:
+                page -= 1
+                offset = page * 25
+            datas = datas.fetch(limit=25, offset=offset)
+    else:
+        if current_user.has_roles(['prestation']):
+            flash('Demandez a l\'administrateur de configurer au mieux les prestations de l\'application', 'warning')
+            return redirect(url_for('dashboard.index'))
         else:
-            page -= 1
-            offset = page * 25
-        datas = datas.fetch(limit=25, offset=offset)
+            flash('Creer SVP les prestations de conge, absence et ferier', 'warning')
+            return redirect(url_for('prestation.index'))
 
     return render_template('tache/index.html', **locals())
 
@@ -80,38 +109,63 @@ def me():
     except ValueError:
         page = 1
 
-    datas = Tache.query(
-        Tache.user_id == user.key,
-        Tache.end == False,
-        Tache.closed == False
-    )
+    #id Prestatation Ferier, Conge et Absence
 
-    if request.args.get('filtre') and request.args.get('filtre') is not None:
-        if request.args.get('filtre') == 'end':
-            datas = Tache.query(
-                Tache.end == True,
-                Tache.closed == False,
-                Tache.user_id == user.key
-            )
-            small_title = 'terminees'
+    prest_ferier = Prestation.query(Prestation.sigle == 'FER').get()
+    prest_conge = Prestation.query(Prestation.sigle == 'CONG').get()
+    prest_absence = Prestation.query(Prestation.sigle == 'ABS').get()
 
-        if request.args.get('filtre') == 'cloture':
-            datas = Tache.query(
-                Tache.closed == True,
-                Tache.end == True,
-                Tache.user_id == user.key
-            )
-            small_title = 'cloturees'
+    if prest_absence and prest_conge and prest_ferier:
 
-    pagination = Pagination(css_framework='bootstrap3', per_page=25, page=page, total=datas.count(), search=search, record_name='Taches')
+        datas = Tache.query(
+            Tache.user_id == user.key,
+            Tache.end == False,
+            Tache.closed == False,
+            Tache.prestation_id != prest_conge.key,
+            Tache.prestation_id != prest_absence.key,
+            Tache.prestation_id != prest_ferier.key
 
-    if datas.count() > 25:
-        if page == 1:
-            offset = 0
-        else:
-            page -= 1
-            offset = page * 25
-        datas = datas.fetch(limit=25, offset=offset)
+        )
+
+        if request.args.get('filtre') and request.args.get('filtre') is not None:
+            if request.args.get('filtre') == 'end':
+                datas = Tache.query(
+                    Tache.end == True,
+                    Tache.closed == False,
+                    Tache.user_id == user.key,
+
+                    Tache.prestation_id != prest_conge.key,
+                    Tache.prestation_id != prest_absence.key,
+                    Tache.prestation_id != prest_ferier.key
+
+                )
+                small_title = 'terminees'
+
+            if request.args.get('filtre') == 'cloture':
+                datas = Tache.query(
+                    Tache.closed == True,
+                    Tache.end == True,
+                    Tache.user_id == user.key,
+                    Tache.prestation_id != prest_conge.key,
+                    Tache.prestation_id != prest_absence.key,
+                    Tache.prestation_id != prest_ferier.key
+
+                )
+                small_title = 'cloturees'
+
+        pagination = Pagination(css_framework='bootstrap3', per_page=25, page=page, total=datas.count(), search=search, record_name='Taches')
+
+        if datas.count() > 25:
+            if page == 1:
+                offset = 0
+            else:
+                page -= 1
+                offset = page * 25
+            datas = datas.fetch(limit=25, offset=offset)
+
+    else:
+        flash('Demandez a l\'administrateur de configurer au mieux les prestations de l\'application', 'warning')
+        return redirect(url_for('dashboard.index'))
 
     return render_template('tache/me.html', **locals())
 
@@ -156,7 +210,12 @@ def edit(tache_id=None):
             list_factu[1] = 'Facturable'
 
     if not tache_id:
-        list_prestation = Prestation.query(Prestation.sigle != None)
+        list_prestation = Prestation.query(
+                Prestation.sigle != None,
+                Prestation.sigle != 'CONG',
+                Prestation.sigle != 'ABS',
+                Prestation.sigle != 'FER'
+        )
 
     success = False
     if form.validate_on_submit():
@@ -246,7 +305,13 @@ def hors_projet(tache_id=None):
             list_factu[1] = 'Facturable'
 
     if not tache_id:
-        list_prestation = Prestation.query(Prestation.sigle != None)
+        list_prestation = Prestation.query(
+            Prestation.sigle != None,
+            Prestation.sigle != None,
+            Prestation.sigle != 'CONG',
+            Prestation.sigle != 'ABS',
+            Prestation.sigle != 'FER'
+        )
 
     success = False
     if form.validate_on_submit():
@@ -451,7 +516,12 @@ def edit(projet_id, tache_id=None):
         if prest.factu:
             list_factu[1] = 'Facturable'
 
-    list_prestation = Prestation.query(Prestation.sigle != None)
+    list_prestation = Prestation.query(
+        Prestation.sigle != None,
+        Prestation.sigle != 'CONG',
+        Prestation.sigle != 'ABS',
+        Prestation.sigle != 'FER'
+    )
 
     success = False
     if form.validate_on_submit():

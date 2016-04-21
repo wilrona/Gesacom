@@ -83,8 +83,12 @@
 
         {% if temps_tache %}
           <div class="list-group">
+            {% set count = 0 %}
             {% for data in temps_tache %}
+                {% if count <= 10 %}
               <a class="list-group-item {% if tache_temps_id and tache_temps_id == data.id_temps|int %} active {% endif %}" href="{{ url_for('temps_tache_breack.temps_breack', tache_id=tache_id, tache_temps_id=data.id_temps) }}">{{ data.date_start|format_date('%d %b %Y') }} au {{ data.date_end|format_date('%d %b %Y') }}</a>
+                {% endif %}
+                {% set count = count + 1 %}
             {% endfor %}
           </div>
         {% else %}

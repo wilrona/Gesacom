@@ -24,7 +24,8 @@
         {% endfor %}
         </div>
       </div>
-     <div class="form-group">
+    {% if not form.derob_day.data %}
+      <div class="form-group">
         {{ form.heure.label(class_='col-sm-3 control-label') }}
         <div class="col-sm-9">
         {{ form.heure(class_='form-control', id="timepicker") }}
@@ -33,6 +34,17 @@
         {% endfor %}
         </div>
       </div>
+    {% else %}
+      <div class="form-group">
+        {{ form.jour.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.jour(class_='form-control') }}
+        {% for message in form.jour.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    {% endif %}
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
@@ -42,8 +54,9 @@
 <script>
     $('#submit').on('click', function(e){
         e.preventDefault();
+        var url = '{% if context == 'absence' %}  {{ url_for('conge.temps_absence_edit', tache_id=tache_id, detail_fdt_id=detail_fdt_id) }} {% elif context == 'conge' %} {{ url_for('conge.temps_conge_edit', tache_id=tache_id, detail_fdt_id=detail_fdt_id) }} {% else %} {{ url_for('temps_tache.edit', tache_id=tache_id, detail_fdt_id=detail_fdt_id) }} {% endif %}';
         $.ajax({
-                url: "{{ url_for('temps_tache.edit', tache_id=tache_id, detail_fdt_id=detail_fdt_id) }}",
+                url: url,
                 data: $('#formulaire').serialize(),
                 type: 'POST',
                 success: function(data) {
@@ -70,7 +83,13 @@
 {##}
 {#            });#}
 
-    {% if success %}
-        window.location.replace(window.location.origin+"{{ url_for('temps_tache.index', tache_id=tache_id) }}").delay();
+    {% if success  %}
+        {% if context == 'absence' %}
+            window.location.replace(window.location.origin+"{{ url_for('conge.temps_absence', prestation_id=tache.prestation_id.get().key.id()) }}").delay();
+        {% elif context == 'conge' %}
+            window.location.replace(window.location.origin+"{{ url_for('conge.temps_conge', prestation_id=tache.prestation_id.get().key.id()) }}").delay();
+        {% else %}
+            window.location.replace(window.location.origin+"{{ url_for('temps_tache.index', tache_id=tache_id) }}").delay();
+        {% endif %}
     {% endif %}
 </script>
