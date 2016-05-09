@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %} Paramètre Jour Ferier | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+
+    <div class="col-lg-9">
+        <div class="page-header">
+          <h1>Liste des jours fériers de l'année {{ year }}</h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('ferier.jour_ferier_edit') }}" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="35%">Date du férier</th>
+                <th width="35%">Raison</th>
+                <th width="30%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                  <tr {% if data.apply %} class="danger" {% endif %}>
+                    <td>{{ data.date|format_date('%d/%m/%Y') }}</td>
+                    <td>{{ data.description }}</td>
+                    <td>
+                        {% if not data.apply %}
+                            <a href="{{ url_for('ferier.jour_ferier_edit', ferier_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static" ><i class="fa fa-pencil-square-o"></i></a>
+                            <a href="{{ url_for('ferier.jour_ferier_delete', ferier_id=data.key.id()) }}" class="btn btn-link btn-xs btn-xs"><i class="fa fa-trash"></i></a>
+                        {% endif %}
+
+                        {% if data.apply %}
+                            <a href="{{ url_for('ferier.jour_ferier_delete', ferier_id=data.key.id(), confirmation=1) }}" class="btn btn-link btn-xs btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static"><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+    <div class="col-lg-3">
+        <h2 style="text-decoration: underline;" class="text-center text-capitalize">Instruction</h2>
+        <p class="lead">
+            <small>Cliquez sur " <i class="fa fa-pencil-square-o"></i> " pour effectuer les modifications sur un jour ferier</small>
+        </p>
+    </div>
+{% endblock %}

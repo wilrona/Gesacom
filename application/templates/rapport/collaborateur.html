@@ -4,43 +4,55 @@
 
 
 {% block layout_content %}
-
-    <div class="col-lg-12">
+    <div class="col-lg-12" id="printer">
         <div class="page-header">
           <h1>Remplissage des feuilles de temps par collaborateur </h1>
         </div>
-         <nav class="navbar navbar-toolbar" role="navigation">
-          <div class="container-fluid">
-            <div class="btn-toolbar" role="toolbar">
-            <div class="btn-group">
-                  <h2 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" value="{{ current_day|get_first_day()|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ current_day|get_last_day()|format_date('%d/%m/%Y') }}"/> </h2>
+{#        {% if printer %}#}
+{#                  <h2 style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" value="{{ date_start|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ date_end|format_date('%d/%m/%Y') }}"/> </h2>#}
+{#        {% endif %}#}
+
+        {% if not printer %}
+             <nav class="navbar navbar-toolbar" role="navigation">
+              <div class="container-fluid">
+                <div class="btn-toolbar" role="toolbar">
+                <div class="btn-group">
+                      <h2 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" value="{{ current_day|get_first_day()|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ current_day|get_last_day()|format_date('%d/%m/%Y') }}"/> </h2>
+                  </div>
+
+                      <div class="btn-group pull-right">
+                          <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Exporter
+                              <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('stat.collaborateur_refresh', print='1', date_start=current_day|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|get_last_day()|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
+                            <li><a href="#" id="print_excel">sous excel</a></li>
+                          </ul>
+                      </div>
+
+                </div>
               </div>
-              <div class="btn-group pull-right">
-                  <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Exporter
-                      <span class="caret"></span>
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a href="#">sous PDF</a></li>
-                    <li><a href="#">sous excel</a></li>
-                  </ul>
-              </div>
-            </div>
-          </div>
-        </nav>
-        <div id="table" style="    position: relative; min-height: 400px;">
-            <div id="load" style="
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.3); display: none;    color: #fff;
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            line-height: 20;">Chargement</div>
-            <table class="table table-condensed table-hover">
+            </nav>
+        {% endif %}
+
+        <div id="table" style="position: relative; min-height: 400px; " >
+
+            {% if not printer %}
+                <div id="load" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3); display: none;    color: #fff;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 20;">Chargement</div>
+            {% endif %}
+
+            <table class="table table-condensed table-hover" width="100%">
                 <thead>
                 <tr>
                     <th width="10%">Collaborateur</th>
@@ -59,9 +71,9 @@
                     {% for datas in analyses %}
                         <tr>
                             <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
-                            <td class="text-center">0</td>
-                            <td class="text-center">0</td>
-                            <td class="text-center">0</td>
+                            <td class="text-center">{{ datas.abs_time }}</td>
+                            <td class="text-center">{{ datas.cong_time }}</td>
+                            <td class="text-center">{{ datas.fer_time }}</td>
                             <td class="text-center">{{ datas.adm_time }} </td>
                             <td class="text-center">{{ datas.form_time }}</td>
                             <td class="text-center">{{ datas.dev_time }}</td>
@@ -82,9 +94,9 @@
                 <tfooter>
                     <tr class="active">
                         <td colspan="1" class="text-center"> <strong>Total</strong></td>
-                        <td class="text-center">0</td>
-                        <td class="text-center">0</td>
-                        <td class="text-center">0</td>
+                        <td class="text-center">{{ total_abs }}</td>
+                        <td class="text-center">{{ total_cong }}</td>
+                        <td class="text-center">{{ total_fer }}</td>
                         <td class="text-center">{{ total_adm }}</td>
                         <td class="text-center">{{ total_form }}</td>
                         <td class="text-center">{{ total_dev }}</td>
@@ -140,6 +152,8 @@
                         datas['date_end'] = date_end;
                     }
 
+                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end'])
+
                     $.ajax({
                         url: url,
                         type: 'POST',
@@ -189,6 +203,8 @@
                         datas['date_end'] = date_end;
                     }
 
+                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
+
                     $.ajax({
                         url: url,
                         type: 'POST',
@@ -201,75 +217,5 @@
         }).inputmask("date", { placeholder:"__/__/____"});
 
 
-{#        $("input.date_start, input.date_end")#}
-{#                .datepicker({#}
-{#                    format: "dd/mm/yyyy",#}
-{#                    weekStart: 1,#}
-            {#        todayBtn: "linked",#}
-{#                    autoclose: true,#}
-{#                    orientation: "top auto",#}
-{#                    todayHighlight: true,#}
-{#                    language: "fr"#}
-{#                })#}
-{#                .on('changeDate', function(e){#}
-{#                        // Proceed with your code#}
-{#                        var date_start = $('#datepicker_input').val();#}
-{#                        var date_end = $('#datepicker2_input').val();#}
-{##}
-{#                        var datas = {};#}
-{##}
-{#                        var url = '{{ url_for('stat.collaborateur_refresh') }}';#}
-{##}
-{#                        var date_start_js = date_start;#}
-{#                        date_start_js = date_start_js.split('/');#}
-{#                        reforme_date = (date_start_js[1])+'/'+date_start_js[0]+'/'+date_start_js[2];#}
-{#                        date_start_js = new Date(reforme_date);#}
-{##}
-{#                        var date_end_js = date_end;#}
-{#                        date_end_js = date_end_js.split('/');#}
-{#                        reforme_date = (date_end_js[1])+'/'+date_end_js[0]+'/'+date_end_js[2];#}
-{#                        date_end_js = new Date(reforme_date);#}
-{##}
-{##}
-{#                        if(date_start_js <= date_end_js){#}
-{##}
-{#                            datas['date_start'] = date_start;#}
-{#                            datas['date_end'] = date_end;#}
-{#                             $.ajax({#}
-{#                                url: url,#}
-{#                                type: 'POST',#}
-{#                                data: datas,#}
-{#                                success: function(data) {#}
-{#                                    $('#table').html(data);#}
-{#                                }#}
-{#                            });#}
-{##}
-{#                        }else{#}
-{#                            if(date_start_js >= date_end_js){#}
-{#                                date_end = date_start;#}
-{#                                $('#datepicker2_input').val(date_start);#}
-{#                            }#}
-{#                            if(date_end_js <= date_start_js){#}
-{#                                date_end = date_start;#}
-{#                                $('#datepicker_input').val(date_end);#}
-{#                            }#}
-{#                            else{#}
-{#                                date_start = date_end;#}
-{#                                $('#datepicker_input').val(date_end);#}
-{#                                alert('ok')#}
-{#                            }#}
-{#                            datas['date_start'] = date_start;#}
-{#                            datas['date_end'] = date_end;#}
-{#                            $.ajax({#}
-{#                                url: url,#}
-{#                                type: 'POST',#}
-{#                                data: datas,#}
-{#                                success: function(data) {#}
-{#                                    $('#table').html(data);#}
-{#                                }#}
-{#                            });#}
-{#                        }#}
-{##}
-{#                });#}
     </script>
 {% endblock %}

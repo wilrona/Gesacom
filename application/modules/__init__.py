@@ -11,9 +11,8 @@ from flask.ext.paginate import Pagination
 
 import hashlib
 import calendar
-import datetime
+import datetime,time
 from datetime import timedelta
-
 
 from google.appengine.api import urlfetch
 import json
@@ -24,14 +23,14 @@ import lib.reportlab
 
 #import pour l'impression des ticket
 from lib.reportlab.pdfgen import canvas
-from lib.reportlab.lib.pagesizes import A5
+from lib.reportlab.lib.pagesizes import A5, A4, landscape
 # from lib.reportlab.platypus.doctemplate import SimpleDocTemplate
 from lib.reportlab.lib import colors
 from lib.reportlab.lib.units import cm
 
 
 from lib.reportlab.platypus import Paragraph
-from lib.reportlab.lib.styles import getSampleStyleSheet
+from lib.reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from lib.reportlab.pdfbase import pdfmetrics
 from lib.reportlab.pdfbase.ttfonts import TTFont
 from lib.reportlab.lib.colors import black,white

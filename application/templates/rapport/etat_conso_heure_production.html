@@ -8,70 +8,197 @@
 
     <div class="col-lg-12">
         <div class="page-header">
-          <h1>Etat des soldes des heures de production </h1>
+          <h1>Solde des heures a effectuer par collaborateur </h1>
         </div>
-         <nav class="navbar navbar-toolbar" role="navigation">
+        <nav class="navbar navbar-toolbar" role="navigation">
           <div class="container-fluid">
             <div class="btn-toolbar" role="toolbar">
             <div class="btn-group">
-                  <h2 class="text-center" style="margin-top: 0;">Periode <small>01/01/{{ now_year }}</small> au <small> 31/12/{{ now_year }}</small> </h2>
+                  <h2 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" disabled="disabled" value="{{ First_day_of_year|get_first_day()|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ current_day|get_last_day()|format_date('%d/%m/%Y') }}"/> </h2>
               </div>
               <div class="btn-group pull-right">
-                <form class="navbar-form navbar-left" role="search" method="get" action="">
-                  <div class="form-group">
-                      <label for="">Exercice en cours :</label>
-                      <select name="year" id="" class="form-control g-select input-lg">
-                          <option value="">Annee en cours</option>
-                          {% for year in list_year %}
-                            <option value="{{ year }}" {% if year == current_year %} selected {% endif %}>{{ year }}</option>
-                          {% endfor %}
-                      </select>
-                  </div>
-                  <button type="submit" class="btn btn-info">OK</button>
-                </form>
+                  <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Exporter
+                      <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a href="{{ url_for('stat.etat_conso_prod_refresh', print='1', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|get_last_day()|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
+                    <li><a href="#">sous excel</a></li>
+                  </ul>
               </div>
             </div>
           </div>
         </nav>
-        <table class="table table-condensed table-hover">
-            <thead>
-            <tr>
-                <th width="15%">Collaborateur</th>
-                <th width="15%">Fonction</th>
-                <th width="10%" class="text-center">Heure Dispo</th>
-                <th width="10%" class="text-center">Heure Consommee.</th>
-                <th width="10%" class="text-center">Solde.</th>
-            </tr>
-            </thead>
-            <tbody>
-                {% for datas in analyses %}
-                    <tr>
-                        <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
-                        <td>{{ datas.user.get().fonction_id.get().libelle }}</td>
-                        <td class="text-center">{{ datas.budget }} </td>
-                        <td class="text-center">{{ datas.conso_prod|round(1, 'floor')  }} </td>
-                        <td class="text-center">{{ datas.solde|round(1, 'floor')  }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5">
-                            <h3 class="text-center">Aucune Information</h3>
-                        </td>
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-            <tfooter>
-                <tr class="active">
-                    <td colspan="2" class="text-center"> <strong>Total</strong></td>
-                    <td class="text-center">{{ total_budget }}</td>
-                    <td class="text-center">{{ total_conso_prod|round(1, 'floor')  }}</td>
-                    <td class="text-center">{{ total_solde|round(1, 'floor')  }}</td>
+        <div id="table" style="    position: relative; min-height: 400px;">
+                <div id="load" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3); display: none;    color: #fff;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 20;">Chargement</div>
+            <table class="table table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th width="15%">Collaborateur</th>
+                    <th width="10%" class="text-center">Heure Dispo</th>
+                    <th width="10%" class="text-center">H. Dispo Restant</th>
+                    <th width="10%" class="text-center">Heure Admin.</th>
+                    <th width="10%" class="text-center">Heure Forma.</th>
+                    <th width="10%" class="text-center">Heure Devpt</th>
+                    <th width="10%" class="text-center">Heure Prod</th>
                 </tr>
-            </tfooter>
-        </table>
+                </thead>
+                <tbody>
+                    {% for datas in analyses %}
+                        <tr>
+                            <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                            <td class="text-center">{{ datas.budget_origine }} </td>
+                            <td class="text-center">{{ datas.budget }} </td>
+                            <td class="text-center">{{ datas.adm_time  }} </td>
+                            <td class="text-center">{{ datas.form_time  }}</td>
+                            <td class="text-center">{{ datas.dev_time  }}</td>
+                            <td class="text-center">{{ datas.prod_time }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7">
+                                <h3 class="text-center">Aucune Information</h3>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+                <tfooter>
+                    <tr class="active">
+                        <td colspan="1" class="text-center"> <strong>Total</strong></td>
+                        <td class="text-center">{{ total_budget_origine }}</td>
+                        <td class="text-center">{{ total_budget }}</td>
+                        <td class="text-center">{{ total_adm  }}</td>
+                        <td class="text-center">{{ total_form  }}</td>
+                        <td class="text-center">{{ total_dev  }}</td>
+                        <td class="text-center">{{ total_prod  }}</td>
+                    </tr>
+                </tfooter>
+            </table>
+        </div>
 
     </div>
 
+{% endblock %}
+{% block footer_script %}
+    <script>
+        $('#datepicker_input').datepicker({
+            format: "dd/mm/yyyy",
+            weekStart: 1,
+            todayBtn: "linked",
+            autoclose: true,
+            orientation: "top auto",
+            todayHighlight: true,
+            language: "fr"
+        }).on('changeDate', function(e) {
+            $('#load').show();
+                    // Proceed with your code
+                    var date_start = $('#datepicker_input').val();
+                    var date_end = $('#datepicker2_input').val();
+
+                    var datas = {};
+
+                    var url = '{{ url_for('stat.etat_conso_prod_refresh') }}';
+
+                    var date_start_js = date_start;
+                    date_start_js = date_start_js.split('/');
+                    reforme_date = (date_start_js[1]) + '/' + date_start_js[0] + '/' + date_start_js[2];
+                    date_start_js = new Date(reforme_date);
+
+                    var date_end_js = date_end;
+                    date_end_js = date_end_js.split('/');
+                    reforme_date = (date_end_js[1]) + '/' + date_end_js[0] + '/' + date_end_js[2];
+                    date_end_js = new Date(reforme_date);
+
+{#                    var current_year = new Date().getFullYear();#}
+{#                    var start_date_of_year = '01/01/'+ current_year;#}
+{#                    start_date_of_year = new Date(start_date_of_year);#}
+
+                    if(date_start_js <= date_end_js){
+                        datas['date_start'] = date_start;
+                        datas['date_end'] = date_end;
+                    }else{
+                        date_end = date_start;
+                        $('#datepicker2_input').val(date_start);
+                        datas['date_start'] = date_start;
+                        datas['date_end'] = date_end;
+                    }
+
+                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
+
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: datas,
+                        success: function(data) {
+                            $('#table').html(data);
+                            $('#load').hide();
+                        }
+                    });
+
+        }).inputmask("date", { placeholder:"__/__/____"});
+
+        $('#datepicker2_input').datepicker({
+            format: "dd/mm/yyyy",
+            weekStart: 1,
+            todayBtn: "linked",
+            autoclose: true,
+            orientation: "top auto",
+            todayHighlight: true,
+            language: "fr"
+        }).on('changeDate', function(e) {
+                    $('#load').show();
+                    // Proceed with your code
+                    var date_start = $('#datepicker_input').val();
+                    var date_end = $('#datepicker2_input').val();
+
+                    var datas = {};
+
+                    var url = '{{ url_for('stat.etat_conso_prod_refresh') }}';
+
+                    var date_start_js = date_start;
+                    date_start_js = date_start_js.split('/');
+                    reforme_date = (date_start_js[1]) + '/' + date_start_js[0] + '/' + date_start_js[2];
+                    date_start_js = new Date(reforme_date);
+
+                    var date_end_js = date_end;
+                    date_end_js = date_end_js.split('/');
+                    reforme_date = (date_end_js[1]) + '/' + date_end_js[0] + '/' + date_end_js[2];
+                    date_end_js = new Date(reforme_date);
+
+                    if(date_start_js >= date_end_js){
+                        date_start = date_end;
+                        $('#datepicker_input').val(date_end);
+                        datas['date_start'] = date_start;
+                        datas['date_end'] = date_end;
+                    }else{
+                        datas['date_start'] = date_start;
+                        datas['date_end'] = date_end;
+                    }
+
+                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
+
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: datas,
+                        success: function(data) {
+                            $('#table').html(data);
+                            $('#load').hide();
+                        }
+                    });
+        }).inputmask("date", { placeholder:"__/__/____"});
+
+    </script>
 {% endblock %}

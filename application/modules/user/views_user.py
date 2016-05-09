@@ -460,7 +460,10 @@ def horaire_refresh():
             user.tauxHApp = id
         user.put()
 
-    return redirect(url_for('user_param.horaire', user_id=request.args.get('user_id')))
+    if request.args.get('user_id'):
+        return redirect(url_for('user_param.horaire', user_id=request.args.get('user_id')))
+    else:
+        return render_template('401.html')
 
 
 @prefix_param.route('/user/horaire/delete/<int:horaire_id>/<int:user_id>')

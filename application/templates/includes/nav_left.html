@@ -116,7 +116,7 @@
             {% endif %}
           {% endif %}
 
-            {% if current_user.has_roles([('super_admin', 'site', 'entreprise', 'departement', 'fonction', 'grade', 'frais', 'domaine', 'ligne', 'prestation', 'charge', 'profil', 'user', 'budget_userH', 'budget_userV', 'budget_charge', 'budget_client')]) %}
+            {% if current_user.has_roles([('super_admin', 'site', 'entreprise', 'departement', 'fonction', 'grade', 'frais', 'domaine', 'ligne', 'prestation', 'charge', 'profil', 'user', 'budget_userH', 'budget_userV', 'budget_charge', 'budget_client', 'ferier')]) %}
                  <li class="divider"></li>
                  <li class="list-group-item {% if menu == 'societe' %} active  {% endif %}">
                    <div class="list-group-item-wrapper">
@@ -148,6 +148,10 @@
                                     <li><a href="{{ url_for('budget.client') }}">Budget</a></li>
                                 {% endif %}
 
+                                {% if current_user.has_roles([('super_admin', 'ferier')]) %}
+                                    <li><a href="{{ url_for('ferier.jour_ferier') }}">Jour Ferier</a></li>
+                                {% endif %}
+
                             </ul>
                           </div>
                        {% endif %}
@@ -166,6 +170,9 @@
                      {% endif %}
                      {% if current_user.has_roles([('super_admin', 'budget')]) %}
                     <li class="list-group-item subitem {% if submenu == 'budget' %} active {% endif %}"><a href="{{ url_for('budget.index') }}">Budgets</a></li>
+                     {% endif %}
+                     {% if current_user.has_roles([('super_admin', 'ferier')]) %}
+                        <li class="list-group-item subitem {% if submenu == 'ferier' %} active {% endif %}"><a href="{{ url_for('ferier.jour_ferier') }}">Jour Ferier</a></li>
                      {% endif %}
                  {% endif %}
             {% endif %}
@@ -194,7 +201,7 @@
                     <li class="list-group-item subitem {% if submenu == 'taux_HProd' %} active {% endif %}"><a href="{{ url_for('stat.taux_HProd') }}">Taux de chargeabilite H. Prod </a></li>
                     <li class="list-group-item subitem {% if submenu == 'taux_HDispo' %} active {% endif %}"><a href="{{ url_for('stat.taux_HDispo') }}">Taux de chargeabilite H. Dispo </a></li>
                     <li class="list-group-item subitem {% if submenu == 'etat_conso' %} active {% endif %}"><a href="{{ url_for('stat.etat_conso') }}">Consommation des H. Dispo. </a></li>
-                    <li class="list-group-item subitem {% if submenu == 'etat_conso_prod' %} active {% endif %}"><a href="{{ url_for('stat.etat_conso_prod') }}">Solde des Heures Prod </a></li>
+                    <li class="list-group-item subitem {% if submenu == 'etat_conso_prod' %} active {% endif %}"><a href="{{ url_for('stat.etat_conso_prod') }}">Solde des Heures Dispo./Collab.</a></li>
                     <li class="list-group-item subitem {% if submenu == 'dev_charge' %} active {% endif %}"><a href="{{ url_for('stat.etat_dev_charge') }}">Heures de devlp chargees </a></li>
                     <li class="list-group-item subitem {% if submenu == 'taux_mali' %} active {% endif %}"><a href="{{ url_for('stat.taux_mali_global') }}">Taux de mali global  </a></li>
 

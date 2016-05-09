@@ -1,66 +1,70 @@
-<div id="load" style="
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.3); display: none;     color: #fff;
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
-    line-height: 20;">Chargement</div>
+
+
+    <div id="load" style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.3); display: none;     color: #fff;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 20;">Chargement</div>
+
  <table class="table table-condensed table-hover">
-                <thead>
-                <tr>
-                    <th width="10%">Collaborateur</th>
-                    <th width="10%" class="text-center">Absence</th>
-                    <th width="10%" class="text-center">Congé</th>
-                    <th width="10%" class="text-center">Férier</th>
-                    <th width="10%" class="text-center">Admin.</th>
-                    <th width="10%" class="text-center">Formation</th>
-                    <th width="10%" class="text-center">Develop.</th>
-                    <th width="10%" class="text-center">Prod. Nfact</th>
-                    <th width="10%" class="text-center">Prod. fact</th>
-                    <th width="10%" class="text-center">Total</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {% for datas in analyses %}
-                        <tr>
-                            <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
-                            <td class="text-center">0</td>
-                            <td class="text-center">0</td>
-                            <td class="text-center">0</td>
-                            <td class="text-center">{{ datas.adm_time }} </td>
-                            <td class="text-center">{{ datas.form_time }}</td>
-                            <td class="text-center">{{ datas.dev_time }}</td>
-                            <td class="text-center">{{ datas.prod_time_nfact }}</td>
-                            <td class="text-center">{{ datas.prod_time_fact }}</td>
-                            <td class="text-center">{{ datas.total }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="10">
-                                <h3 class="text-center">Aucune Information</h3>
-                            </td>
-                        </tr>
+    <thead>
+    <tr>
+        <th width="10%">Collaborateur</th>
+        <th width="10%" class="text-center">Absence</th>
+        <th width="10%" class="text-center">Congé</th>
+        <th width="10%" class="text-center">Férier</th>
+        <th width="10%" class="text-center">Admin.</th>
+        <th width="10%" class="text-center">Formation</th>
+        <th width="10%" class="text-center">Develop.</th>
+        <th width="10%" class="text-center">Prod. Nfact</th>
+        <th width="10%" class="text-center">Prod. fact</th>
+        <th width="10%" class="text-center">Total</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for datas in analyses %}
+            <tr>
+                <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                <td class="text-center">{{ datas.abs_time }}</td>
+                <td class="text-center">{{ datas.cong_time }}</td>
+                <td class="text-center">{{ datas.fer_time }}</td>
+                <td class="text-center">{{ datas.adm_time }} </td>
+                <td class="text-center">{{ datas.form_time }}</td>
+                <td class="text-center">{{ datas.dev_time }}</td>
+                <td class="text-center">{{ datas.prod_time_nfact }}</td>
+                <td class="text-center">{{ datas.prod_time_fact }}</td>
+                <td class="text-center">{{ datas.total }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="10">
+                    <h3 class="text-center">Aucune Information</h3>
+                </td>
+            </tr>
 
-                    {% endfor %}
+        {% endfor %}
 
-                </tbody>
-                <tfooter>
-                    <tr class="active">
-                        <td colspan="1" class="text-center"> <strong>Total</strong></td>
-                        <td class="text-center">0</td>
-                        <td class="text-center">0</td>
-                        <td class="text-center">0</td>
-                        <td class="text-center">{{ total_adm }}</td>
-                        <td class="text-center">{{ total_form }}</td>
-                        <td class="text-center">{{ total_dev }}</td>
-                        <td class="text-center">{{ total_prod_nfact }}</td>
-                        <td class="text-center">{{ total_prod_fact }}</td>
-                        <td class="text-center">{{ total }}</td>
-                    </tr>
+    </tbody>
+    <tfooter>
+        <tr class="active">
+            <td colspan="1" class="text-center"> <strong>Total</strong></td>
+            <td class="text-center">{{ total_abs }}</td>
+            <td class="text-center">{{ total_cong }}</td>
+            <td class="text-center">{{ total_fer }}</td>
+            <td class="text-center">{{ total_adm }}</td>
+            <td class="text-center">{{ total_form }}</td>
+            <td class="text-center">{{ total_dev }}</td>
+            <td class="text-center">{{ total_prod_nfact }}</td>
+            <td class="text-center">{{ total_prod_fact }}</td>
+            <td class="text-center">{{ total }}</td>
+        </tr>
 
-                </tfooter>
-            </table>
+    </tfooter>
+</table>
+

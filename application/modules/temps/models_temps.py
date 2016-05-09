@@ -22,6 +22,7 @@ class DetailTemps(ndb.Model):
     conversion = ndb.FloatProperty()
     temps_id = ndb.KeyProperty(kind=Temps)
     ordre = ndb.IntegerProperty()
+    parent = ndb.IntegerProperty()
 
 
 class DetailFrais(ndb.Model):

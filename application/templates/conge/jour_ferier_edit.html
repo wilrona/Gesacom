@@ -1,0 +1,62 @@
+<div class="modal-header bg-primary">
+        <h4 class="modal-title" id="myModalLabel">Edition un jour férier</h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire" action="">
+
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+      <div class="form-group">
+        {{ form.date.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.date(class_='form-control', id="datepicker") }}
+        {% for message in form.date.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+     <div class="form-group">
+        {{ form.description.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.description(class_='form-control') }}
+        {% for message in form.description.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        var url = '{{ url_for('ferier.jour_ferier_edit', ferier_id=ferier_id) }}';
+        $.ajax({
+                url: url,
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+     $('#datepicker').datepicker({
+        format: "dd/mm/yyyy",
+        weekStart: 1,
+        todayBtn: "linked",
+        orientation: "top auto",
+        todayHighlight: true
+    }).inputmask("date", { placeholder:"__/__/____"});
+
+    {% if success  %}
+        {% if not update %}
+            window.location.replace(window.location.origin+"{{ url_for('ferier.jour_ferier') }}").delay();
+        {% else %}
+            window.location.replace(window.location.origin+"{{ url_for('ferier.jour_ferier_tache', return='1') }}").delay();
+        {% endif %}
+    {% endif %}
+</script>

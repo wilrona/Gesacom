@@ -1,0 +1,57 @@
+<div id="load" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3); display: none;    color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 20;">Chargement</div>
+            <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="15%">Collaborateur</th>
+                <th width="15%" class="text-center">Budget Prod</th>
+                <th width="15%" class="text-center">H. Prod Chargee</th>
+                <th width="15%" class="text-center">H. Prod Facturee</th>
+                <th width="15%" class="text-center">% heure chargees</th>
+                <th width="15%" class="text-center">% sur budget</th>
+                <th width="15%" class="text-center">Ecart</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for datas in analyses %}
+                    <tr>
+                        <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                        <td class="text-center">{{ datas.budget }} </td>
+                        <td class="text-center">{{ datas.HProd_Charg }}</td>
+                        <td class="text-center">{{ datas.HProd_Fact }}</td>
+                        <td class="text-center">{{ datas.Pourc_Charg }}</td>
+                        <td class="text-center">{{ datas.Pourc_Bubget }}</td>
+                        <td class="text-center">{{ datas.ecart }}</td>
+                    </tr>
+                {% else %}
+
+                    <tr>
+                        <td colspan="7">
+                            <h3 class="text-center">Aucune Information</h3>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </tbody>
+            <tfooter>
+                <tr class="active">
+                    <td colspan="1" class="text-center"> <strong>Total</strong></td>
+                    <td class="text-center">{{ total_bud }}</td>
+                    <td class="text-center">{{ total_HP_charge }}</td>
+                    <td class="text-center">{{ total_HP_fact }}</td>
+                    <td class="text-center">{{ total_pourc_c }}</td>
+                    <td class="text-center">{{ total__budget }}</td>
+                    <td class="text-center"></td>
+                </tr>
+
+            </tfooter>
+        </table>

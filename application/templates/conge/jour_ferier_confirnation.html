@@ -1,0 +1,13 @@
+<div class="modal-header bg-danger">
+        <h4 class="modal-title" id="myModalLabel">Confirmez vous la suppression de cette date de jour ferier ? </h4>
+</div>
+<div class="modal-body">
+    <p class="lead text-center">
+        Cette suppression va éliminer certain information sur le decompte de l'analyse des Feuilles de temps
+    </p>
+</div>
+<div class="modal-footer">
+
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <a class="btn btn-primary" href="{{ url_for('ferier.jour_ferier_delete', ferier_id=ferier_id) }}">Valider</a>
+</div>

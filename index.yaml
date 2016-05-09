@@ -12,6 +12,15 @@ indexes:
 
 - kind: DetailTemps
   properties:
+  - name: parent
+  - name: temps_id
+  - name: date
+    direction: desc
+  - name: ordre
+    direction: desc
+
+- kind: DetailTemps
+  properties:
   - name: temps_id
   - name: date
 
@@ -34,6 +43,16 @@ indexes:
   - name: temps_id
   - name: ordre
     direction: desc
+
+- kind: DetailTemps
+  properties:
+  - name: temps_id
+  - name: parent
+
+- kind: Ferier
+  properties:
+  - name: apply
+  - name: date
 
 - kind: Horaire
   properties:

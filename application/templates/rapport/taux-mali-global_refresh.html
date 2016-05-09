@@ -1,0 +1,57 @@
+<div id="load" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3); display: none;    color: #fff;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 20;">Chargement</div>
+                <table class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th width="15%">Collaborateur</th>
+                        <th width="10%" class="text-center">Prod. Brute</th>
+                        <th width="10%" class="text-center">Prod. Brute Facturable</th>
+                        <th width="10%" class="text-center">Prod. Brute Facturee</th>
+                        <th width="10%" class="text-center">Taux Mali Tech.</th>
+                        <th width="10%" class="text-center">Taux Mali Com.</th>
+                        <th width="10%" class="text-center">Taux Mali Global</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for datas in analyses %}
+                            <tr>
+                                <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                                <td class="text-center">{{ datas.budget|format_price() }} </td>
+                                <td class="text-center">{{ datas.HFacturable|format_price() }}</td>
+                                <td class="text-center">{{ datas.HFacturee|format_price() }}</td>
+                                <td class="text-center">{{ (datas.mali_tech * 100) }}</td>
+                                <td class="text-center">{{ (datas.mali_com * 100) }}</td>
+                                <td class="text-center">{{ (datas.mali_global * 100) }}</td>
+                            </tr>
+                        {% else %}
+
+                            <tr>
+                                <td colspan="7">
+                                    <h3 class="text-center">Aucune Information</h3>
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+                    </tbody>
+                    <tfooter>
+                        <tr class="active">
+                            <td colspan="1" class="text-center"> <strong>Total</strong></td>
+                            <td class="text-center">{{ total_bud|format_price() }}</td>
+                            <td class="text-center">{{ total_facturable|format_price() }}</td>
+                            <td class="text-center">{{ total_facturee|format_price() }}</td>
+                            <td class="text-center">{{ (total_mali_tech * 100) }}</td>
+                            <td class="text-center">{{ (total_mali_com * 100) }}</td>
+                            <td class="text-center">{{ (total_global * 100) }}</td>
+                        </tr>
+
+                    </tfooter>
+                </table>

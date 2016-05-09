@@ -307,7 +307,6 @@ def hors_projet(tache_id=None):
     if not tache_id:
         list_prestation = Prestation.query(
             Prestation.sigle != None,
-            Prestation.sigle != None,
             Prestation.sigle != 'CONG',
             Prestation.sigle != 'ABS',
             Prestation.sigle != 'FER'
