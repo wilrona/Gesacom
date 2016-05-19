@@ -192,7 +192,9 @@ def collaborateur_refresh():
     else:
         date_start = function.date_convert(request.args.get('date_start'))
         date_end = function.date_convert(request.args.get('date_end'))
+
     printer = request.args.get('print')
+    title_page = 'Remplissage des feuilles du temps par collaborateur'
 
     time_zones = pytz.timezone('Africa/Douala')
     current_month = datetime.datetime.now(time_zones).month
@@ -330,66 +332,24 @@ def collaborateur_refresh():
 
         analyses.append(temp_dict)
 
-    if printer:
+    return render_template('rapport/collaborateur_refresh.html', **locals())
 
-        from data_to_pdf import DataToPdf
-        datas = []
 
-        for data in analyses:
-            datas.append({
-                    'collaborateur': data['user'].get().last_name+" "+data['user'].get().first_name,
-                    'absence': data['abs_time'],
-                    'conge': data['cong_time'],
-                    'ferier': data['fer_time'],
-                    'admin': data['adm_time'],
-                    'formation': data['form_time'],
-                    'developpement': data['dev_time'],
-                    'prod_Nfact': data['prod_time_nfact'],
-                    'prod_fact': data['prod_time_fact'],
-                    'total': data['total'],
-            })
+@prefix.route('/collaborateur/export/exel')
+def collaborateur_export_excel():
 
-        datas.append({
-                    'collaborateur': 'Total',
-                    'absence': total_abs,
-                    'conge': total_cong,
-                    'ferier': total_fer,
-                    'admin': total_adm,
-                    'formation': total_form,
-                    'developpement': total_dev,
-                    'prod_Nfact': total_prod_nfact,
-                    'prod_fact': total_prod_fact,
-                    'total': total,
-            })
+    workbook = Workbook()
+    sheet = workbook.add_sheet("Hello World")
+    sheet.write(0, 0, 'Hello world!')
+    out = StringIO()
+    workbook.save('example.xls')
 
-        fields = (
-            ('collaborateur', 'Collaborateur'),
-            ('absence', 'Absence'),
-            ('conge', 'Conge'),
-            ('ferier', 'Ferier'),
-            ('admin', 'Admin.'),
-            ('formation', 'Formation'),
-            ('developpement', 'Develop.'),
-            ('prod_Nfact', 'Prod. Nfact'),
-            ('prod_fact', 'Prod. Fact'),
-            ('total', 'Total')
-        )
+    response = make_response(out.getvalue())
+    response.headers["Content-Type"] = "application/vnd.ms-excel"
 
-        import cStringIO
-        output = cStringIO.StringIO()
+    return response
 
-        doc = DataToPdf(fields, datas,
-                title='ACCENT COM : Remplissage des feuilles du temps par collaborateur', subtitle='De la periode du '+function.format_date(date_start,'%d/%m/%Y')+' au '+function.format_date(date_end,'%d/%m/%Y'))
 
-        doc.export(output, data_align='LEFT', table_halign='CENTER')
-        pdf_out = output.getvalue()
-        output.close()
-
-        response = make_response(pdf_out)
-        response.headers["Content-Type"] = "application/pdf"
-        return response
-    else:
-        return render_template('rapport/collaborateur_refresh.html', **locals())
 
 
 @prefix.route('/taux-chargeabilite-heure-production')
@@ -493,6 +453,7 @@ def taux_HProd_refresh():
         date_start = function.date_convert(request.args.get('date_start'))
         date_end = function.date_convert(request.args.get('date_end'))
     printer = request.args.get('print')
+    title_page = 'Taux du chargeabilite des heures du production'
 
     time_zones = pytz.timezone('Africa/Douala')
     current_month = datetime.datetime.now(time_zones).month
@@ -571,57 +532,7 @@ def taux_HProd_refresh():
 
             analyses.append(temp_dict)
 
-    if printer:
-
-        from data_to_pdf import DataToPdf
-        datas = []
-
-        for data in analyses:
-            datas.append({
-                    'collaborateur': data['user'].get().last_name+" "+data['user'].get().first_name,
-                    'budget': data['budget'],
-                    'HProd_Charg': data['HProd_Charg'],
-                    'HProd_Fact': data['HProd_Fact'],
-                    'Pourc_Charg': data['Pourc_Charg'],
-                    'Pourc_Bubget': data['Pourc_Bubget'],
-                    'ecart': data['ecart']
-            })
-
-        datas.append({
-                    'collaborateur': 'Total',
-                    'budget': total_bud,
-                    'HProd_Charg': total_HP_charge,
-                    'HProd_Fact': total_HP_fact,
-                    'Pourc_Charg': total_pourc_c,
-                    'Pourc_Bubget': total__budget,
-                    'ecart': ''
-            })
-
-        fields = (
-            ('collaborateur', 'Collaborateur'),
-            ('budget', 'Budget Prod'),
-            ('HProd_Charg', 'H. Prod Chargee'),
-            ('HProd_Fact', 'H. Prod Facturee'),
-            ('Pourc_Charg', '% heure chargees'),
-            ('Pourc_Bubget', '% sur budget'),
-            ('ecart', 'Ecart')
-        )
-
-        import cStringIO
-        output = cStringIO.StringIO()
-
-        doc = DataToPdf(fields, datas,
-                title='ACCENT COM : Taux du chargeabilite des heures du production', subtitle='De la periode du '+function.format_date(date_start,'%d/%m/%Y')+' au '+function.format_date(date_end,'%d/%m/%Y'))
-
-        doc.export(output, data_align='LEFT', table_halign='CENTER')
-        pdf_out = output.getvalue()
-        output.close()
-
-        response = make_response(pdf_out)
-        response.headers["Content-Type"] = "application/pdf"
-        return response
-    else:
-        return render_template('rapport/taux_heure_production_refresh.html', **locals())
+    return render_template('rapport/taux_heure_production_refresh.html', **locals())
 
 
 @prefix.route('/taux-chargeabilite-heure-disponible')
@@ -646,7 +557,7 @@ def taux_HDispo():
 
     analyse = []
     for detail in temps_year:
-        if detail.date.month == current_month and detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
+        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
             infos = {}
             infos['user'] = detail.temps_id.get().user_id
             infos['user_infos'] = 1
@@ -718,6 +629,7 @@ def taux_HDispo_refresh():
         date_start = function.date_convert(request.args.get('date_start'))
         date_end = function.date_convert(request.args.get('date_end'))
     printer = request.args.get('print')
+    title_page = 'Taux du chargeabilite des heures disponibles'
 
     time_zones = pytz.timezone('Africa/Douala')
     current_month = datetime.datetime.now(time_zones).month
@@ -730,7 +642,7 @@ def taux_HDispo_refresh():
 
     analyse = []
     for detail in temps_year:
-        if detail.date.month == current_month and detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
+        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
             infos = {}
             infos['user'] = detail.temps_id.get().user_id
             infos['user_infos'] = 1
@@ -787,57 +699,8 @@ def taux_HDispo_refresh():
 
             analyses.append(temp_dict)
 
-    if printer:
 
-        from data_to_pdf import DataToPdf
-        datas = []
-
-        for data in analyses:
-            datas.append({
-                    'collaborateur': data['user'].get().last_name+" "+data['user'].get().first_name,
-                    'budget': data['budget'],
-                    'HDispo': data['HDispo'],
-                    'HFact': data['HFact'],
-                    'Pourc_HD': data['Pourc_HD'],
-                    'Pourc_Bubget': data['Pourc_Bubget'],
-                    'ecart': data['ecart']
-            })
-
-        datas.append({
-                    'collaborateur': 'Total',
-                    'budget': total_bud,
-                    'HDispo': total_HDispo,
-                    'HFact': total_HFact,
-                    'Pourc_HD': total_pourc_c,
-                    'Pourc_Bubget': total__budget,
-                    'ecart': ''
-            })
-
-        fields = (
-            ('collaborateur', 'Collaborateur'),
-            ('budget', 'Budget Prod'),
-            ('HDispo', 'H. Prod Chargee'),
-            ('HFact', 'H. Prod Facturee'),
-            ('Pourc_HD', '% heure chargees'),
-            ('Pourc_Bubget', '% sur budget'),
-            ('ecart', 'Ecart')
-        )
-
-        import cStringIO
-        output = cStringIO.StringIO()
-
-        doc = DataToPdf(fields, datas,
-                title='ACCENT COM : Taux du chargeabilite des heures disponibles', subtitle='De la periode du '+function.format_date(date_start,'%d/%m/%Y')+' au '+function.format_date(date_end,'%d/%m/%Y'))
-
-        doc.export(output, data_align='LEFT', table_halign='CENTER')
-        pdf_out = output.getvalue()
-        output.close()
-
-        response = make_response(pdf_out)
-        response.headers["Content-Type"] = "application/pdf"
-        return response
-    else:
-        return render_template('rapport/taux_heure_production_refresh.html', **locals())
+    return render_template('rapport/taux_heure_disponible_refresh.html', **locals())
 
 
 @prefix.route('/etat-consommation-heures-disponible')
@@ -939,6 +802,7 @@ def etat_conso_refresh():
         date_start = function.date_convert(request.args.get('date_start'))
         date_end = function.date_convert(request.args.get('date_end'))
     printer = request.args.get('print')
+    title_page = 'Etat du consommation des heures disponibles'
 
     time_zones = pytz.timezone('Africa/Douala')
     current_month = datetime.datetime.now(time_zones).month
@@ -1016,55 +880,8 @@ def etat_conso_refresh():
 
             analyses.append(temp_dict)
 
-    if printer:
 
-        from data_to_pdf import DataToPdf
-        datas = []
-
-        for data in analyses:
-            datas.append({
-                    'collaborateur': data['user'].get().last_name+" "+data['user'].get().first_name,
-                    'budget': data['budget'],
-                    'adm_time': data['adm_time'],
-                    'form_time': data['form_time'],
-                    'dev_time': data['dev_time'],
-                    'prod_time': data['prod_time']
-            })
-
-        datas.append({
-                'collaborateur': 'Total',
-                'budget': total_budget,
-                'adm_time': total_adm,
-                'form_time': total_form,
-                'dev_time': total_dev,
-                'prod_time': total_prod
-            })
-
-        fields = (
-            ('collaborateur', 'Collaborateur'),
-            ('budget', 'Heure Dispo'),
-            ('adm_time', 'Heure Admin.'),
-            ('form_time', 'Heure Forma.'),
-            ('dev_time', 'Heure Devpt'),
-            ('prod_time', 'Heure Prod')
-        )
-
-        import cStringIO
-        output = cStringIO.StringIO()
-
-        doc = DataToPdf(fields, datas,
-                title='ACCENT COM : Etat du consommation des heures disponibles', subtitle='De la periode du '+function.format_date(date_start,'%d/%m/%Y')+' au '+function.format_date(date_end,'%d/%m/%Y'))
-
-        doc.export(output, data_align='LEFT', table_halign='CENTER')
-
-        pdf_out = output.getvalue()
-        output.close()
-
-        response = make_response(pdf_out)
-        response.headers["Content-Type"] = "application/pdf"
-        return response
-    else:
-        return render_template('rapport/etat_conso_heure_disponible_refresh.html', **locals())
+    return render_template('rapport/etat_conso_heure_disponible_refresh.html', **locals())
 
 
 @prefix.route('/etat-consommation-heure-production')
@@ -1189,7 +1006,7 @@ def etat_conso_prod():
     return render_template('rapport/etat_conso_heure_production.html', **locals())
 
 
-@prefix.route('/etat-consommation-heure-production/refresh', methods=['GET','POST'])
+@prefix.route('/etat-consommation-heure-production/refresh', methods=['GET', 'POST'])
 def etat_conso_prod_refresh():
 
     if request.method == 'POST':
@@ -1199,6 +1016,7 @@ def etat_conso_prod_refresh():
         date_start = function.date_convert(request.args.get('date_start'))
         date_end = function.date_convert(request.args.get('date_end'))
     printer = request.args.get('print')
+    title_page = 'Solde des heures a effectuer par collaborateur'
 
     time_zones = pytz.timezone('Africa/Douala')
     current_month = datetime.datetime.now(time_zones).month
@@ -1312,57 +1130,7 @@ def etat_conso_prod_refresh():
 
             analyses.append(temp_dict)
 
-    if printer:
-
-        from data_to_pdf import DataToPdf
-        datas = []
-
-        for data in analyses:
-            datas.append({
-                    'collaborateur': data['user'].get().last_name+" "+data['user'].get().first_name,
-                    'budget_origine': data['budget_origine'],
-                    'budget': data['budget'],
-                    'adm_time': data['adm_time'],
-                    'form_time': data['form_time'],
-                    'dev_time': data['dev_time'],
-                    'prod_time': data['prod_time']
-            })
-
-        datas.append({
-                'collaborateur': 'Total',
-                'budget_origine': total_budget_origine,
-                'budget': total_budget,
-                'adm_time': total_adm,
-                'form_time': total_form,
-                'dev_time': total_dev,
-                'prod_time': total_prod
-            })
-
-        fields = (
-            ('collaborateur', 'Collaborateur'),
-            ('budget_origine', 'Heure Dispo'),
-            ('budget', 'H. Dispo Restant'),
-            ('adm_time', 'Heure Admin.'),
-            ('form_time', 'Heure Forma.'),
-            ('dev_time', 'Heure Devpt'),
-            ('prod_time', 'Heure Prod')
-        )
-
-        import cStringIO
-        output = cStringIO.StringIO()
-
-        doc = DataToPdf(fields, datas,
-                title='ACCENT COM : Solde des heures a effectuer par collaborateur', subtitle='De la periode du '+function.format_date(date_start,'%d/%m/%Y')+' au '+function.format_date(date_end,'%d/%m/%Y'))
-
-        doc.export(output, data_align='LEFT', table_halign='CENTER')
-        pdf_out = output.getvalue()
-        output.close()
-
-        response = make_response(pdf_out)
-        response.headers["Content-Type"] = "application/pdf"
-        return response
-    else:
-        return render_template('rapport/etat_conso_heure_production_refresh.html', **locals())
+    return render_template('rapport/etat_conso_heure_production_refresh.html', **locals())
 
 
 @prefix.route('/heure-de-developpement-chargee')
@@ -1434,17 +1202,17 @@ def etat_dev_charge():
     return render_template('rapport/heure-de-developpement-chargee.html', **locals())
 
 
-@prefix.route('/heure-de-developpement-chargee/refresh', methods=['POST'])
+@prefix.route('/heure-de-developpement-chargee/refresh', methods=['GET', 'POST'])
 def etat_dev_charge_refresh():
 
-    date_start = function.date_convert(request.form['date_start'])
-    date_end = function.date_convert(request.form['date_end'])
-
-    time_zones = pytz.timezone('Africa/Douala')
-    current_month = datetime.datetime.now(time_zones).month
-    now_year = datetime.datetime.now(time_zones).year
-    current_day = datetime.datetime.now(time_zones)
-    First_day_of_year = datetime.date(now_year, 1, 1)
+    if request.method == 'POST':
+        date_start = function.date_convert(request.form['date_start'])
+        date_end = function.date_convert(request.form['date_end'])
+    else:
+        date_start = function.date_convert(request.args.get('date_start'))
+        date_end = function.date_convert(request.args.get('date_end'))
+    printer = request.args.get('print')
+    title_page = 'Heures du developpement chargees'
 
     #Traitement du formulaire d'affichage du la liste des annees
     temps_year = DetailTemps.query(
@@ -1597,17 +1365,20 @@ def taux_mali_global():
     return render_template('rapport/taux-mali-global.html', **locals())
 
 
-@prefix.route('/taux-mali-global/refresh', methods=['POST'])
+@prefix.route('/taux-mali-global/refresh', methods=['GET', 'POST'])
 def taux_mali_global_refresh():
 
-    date_start = function.date_convert(request.form['date_start'])
-    date_end = function.date_convert(request.form['date_end'])
+    if request.method == 'POST':
+        date_start = function.date_convert(request.form['date_start'])
+        date_end = function.date_convert(request.form['date_end'])
+    else:
+        date_start = function.date_convert(request.args.get('date_start'))
+        date_end = function.date_convert(request.args.get('date_end'))
+    printer = request.args.get('print')
+    title_page = 'Taux du mali global'
 
     time_zones = pytz.timezone('Africa/Douala')
-    current_month = datetime.datetime.now(time_zones).month
     now_year = datetime.datetime.now(time_zones).year
-    current_day = datetime.datetime.now(time_zones)
-    First_day_of_year = datetime.date(now_year, 1, 1)
 
     #Traitement du formulaire d'affichage du la liste des annees
     temps_year = DetailTemps.query(

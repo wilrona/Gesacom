@@ -44,7 +44,7 @@
                       <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <li><a href="#">sous PDF</a></li>
+                    <li><a href="{{ url_for('stat.taux_mali_global_refresh', print='1', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|get_last_day()|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
                     <li><a href="#">sous excel</a></li>
                   </ul>
               </div>
@@ -158,7 +158,7 @@
                         datas['date_end'] = date_end;
                     }
 
-
+                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end'])
 
                     $.ajax({
                         url: url,
@@ -209,6 +209,8 @@
                         datas['date_start'] = date_start;
                         datas['date_end'] = date_end;
                     }
+
+                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end'])
 
                     $.ajax({
                         url: url,

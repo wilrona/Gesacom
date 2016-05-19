@@ -3,7 +3,7 @@ from operator import itemgetter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, landscape, A5, A4
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, \
     Table, TableStyle
 
@@ -42,6 +42,7 @@ class DataToPdf():
                 (eg. 'LEFT', 'CENTER', 'RIGHT')
         """
         doc = SimpleDocTemplate(filename, pagesize=letter)
+        doc.pagesize = landscape(A4)
 
         styles = getSampleStyleSheet()
         styleH = styles['Heading1']

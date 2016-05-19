@@ -48,6 +48,7 @@ from operator import itemgetter
 
 from cStringIO import StringIO
 from xhtml2pdf import pisa
+from xlwt import Workbook
 
 global_role = [
     {"module":"parametre", "valeur": "module_parametre",

@@ -1,3 +1,4 @@
+{% if not printer %}
 <div id="load" style="
                 position: absolute;
                 top: 0;
@@ -53,3 +54,108 @@
                   </div>
                 {% endfor %}
             </div>
+
+{% else %}
+<html lang='en'>
+ <head>
+ 	<meta charset='utf-8'>
+ 	<title>{{ title_page }}</title>
+
+     <script type="text/javascript" src="/static/js/pdfmake.js"></script>
+     <script type="text/javascript" src="/static/js/vfs_fonts.js"></script>
+     <script>
+
+          var docDefinition = {
+              pagesize: 'A4',
+              pageOrientation: 'landscape',
+              pageMargins:[30,50,30,30],
+              header: [
+                  {
+                      text: 'Accent Com ({{ title_page }})',
+                      alignment: 'center',
+                      margin:[0, 25, 0, 0]
+                  }
+              ],
+              footer:function(currentPage, pageCount) {
+                  return {
+                      text: currentPage.toString() + ' sur ' + pageCount,
+                      alignment: 'center'
+                  }
+              },
+              content: [
+                  {
+                      text: '{{ title_page }}',
+                      alignment: 'center',
+                      fontSize: 20,
+                      margin:[0, 20, 0, 20]
+                  },
+                  {
+                      text: 'Periode du {{ date_start|format_date('%d/%m/%Y') }} au {{ date_end|format_date('%d/%m/%Y') }}',
+                      alignment: 'center',
+                      margin:[0, 10, 0, 10]
+                  },
+                  {% for datas in analyses %}
+                      {% if loop.index > 1 %}
+                      {
+                          text:'---------', fontSize: 15, alignment:'center'
+                      },
+                      {% endif %}
+                      {
+                          table:{
+                                headerRows: 1,
+                                widths: ['*','*'],
+                                body: [
+                                        [{ text: 'Collaborateur : {{ datas.user.get().first_name }} {{ datas.user.get().last_name }}', bold: true, alignment:'left' },{ text: 'Total: {{ datas.total|round(1, 'floor') }}',bold: true, alignment:'right' } ],
+                                        [
+                                            {
+                                                table:{
+                                                     headerRows: 1,
+                                                     widths: ['*','*', '*', '*'],
+                                                     body:[
+                                                            [{text:'Code Client', bold:true},{text:'Nom du Client', bold:true},{text:'Prospect', bold:true},{text:'Heure devlp', bold:true}],
+                                                            {% for client in datas.clients %}
+                                                            ['{{ client.ref_client }}', '{{ client.client }}', '{% if client.prospect %}{{ client.prospect.get().name }}{% else %} - {% endif %}', '{{ client.time }}'],
+                                                            {% endfor %}
+                                                     ]
+                                                },
+                                                layout: 'lightHorizontalLines'
+                                            },
+                                            ''
+                                        ]
+
+                                ]
+                           },
+                          layout: {
+                                                            hLineWidth: function(i, node) {
+                                                                    return (i === 0 || i === node.table.body.length) ? 2 : 1;
+                                                            },
+                                                            vLineWidth: function(i, node) {
+                                                                    return (i === 0 || i === node.table.widths.length) ? 2 : 1;
+                                                            },
+                                                            hLineColor: function(i, node) {
+                                                                    return (i === 0 || i === node.table.body.length) ? 'black' : 'gray';
+                                                            },
+                                                            vLineColor: function(i, node) {
+                                                                    return (i === 0 || i === node.table.widths.length) ? 'black' : 'gray';
+                                                            }
+                                                            // paddingLeft: function(i, node) { return 4; },
+                                                            // paddingRight: function(i, node) { return 4; },
+                                                            // paddingTop: function(i, node) { return 2; },
+                                                            // paddingBottom: function(i, node) { return 2; }
+                            }
+                      }{% if loop.index != analyses|length %},{% endif %}
+                  {% endfor %}
+              ],
+              defaultStyle: {
+                alignment: 'center'
+              }
+          };
+          pdfMake.createPdf(docDefinition).open();
+     </script>
+ </head>
+ <body>
+
+</body>
+</html>
+
+{% endif %}

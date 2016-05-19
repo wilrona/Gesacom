@@ -1,6 +1,6 @@
+{% if not printer %}
 
-
-    <div id="load" style="
+<div id="load" style="
         position: absolute;
         top: 0;
         left: 0;
@@ -67,4 +67,93 @@
 
     </tfooter>
 </table>
+{% else %}
+
+
+ <html lang='en'>
+ <head>
+ 	<meta charset='utf-8'>
+ 	<title>{{ title_page }}</title>
+
+     <script type="text/javascript" src="/static/js/pdfmake.js"></script>
+     <script type="text/javascript" src="/static/js/vfs_fonts.js"></script>
+     <script>
+
+          var docDefinition = {
+              pagesize: 'A4',
+              pageOrientation: 'landscape',
+              pageMargins:[30,50,30,30],
+              header: [
+                  {
+                      text: 'Accent Com',
+                      alignment: 'center',
+                      margin:[0, 25, 0, 0]
+                  }
+              ],
+              footer:function(currentPage, pageCount) {
+                  return {
+                      text: currentPage.toString() + ' sur ' + pageCount,
+                      alignment: 'center'
+                  }
+              },
+              content: [
+                  {
+                      text: '{{ title_page }}',
+                      alignment: 'center',
+                      fontSize: 20,
+                      margin:[0, 20, 0, 20]
+                  },
+                  {
+                      text: 'Periode du {{ date_start|format_date('%d/%m/%Y') }} au {{ date_end|format_date('%d/%m/%Y') }}',
+                      alignment: 'center',
+                      margin:[0, 10, 0, 10]
+                  },
+                  {
+                      table: {
+                            headerRows: 1,
+                            widths: ['auto','auto','*','*','*','auto','auto','auto','auto','auto'],
+                            body: [
+                                    [{ text: 'Collaborateur', bold: true, alignment:'left' }, { text: 'Absence', bold: true }, { text: 'Congé', bold: true }, { text: 'Férier', bold: true }, { text: 'Admin.', bold: true}, { text: 'Formation', bold: true }, { text: 'Develop.', bold: true }, { text: 'Prod. Nfact', bold: true }, { text: 'Prod. fact', bold: true }, { text: 'Total', bold: true }],
+                                    {% for datas in analyses %}
+                                       [{text:'{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}', alignment:'left'},'{{ datas.abs_time }}', '{{ datas.cong_time }}','{{ datas.fer_time }}', '{{ datas.adm_time }}', '{{ datas.form_time }}', '{{ datas.dev_time }}', '{{ datas.prod_time_nfact }}', '{{ datas.prod_time_fact }}', '{{ datas.total }}'],
+                                    {% else %}
+                                        ['Collaborateur','0','0','0','0','0','0','0','0','0'],
+                                    {% endfor %}
+                                    [{ text: 'Total', bold: true }, '{{ total_abs }}', '{{ total_cong }}','{{ total_fer }}', '{{ total_adm }}', '{{ total_form }}', '{{ total_dev }}', '{{ total_prod_nfact }}', '{{ total_prod_fact }}', '{{ total }}']
+
+                            ]
+                      },
+                      layout: {
+														hLineWidth: function(i, node) {
+																return (i === 0 || i === node.table.body.length) ? 2 : 1;
+														},
+														vLineWidth: function(i, node) {
+																return (i === 0 || i === node.table.widths.length) ? 2 : 1;
+														},
+														hLineColor: function(i, node) {
+																return (i === 0 || i === node.table.body.length) ? 'black' : 'gray';
+														},
+														vLineColor: function(i, node) {
+																return (i === 0 || i === node.table.widths.length) ? 'black' : 'gray';
+														}
+														// paddingLeft: function(i, node) { return 4; },
+														// paddingRight: function(i, node) { return 4; },
+														// paddingTop: function(i, node) { return 2; },
+														// paddingBottom: function(i, node) { return 2; }
+						}
+                  }
+              ],
+              defaultStyle: {
+                alignment: 'center'
+              }
+          };
+          pdfMake.createPdf(docDefinition).open();
+     </script>
+ </head>
+ <body>
+
+</body>
+</html>
+
+{% endif %}
 
