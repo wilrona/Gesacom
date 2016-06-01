@@ -10,86 +10,12 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: DetailTemps
-  properties:
-  - name: parent
-  - name: temps_id
-  - name: date
-    direction: desc
-  - name: ordre
-    direction: desc
-
-- kind: DetailTemps
-  properties:
-  - name: temps_id
-  - name: date
-
-- kind: DetailTemps
-  properties:
-  - name: temps_id
-  - name: date
-    direction: desc
-
-- kind: DetailTemps
-  properties:
-  - name: temps_id
-  - name: date
-    direction: desc
-  - name: ordre
-    direction: desc
-
-- kind: DetailTemps
-  properties:
-  - name: temps_id
-  - name: ordre
-    direction: desc
-
-- kind: DetailTemps
-  properties:
-  - name: temps_id
-  - name: parent
-
 - kind: Ferier
   properties:
   - name: apply
   - name: date
 
-- kind: Horaire
+- kind: Users
   properties:
-  - name: user
-  - name: date_start
-
-- kind: Horaire
-  properties:
-  - name: user
-  - name: date_start
-    direction: desc
-
-- kind: Roles
-  properties:
-  - name: parent
-  - name: valeur
-
-- kind: Tache
-  properties:
-  - name: closed
-  - name: end
-  - name: prestation_id
-
-- kind: Tache
-  properties:
-  - name: closed
-  - name: end
-  - name: user_id
-  - name: prestation_id
-
-- kind: roles
-  properties:
-  - name: class
-  - name: parent
-  - name: valeur
-
-- kind: roles
-  properties:
-  - name: class
-  - name: valeur
+  - name: email
+  - name: first_name

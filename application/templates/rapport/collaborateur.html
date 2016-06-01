@@ -17,7 +17,7 @@
               <div class="container-fluid">
                 <div class="btn-toolbar" role="toolbar">
                 <div class="btn-group">
-                      <h2 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" value="{{ current_day|get_first_day()|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ current_day|get_last_day()|format_date('%d/%m/%Y') }}"/> </h2>
+                      <h2 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" value="{{ First_day_of_year|get_first_day()|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ current_day|format_date('%d/%m/%Y') }}"/> </h2>
                   </div>
 
                       <div class="btn-group pull-right">
@@ -26,8 +26,8 @@
                               <span class="caret"></span>
                           </button>
                           <ul class="dropdown-menu">
-                            <li><a href="{{ url_for('stat.collaborateur_refresh', print='1', date_start=current_day|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|get_last_day()|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
-                            <li><a href="#" id="print_excel">sous excel</a></li>
+                            <li><a href="{{ url_for('stat.collaborateur_refresh', print='1', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
+                            <li><a href="{{ url_for('stat.collaborateur_export_excel', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|format_date('%d/%m/%Y')) }}" target="_blank" id="print_excel">sous Excel</a></li>
                           </ul>
                       </div>
 
@@ -38,19 +38,19 @@
 
         <div id="table" style="position: relative; min-height: 400px; " >
 
-            {% if not printer %}
-                <div id="load" style="
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0,0,0,0.3); display: none;    color: #fff;
-                font-size: 20px;
-                font-weight: bold;
-                text-align: center;
-                line-height: 20;">Chargement</div>
-            {% endif %}
+
+            <div id="load" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3); display: none;    color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 20;">Chargement</div>
+
 
             <table class="table table-condensed table-hover" width="100%">
                 <thead>
@@ -64,13 +64,14 @@
                     <th width="10%" class="text-center">Develop.</th>
                     <th width="10%" class="text-center">Prod. Nfact</th>
                     <th width="10%" class="text-center">Prod. fact</th>
+                    <th width="10%" class="text-center">H. Non chargee</th>
                     <th width="10%" class="text-center">Total</th>
                 </tr>
                 </thead>
                 <tbody>
                     {% for datas in analyses %}
                         <tr>
-                            <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                            <td>{{ datas.user.last_name }} {{ datas.user.first_name}}</td>
                             <td class="text-center">{{ datas.abs_time }}</td>
                             <td class="text-center">{{ datas.cong_time }}</td>
                             <td class="text-center">{{ datas.fer_time }}</td>
@@ -79,11 +80,12 @@
                             <td class="text-center">{{ datas.dev_time }}</td>
                             <td class="text-center">{{ datas.prod_time_nfact }}</td>
                             <td class="text-center">{{ datas.prod_time_fact }}</td>
+                            <td class="text-center">{{ datas.H_NCharge }}</td>
                             <td class="text-center">{{ datas.total }}</td>
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="10">
+                            <td colspan="11">
                                 <h3 class="text-center">Aucune Information</h3>
                             </td>
                         </tr>
@@ -102,6 +104,7 @@
                         <td class="text-center">{{ total_dev }}</td>
                         <td class="text-center">{{ total_prod_nfact }}</td>
                         <td class="text-center">{{ total_prod_fact }}</td>
+                        <td class="text-center">{{ total_h_ncharge }}</td>
                         <td class="text-center">{{ total }}</td>
                     </tr>
 
@@ -131,6 +134,7 @@
                     var datas = {};
 
                     var url = '{{ url_for('stat.collaborateur_refresh') }}';
+                    var url_excel = '{{ url_for('stat.collaborateur_export_excel') }}';
 
                     var date_start_js = date_start;
                     date_start_js = date_start_js.split('/');
@@ -152,7 +156,8 @@
                         datas['date_end'] = date_end;
                     }
 
-                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end'])
+                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
+                    $('#print_excel').attr('href', url_excel+'?date_start='+datas['date_start']+"&date_end="+datas['date_end']);
 
                     $.ajax({
                         url: url,
@@ -182,6 +187,7 @@
                     var datas = {};
 
                     var url = '{{ url_for('stat.collaborateur_refresh') }}';
+                    var url_excel = '{{ url_for('stat.collaborateur_export_excel') }}';
 
                     var date_start_js = date_start;
                     date_start_js = date_start_js.split('/');
@@ -204,6 +210,7 @@
                     }
 
                     $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
+                    $('#print_excel').attr('href', url_excel+'?date_start='+datas['date_start']+"&date_end="+datas['date_end']);
 
                     $.ajax({
                         url: url,

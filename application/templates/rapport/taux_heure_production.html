@@ -24,7 +24,7 @@
                   <ul class="dropdown-menu">
                     <li><a href="{{ url_for('stat.taux_HProd_refresh', print='1', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|get_last_day()|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
 
-                    <li><a href="#">sous excel</a></li>
+                    <li><a href="{{ url_for('stat.taux_HProd_export_excel', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|get_last_day()|format_date('%d/%m/%Y')) }}" target="_blank" id="print_excel">sous Excel</a></li>
                   </ul>
               </div>
             </div>
@@ -112,6 +112,7 @@
                     var datas = {};
 
                     var url = '{{ url_for('stat.taux_HProd_refresh') }}';
+                    var url_excel = '{{ url_for('stat.taux_HProd_export_excel') }}';
 
                     var date_start_js = date_start;
                     date_start_js = date_start_js.split('/');
@@ -138,6 +139,7 @@
                     }
 
                     $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
+                    $('#print_excel').attr('href', url_excel+'?date_start='+datas['date_start']+"&date_end="+datas['date_end']);
 
                     $.ajax({
                         url: url,
@@ -168,6 +170,7 @@
                     var datas = {};
 
                     var url = '{{ url_for('stat.taux_HProd_refresh') }}';
+                    var url_excel = '{{ url_for('stat.taux_HProd_export_excel') }}';
 
                     var date_start_js = date_start;
                     date_start_js = date_start_js.split('/');
@@ -190,6 +193,7 @@
                     }
 
                     $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
+                    $('#print_excel').attr('href', url_excel+'?date_start='+datas['date_start']+"&date_end="+datas['date_end']);
 
                     $.ajax({
                         url: url,

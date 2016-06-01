@@ -112,6 +112,30 @@ class Users(ndb.Model):
         # All requirements have been met: return True
         return True
 
+    def time_user(self, date_start=None, date_end=None):
+        from ..temps.models_temps import DetailTemps, Temps
+
+        the_time_user = []
+
+        temps = Temps.query(Temps.user_id == self.key)
+
+        for temp in temps:
+            if date_start and date_end:
+                details = DetailTemps.query(
+                    DetailTemps.date >= date_start,
+                    DetailTemps.date <= date_end,
+                    DetailTemps.temps_id == temp.key
+                )
+            else:
+
+                details = DetailTemps.query(
+                    DetailTemps.temps_id == temp.key
+                )
+            for detail in details:
+                the_time_user.append(detail)
+
+        return the_time_user
+
 
 class UserRole(ndb.Model):
     user_id = ndb.KeyProperty(kind=Users)
