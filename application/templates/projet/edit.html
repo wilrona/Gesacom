@@ -109,7 +109,7 @@
                                 Aucun
                             {% endif %}
                         </p>
-                        <input type="hidden" name="prospect_id" value="{% if projet.prospect_id %} {{ projet.prospect_id.get().key.id() }} {% endif %}"/>
+                        <input type="hidden" name="prospect_id" value="{% if projet.prospect_id %} {{ projet.prospect_id.get().key.id() }} {% else %} 0 {% endif %}"/>
                     {% else %}
                           <select name="prospect_id" class="form-control g-select" id="prospect">
                             <option value="0">Selection du prospect</option>

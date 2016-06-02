@@ -2,7 +2,7 @@ __author__ = 'Ronald'
 
 from ...modules import *
 
-from models_projet import Projet, Domaine, Service, Users, Client
+from models_projet import Projet, Domaine, Service, Users, Client, ndb
 from forms_projet import FormProjet
 
 # Flask-Cache (configured to use App Engine Memcache API)
@@ -85,9 +85,14 @@ def me():
         if tache.projet_id:
             all_tache.append(tache.projet_id.get().key.id())
 
+    responsable = Projet.query(
+        Projet.responsable_id == user.key,
+        Projet.suspend == False,
+        Projet.closed == False
+    )
+
     all_projet = []
     all_projet_id = []
-    count_projet = 0
     en_cours = Projet.query(
         Projet.closed == False,
         Projet.suspend == False
@@ -99,6 +104,12 @@ def me():
                 Projet.closed == False,
                 Projet.suspend == True
             )
+
+            responsable = Projet.query(
+                Projet.responsable_id == user.key,
+                Projet.suspend == False,
+                Projet.closed == True
+            )
             small_title = 'en suspend'
 
         if request.args.get('filtre') == 'cloture':
@@ -106,7 +117,17 @@ def me():
                 Projet.closed == True,
                 Projet.suspend == False
             )
+
+            responsable = Projet.query(
+                Projet.responsable_id == user.key,
+                Projet.suspend == True,
+                Projet.closed == False
+            )
             small_title = 'clotures'
+
+    for resp in responsable:
+        if resp.key.id() not in all_tache:
+            all_tache.append(resp.key.id())
 
     # Projet ou l'utilisateur a une tache
     for proj in en_cours:
@@ -119,42 +140,8 @@ def me():
             projet['responsable'] = proj.responsable_id.get().last_name
             projet['responsable_id'] = proj.responsable_id.get().key.id()
             all_projet.append(projet)
-            all_projet_id.append(proj.key.id())
-            count_projet = count_projet + 1
 
-    responsable = Projet.query(
-        Projet.responsable_id == user.key,
-        Projet.suspend == False,
-        Projet.closed == False
-    )
-
-    if request.args.get('filtre') and request.args.get('filtre') is not None:
-        if request.args.get('filtre') == 'suspend':
-            responsable = Projet.query(
-                Projet.responsable_id == user.key,
-                Projet.closed == False,
-                Projet.suspend == True
-            )
-
-        if request.args.get('filtre') == 'cloture':
-            responsable = Projet.query(
-                Projet.responsable_id == user.key,
-                Projet.closed == True,
-                Projet.suspend == False
-            )
-    for projs in responsable:
-        if projs.key.id() not in all_projet_id:
-            projet = {}
-            projet['id'] = proj.key.id()
-            projet['code'] = proj.code
-            projet['titre'] = proj.titre
-            projet['client'] = proj.client_id.get().name
-            projet['responsable'] = proj.responsable_id.get().last_name
-            projet['responsable_id'] = proj.responsable_id.get().key.id()
-            all_projet.append(projet)
-            count_projet = count_projet + 1
-
-    pagination = Pagination(css_framework='bootstrap3', page=page, total=count_projet, search=search, record_name='Projet')
+    pagination = Pagination(css_framework='bootstrap3', page=page, total=len(all_projet), search=search, record_name='Projet')
 
     return render_template('projet/me.html', **locals())
 
@@ -171,13 +158,14 @@ def edit(projet_id=None):
     if projet_id:
         projet = Projet.get_by_id(projet_id)
         form = FormProjet(obj=projet)
-        form.domaine_id.data = projet.domaine_id.get().key.id()
-        form.service_id.data = projet.service_id.get().key.id()
-        form.client_id.data = projet.client_id.get().key.id()
-        form.responsable_id.data = projet.responsable_id.get().key.id()
-        if projet.prospect_id:
-            form.prospect_id.data = projet.prospect_id.get().key.id()
-        form.id.data = projet_id
+        if request.method != 'POST':
+            form.domaine_id.data = projet.domaine_id.get().key.id()
+            form.service_id.data = projet.service_id.get().key.id()
+            form.client_id.data = projet.client_id.get().key.id()
+            form.responsable_id.data = projet.responsable_id.get().key.id()
+            if projet.prospect_id:
+                form.prospect_id.data = projet.prospect_id.get().key.id()
+            form.id.data = projet_id
 
     else:
         projet = Projet()
@@ -246,7 +234,9 @@ def edit(projet_id=None):
         service = Service.get_by_id(int(form.service_id.data))
         projet.service_id = service.key
 
-        projet.facturable = form.facturable.data
+        if not projet_id:
+            projet.facturable = form.facturable.data
+
         projet.closed = form.closed.data
 
         projet_id = projet.put()

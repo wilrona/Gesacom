@@ -25,7 +25,7 @@
             <tbody>
                 {% for datas in analyses %}
                     <tr>
-                        <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                        <td>{{ datas.user.last_name }} {{ datas.user.first_name}}</td>
                         <td class="text-center">{{ datas.budget }} </td>
                         <td class="text-center">{{ datas.HProd_Charg }}</td>
                         <td class="text-center">{{ datas.HProd_Fact }}</td>

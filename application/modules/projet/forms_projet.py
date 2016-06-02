@@ -16,8 +16,8 @@ def controle_date_end(form, field):
 
 def controle_date_start(form, field):
     date_start = function.date_convert(field.data)
-    if datetime.date.today() > date_start and not form.id.data:
-        raise wtf.ValidationError('La date de debut doit etre >= date en cours')
+    # if datetime.date.today() > date_start and not form.id.data:
+    #     raise wtf.ValidationError('La date de debut doit etre >= date en cours')
 
     if form.id.data:
         projet = Projet.get_by_id(int(form.id.data))
