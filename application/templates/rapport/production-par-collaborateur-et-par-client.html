@@ -5,10 +5,9 @@
 
 {% block layout_content %}
 
-
     <div class="col-lg-12">
         <div class="page-header">
-          <h1>Etat de consommation des heures disponibles </h1>
+          <h1>Production par collaborateur et par client </h1>
         </div>
         <nav class="navbar navbar-toolbar" role="navigation">
           <div class="container-fluid">
@@ -22,14 +21,14 @@
                       <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <li><a href="{{ url_for('stat.etat_conso_refresh', print='1', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
-                    <li><a href="{{ url_for('stat.etat_conso_export_excel', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|format_date('%d/%m/%Y')) }}" target="_blank" id="print_excel">sous Excel</a></li>
+                    <li><a href="{{ url_for('stat.production_par_coll_client_refresh', print='1', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
+                    <li><a href="{{ url_for('stat.production_par_coll_client_export_excel', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|format_date('%d/%m/%Y')) }}" target="_blank" id="print_excel">sous Excel</a></li>
                   </ul>
               </div>
             </div>
           </div>
         </nav>
-        <div id="table" style="    position: relative; min-height: 400px;">
+     <div id="table" style="    position: relative; min-height: 400px;">
                 <div id="load" style="
                 position: absolute;
                 top: 0;
@@ -41,48 +40,52 @@
                 font-weight: bold;
                 text-align: center;
                 line-height: 20;">Chargement</div>
-            <table class="table table-condensed table-hover">
-                <thead>
-                <tr>
-                    <th width="15%">Collaborateur</th>
-                    <th width="10%" class="text-center">Heure Dispo</th>
-                    <th width="10%" class="text-center">Heure Admin.</th>
-                    <th width="10%" class="text-center">Heure Forma.</th>
-                    <th width="10%" class="text-center">Heure Devpt</th>
-                    <th width="10%" class="text-center">Heure Prod</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {% for datas in analyses %}
-                        <tr>
-                            <td>{{ datas.user.last_name }} {{ datas.user.first_name}}</td>
-                            <td class="text-center">{{ datas.budget }} </td>
-                            <td class="text-center">{{ datas.adm_time  }} </td>
-                            <td class="text-center">{{ datas.form_time  }}</td>
-                            <td class="text-center">{{ datas.dev_time  }}</td>
-                            <td class="text-center">{{ datas.prod_time }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="6">
-                                <h3 class="text-center">Aucune Information</h3>
-                            </td>
-                        </tr>
-
-                    {% endfor %}
-
-                </tbody>
-                <tfooter>
-                    <tr class="active">
-                        <td colspan="1" class="text-center"> <strong>Total</strong></td>
-                        <td class="text-center">{{ total_budget }}</td>
-                        <td class="text-center">{{ total_adm  }}</td>
-                        <td class="text-center">{{ total_form  }}</td>
-                        <td class="text-center">{{ total_dev  }}</td>
-                        <td class="text-center">{{ total_prod  }}</td>
-                    </tr>
-                </tfooter>
-            </table>
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                {% for datas in analyses %}
+                  <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                      <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{ datas.user_id }}" aria-expanded="true" aria-controls="{{ datas.user_id }}">
+                            <span class="pull-right"><strong>Total :</strong>  {{ datas.total|round(1, 'floor') }}</span>
+                          <strong>Collaborateur :</strong> {{ datas.user.first_name }} {{ datas.user.last_name }}
+                        </a>
+                      </h4>
+                    </div>
+                    <div id="{{ datas.user_id }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                      <div class="panel-body">
+                          <table class="table table-striped">
+                              <thead>
+                                  <tr>
+                                      <th>Code Client</th>
+                                      <th>Nom du Client</th>
+                                      <th>Prospect</th>
+                                      <th>Heure</th>
+                                      <th>Monant</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                              {% for client in datas.clients %}
+                                  <tr>
+                                      <td>{{ client.ref_client }}</td>
+                                      <td>{{ client.client }}</td>
+                                      <td>
+                                          {% if client.prospect %}
+                                          {{ client.prospect.get().name }}
+                                          {% else %}
+                                            -
+                                          {% endif %}
+                                      </td>
+                                      <td>{{ client.time }}</td>
+                                      <td>{{ client.montant|format_price() }}</td>
+                                  </tr>
+                              {% endfor %}
+                              </tbody>
+                          </table>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+            </div>
         </div>
 
     </div>
@@ -106,8 +109,8 @@
 
                     var datas = {};
 
-                    var url = '{{ url_for('stat.etat_conso_refresh') }}';
-                    var url_excel = '{{ url_for('stat.etat_conso_export_excel') }}';
+                    var url = '{{ url_for('stat.production_par_coll_client_refresh') }}';
+                    var url_excel = '{{ url_for('stat.production_par_coll_client_export_excel') }}';
 
                     var date_start_js = date_start;
                     date_start_js = date_start_js.split('/');
@@ -119,9 +122,6 @@
                     reforme_date = (date_end_js[1]) + '/' + date_end_js[0] + '/' + date_end_js[2];
                     date_end_js = new Date(reforme_date);
 
-{#                    var current_year = new Date().getFullYear();#}
-{#                    var start_date_of_year = '01/01/'+ current_year;#}
-{#                    start_date_of_year = new Date(start_date_of_year);#}
 
                     if(date_start_js <= date_end_js){
                         datas['date_start'] = date_start;
@@ -132,7 +132,6 @@
                         datas['date_start'] = date_start;
                         datas['date_end'] = date_end;
                     }
-
 
                     $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
                     $('#print_excel').attr('href', url_excel+'?date_start='+datas['date_start']+"&date_end="+datas['date_end']);
@@ -165,8 +164,8 @@
 
                     var datas = {};
 
-                    var url = '{{ url_for('stat.etat_conso_refresh') }}';
-                    var url_excel = '{{ url_for('stat.etat_conso_export_excel') }}';
+                    var url = '{{ url_for('stat.production_par_coll_client_refresh') }}';
+                    var url_excel = '{{ url_for('stat.production_par_coll_client_export_excel') }}';
 
                     var date_start_js = date_start;
                     date_start_js = date_start_js.split('/');
@@ -187,10 +186,8 @@
                         datas['date_start'] = date_start;
                         datas['date_end'] = date_end;
                     }
-
                     $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
                     $('#print_excel').attr('href', url_excel+'?date_start='+datas['date_start']+"&date_end="+datas['date_end']);
-
 
                     $.ajax({
                         url: url,
@@ -205,3 +202,4 @@
 
     </script>
 {% endblock %}
+

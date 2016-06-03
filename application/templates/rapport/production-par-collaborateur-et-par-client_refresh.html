@@ -29,7 +29,8 @@
                                       <th>Code Client</th>
                                       <th>Nom du Client</th>
                                       <th>Prospect</th>
-                                      <th>Heure devlp</th>
+                                      <th>Heure</th>
+                                      <th>Monant</th>
                                   </tr>
                               </thead>
                               <tbody>
@@ -45,6 +46,7 @@
                                           {% endif %}
                                       </td>
                                       <td>{{ client.time }}</td>
+                                      <td>{{ client.montant|format_price() }}</td>
                                   </tr>
                               {% endfor %}
                               </tbody>
@@ -103,18 +105,18 @@
                       {
                           table:{
                                 headerRows: 1,
-                                widths: ['*','*'],
+                                widths: ['*', 'auto'],
                                 body: [
                                         [{ text: 'Collaborateur : {{ datas.user.first_name }} {{ datas.user.last_name }}', bold: true, alignment:'left' },{ text: 'Total: {{ datas.total|round(1, 'floor') }}',bold: true, alignment:'right' } ],
                                         [
-                                            {
+                                            {   colSpan: 2,
                                                 table:{
                                                      headerRows: 1,
-                                                     widths: ['*','*', '*', '*'],
+                                                     widths: ['*','*', '*', '*', '*'],
                                                      body:[
-                                                            [{text:'Code Client', bold:true},{text:'Nom du Client', bold:true},{text:'Prospect', bold:true},{text:'Heure devlp', bold:true}],
+                                                            [{text:'Code Client', bold:true},{text:'Nom du Client', bold:true},{text:'Prospect', bold:true},{text:'Heure', bold:true}, {text:'Montant', bold:true}],
                                                             {% for client in datas.clients %}
-                                                            ['{{ client.ref_client }}', '{{ client.client }}', '{% if client.prospect %}{{ client.prospect.get().name }}{% else %} - {% endif %}', '{{ client.time }}'],
+                                                            ['{{ client.ref_client }}', '{{ client.client }}', '{% if client.prospect %}{{ client.prospect.get().name }}{% else %} - {% endif %}', '{{ client.time }}', '{{ client.montant|format_price() }}'],
                                                             {% endfor %}
                                                      ]
                                                 },

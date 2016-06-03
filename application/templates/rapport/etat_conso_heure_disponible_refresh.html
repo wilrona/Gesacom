@@ -24,7 +24,7 @@
                 <tbody>
                     {% for datas in analyses %}
                         <tr>
-                            <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                            <td>{{ datas.user.last_name }} {{ datas.user.first_name}}</td>
                             <td class="text-center">{{ datas.budget }} </td>
                             <td class="text-center">{{ datas.adm_time  }} </td>
                             <td class="text-center">{{ datas.form_time  }}</td>
@@ -106,7 +106,7 @@
                                         { text: 'Heure Prod',bold: true }
                                     ],
                                     {% for datas in analyses %}
-                                       [{text:'{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}', alignment:'left'},'{{ datas.budget }} ','{{ datas.adm_time  }} ','{{ datas.form_time  }}','{{ datas.dev_time  }}','{{ datas.prod_time }}'],
+                                       [{text:'{{ datas.user.last_name }} {{ datas.user.first_name}}', alignment:'left'},'{{ datas.budget }} ','{{ datas.adm_time  }} ','{{ datas.form_time  }}','{{ datas.dev_time  }}','{{ datas.prod_time }}'],
                                     {% else %}
                                         ['Collaborateur','0','0','0','0','0'],
                                     {% endfor %}

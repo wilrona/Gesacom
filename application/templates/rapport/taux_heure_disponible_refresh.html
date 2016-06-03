@@ -25,7 +25,7 @@
                 <tbody>
                     {% for datas in analyses %}
                         <tr>
-                            <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                            <td>{{ datas.user.last_name }} {{ datas.user.first_name}}</td>
                             <td class="text-center">{{ datas.budget }} </td>
                             <td class="text-center">{{ datas.HDispo }}</td>
                             <td class="text-center">{{ datas.HFact }}</td>
@@ -110,7 +110,7 @@
                                         { text: 'Ecart', bold: true }
                                     ],
                                     {% for datas in analyses %}
-                                       [{text:'{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}', alignment:'left'},'{{ datas.budget }} ','{{ datas.HDispo }}','{{ datas.HFact }}','{{ datas.Pourc_HD }}','{{ datas.Pourc_Bubget }}','{{ datas.ecart }}'],
+                                       [{text:'{{ datas.user.last_name }} {{ datas.user.first_name}}', alignment:'left'},'{{ datas.budget }} ','{{ datas.HDispo }}','{{ datas.HFact }}','{{ datas.Pourc_HD }}','{{ datas.Pourc_Bubget }}','{{ datas.ecart }}'],
                                     {% else %}
                                         ['Collaborateur','0','0','0','0','0','0'],
                                     {% endfor %}

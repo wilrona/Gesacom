@@ -272,7 +272,7 @@ def collaborateur_refresh():
     all_user = Users.query(
             Users.email != 'admin@accentcom-cm.com',
             Users.email != 'henri@accentcom-cm.com'
-    ).order()
+    )
 
     analyse = []
     for user in all_user:
@@ -477,7 +477,7 @@ def collaborateur_export_excel():
     all_user = Users.query(
             Users.email != 'admin@accentcom-cm.com',
             Users.email != 'henri@accentcom-cm.com'
-    ).order(Users.email)
+    )
 
     analyse = []
     for user in all_user:
@@ -750,17 +750,16 @@ def taux_HProd():
     now_year = datetime.datetime.now(time_zones).year
     current_day = datetime.datetime.now(time_zones)
     First_day_of_year = datetime.date(now_year, 1, 1)
-    last_days_current = function.get_last_day(current_day)
 
     all_user = Users.query(
             Users.email != 'admin@accentcom-cm.com',
             Users.email != 'henri@accentcom-cm.com'
-    ).order()
+    )
 
     analyse = []
     for user in all_user:
         have = False
-        for detail in user.time_user(First_day_of_year, last_days_current):
+        for detail in user.time_user(First_day_of_year, current_day):
             if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'PRO':
                 have = True
                 infos = {}
@@ -781,11 +780,11 @@ def taux_HProd():
             infos['time'] = 0.0
             analyse.append(infos)
 
-    grouper = itemgetter("user", "user_id")
+    grouper = itemgetter("user_id", "user")
 
     Nbre_current_day = function.networkdays(
         function.date_convert(function.get_first_day(First_day_of_year)),
-        function.date_convert(function.get_last_day(current_day)),
+        function.date_convert(current_day),
         [],
         ()
     )
@@ -797,11 +796,11 @@ def taux_HProd():
     total_pourc_c = 0.0
     total__budget = 0.0
     for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
-        temp_dict = dict(zip(["user", "user_id"], key))
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
             Budget.user_id == temp_dict['user'].key,
-            Budget.date_start == datetime.date(now_year, 1, 1)
+            Budget.date_start == First_day_of_year
         ).get()
 
         if budget:
@@ -876,7 +875,7 @@ def taux_HProd_refresh():
     all_user = Users.query(
             Users.email != 'admin@accentcom-cm.com',
             Users.email != 'henri@accentcom-cm.com'
-    ).order()
+    )
 
     analyse = []
     for user in all_user:
@@ -902,7 +901,14 @@ def taux_HProd_refresh():
             infos['time'] = 0.0
             analyse.append(infos)
 
-    grouper = itemgetter("user", "user_id")
+    grouper = itemgetter("user_id", "user")
+
+    Nbre_current_day = function.networkdays(
+                date_start,
+                date_end,
+                [],
+                ()
+            )
 
     analyses = []
     total_bud = 0.0
@@ -911,7 +917,7 @@ def taux_HProd_refresh():
     total_pourc_c = 0.0
     total__budget = 0.0
     for key, grp in groupby(sorted(analyse, key=grouper,reverse=True), grouper):
-        temp_dict = dict(zip(["user", "user_id"], key))
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
             Budget.user_id == temp_dict['user'].key,
@@ -928,13 +934,6 @@ def taux_HProd_refresh():
                 BudgetPrestation.budget_id == budget.key,
                 BudgetPrestation.prestation_id == prest_prod.key
             ).get()
-
-            Nbre_current_day = function.networkdays(
-                date_start,
-                date_end,
-                [],
-                ()
-            )
 
             current_heure = budget_prod.heure * Nbre_current_day
             current_heure /= 365
@@ -990,7 +989,7 @@ def taux_HProd_export_excel():
     all_user = Users.query(
             Users.email != 'admin@accentcom-cm.com',
             Users.email != 'henri@accentcom-cm.com'
-    ).order()
+    )
 
     analyse = []
     for user in all_user:
@@ -1016,7 +1015,15 @@ def taux_HProd_export_excel():
             infos['time'] = 0.0
             analyse.append(infos)
 
-    grouper = itemgetter("user", "user_id")
+    grouper = itemgetter("user_id", "user")
+
+
+    Nbre_current_day = function.networkdays(
+                date_start,
+                date_end,
+                [],
+                ()
+            )
 
     analyses = []
     total_bud = 0.0
@@ -1025,7 +1032,7 @@ def taux_HProd_export_excel():
     total_pourc_c = 0.0
     total__budget = 0.0
     for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
-        temp_dict = dict(zip(["user", "user_id"], key))
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
             Budget.user_id == temp_dict['user'].key,
@@ -1042,13 +1049,6 @@ def taux_HProd_export_excel():
                 BudgetPrestation.budget_id == budget.key,
                 BudgetPrestation.prestation_id == prest_prod.key
             ).get()
-
-            Nbre_current_day = function.networkdays(
-                date_start,
-                date_end,
-                [],
-                ()
-            )
 
             current_heure = budget_prod.heure * Nbre_current_day
             current_heure /= 365
@@ -1160,46 +1160,68 @@ def taux_HDispo():
     current_day = datetime.datetime.now(time_zones)
     First_day_of_year = datetime.date(now_year, 1, 1)
 
-    #Traitement du formulaire d'affichage du la liste des annees
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= datetime.date(now_year, 1, 1)
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
     )
 
     analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
+    for user in all_user:
+        have = False
+        for detail in user.time_user(First_day_of_year, current_day):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                if detail.temps_id.get().tache_id.get().facturable:
+                    infos['facturable'] = 1
+                else:
+                    infos['facturable'] = 0
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+        if not have:
             infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            if detail.temps_id.get().tache_id.get().facturable:
-                infos['facturable'] = 1
-            else:
-                infos['facturable'] = 0
-            infos['time'] = round(detail.conversion, 1)
-            infos['end'] = detail.temps_id.get().tache_id.get().end
+            infos['user'] = user
+            infos['user_id'] = user.key.id()
+            infos['facturable'] = 0
+            infos['time'] = 0.0
             analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    grouper = itemgetter("user_id", "user")
+
+    Nbre_current_day = function.networkdays(
+        function.date_convert(function.get_first_day(First_day_of_year)),
+        function.date_convert(current_day),
+        [],
+        ()
+    )
 
     analyses = []
-    total_bud = 0
-    total_HDispo = 0
-    total_HFact = 0
-    total_pourc_c = 0
-    total__budget = 0
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    total_bud = 0.0
+    total_HDispo = 0.0
+    total_HFact = 0.0
+    total_pourc_c = 0.0
+    total__budget = 0.0
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
-            Budget.date_start == datetime.date(now_year, 1, 1)
+            Budget.user_id == temp_dict['user'].key,
+            Budget.date_start == First_day_of_year
         ).get()
 
         if budget:
 
-            temp_dict['budget'] = 0.0
-            if budget:
-                temp_dict['budget'] = budget.heure
+            current_heure = budget.heure * Nbre_current_day
+            current_heure /= 365
+
+            temp_dict['budget'] = round(current_heure, 1)
+
+            # temp_dict['budget'] = 0.0
+            # if budget:
+            #     temp_dict['budget'] = budget.heure
             temp_dict['HDispo'] = 0.0
             temp_dict['HFact'] = 0.0
 
@@ -1209,20 +1231,28 @@ def taux_HDispo():
             for item in grp:
                 temp_dict['HDispo'] += item['time']
                 HDispo += item['time']
-                if item['facturable'] and item['end']:
+                if item['facturable']:
                     temp_dict['HFact'] += item['time']
                     HFact += item['time']
 
-            temp_dict['Pourc_HD'] = round(((temp_dict['HFact'] * 100) / temp_dict['HDispo']), 1)
-            temp_dict['Pourc_Bubget'] = round(((temp_dict['HFact'] * 100) / temp_dict['budget']), 1)
+            temp_dict['Pourc_HD'] = 0.0
+            if temp_dict['HDispo']:
+                temp_dict['Pourc_HD'] = round(((temp_dict['HFact'] * 100) / temp_dict['HDispo']), 1)
+
+            temp_dict['Pourc_Bubget'] = 0.0
+            if temp_dict['budget']:
+                temp_dict['Pourc_Bubget'] = round(((temp_dict['HFact'] * 100) / temp_dict['budget']), 1)
+
             temp_dict['ecart'] = round((temp_dict['Pourc_HD'] - temp_dict['Pourc_Bubget']), 1)
 
 
             total_bud += temp_dict['budget']
             total_HDispo += round(HDispo, 1)
             total_HFact += round(HFact, 1)
-            total_pourc_c += temp_dict['Pourc_HD']
-            total__budget += temp_dict['Pourc_Bubget']
+            if total_HDispo:
+                total_pourc_c = round((total_HFact*100)/total_HDispo, 1)
+            if total_bud:
+                total__budget = round((total_HFact*100)/total_bud, 1)
 
             analyses.append(temp_dict)
 
@@ -1245,26 +1275,44 @@ def taux_HDispo_refresh():
     current_month = datetime.datetime.now(time_zones).month
     now_year = datetime.datetime.now(time_zones).year
 
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
     )
 
     analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
+    for user in all_user:
+        have = False
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                if detail.temps_id.get().tache_id.get().facturable:
+                    infos['facturable'] = 1
+                else:
+                    infos['facturable'] = 0
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+        if not have:
             infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            if detail.temps_id.get().tache_id.get().facturable:
-                infos['facturable'] = 1
-            else:
-                infos['facturable'] = 0
-            infos['time'] = round(detail.conversion, 1)
-            infos['end'] = detail.temps_id.get().tache_id.get().end
+            infos['user'] = user
+            infos['user_id'] = user.key.id()
+            infos['facturable'] = 0
+            infos['time'] = 0.0
             analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    grouper = itemgetter("user_id", "user")
+
+
+    Nbre_current_day = function.networkdays(
+        date_start,
+        date_end,
+        [],
+        ()
+    )
 
     analyses = []
     total_bud = 0
@@ -1272,17 +1320,20 @@ def taux_HDispo_refresh():
     total_HFact = 0
     total_pourc_c = 0
     total__budget = 0
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper,reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
+            Budget.user_id == temp_dict['user'].key,
             Budget.date_start == datetime.date(now_year, 1, 1)
         ).get()
 
         if budget:
 
-            temp_dict['budget'] = budget.heure
+            current_heure = budget.heure * Nbre_current_day
+            current_heure /= 365
+
+            temp_dict['budget'] = round(current_heure, 1)
             temp_dict['HDispo'] = 0
             temp_dict['HFact'] = 0
 
@@ -1292,20 +1343,28 @@ def taux_HDispo_refresh():
             for item in grp:
                 temp_dict['HDispo'] += item['time']
                 HDispo += item['time']
-                if item['facturable'] and item['end']:
+                if item['facturable']:
                     temp_dict['HFact'] += item['time']
                     HFact += item['time']
 
-            temp_dict['Pourc_HD'] = round(((temp_dict['HFact'] * 100) / temp_dict['HDispo']), 1)
-            temp_dict['Pourc_Bubget'] = round(((temp_dict['HFact'] * 100) / temp_dict['budget']), 1)
+            temp_dict['Pourc_HD'] = 0.0
+            if temp_dict['HDispo']:
+                temp_dict['Pourc_HD'] = round(((temp_dict['HFact'] * 100) / temp_dict['HDispo']), 1)
+
+            temp_dict['Pourc_Bubget'] = 0.0
+            if temp_dict['budget']:
+                temp_dict['Pourc_Bubget'] = round(((temp_dict['HFact'] * 100) / temp_dict['budget']), 1)
+
             temp_dict['ecart'] = round((temp_dict['Pourc_HD'] - temp_dict['Pourc_Bubget']), 1)
 
 
             total_bud += temp_dict['budget']
             total_HDispo += round(HDispo, 1)
             total_HFact += round(HFact, 1)
-            total_pourc_c += temp_dict['Pourc_HD']
-            total__budget += temp_dict['Pourc_Bubget']
+            if total_HDispo:
+                total_pourc_c = round((total_HFact*100)/total_HDispo, 1)
+            if total_bud:
+                total__budget = round((total_HFact*100)/total_bud, 1)
 
             analyses.append(temp_dict)
 
@@ -1324,26 +1383,44 @@ def taux_HDispo_export_excel():
     time_zones = pytz.timezone('Africa/Douala')
     now_year = datetime.datetime.now(time_zones).year
 
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
     )
 
     analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
+    for user in all_user:
+        have = False
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle != 'FER':
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                if detail.temps_id.get().tache_id.get().facturable:
+                    infos['facturable'] = 1
+                else:
+                    infos['facturable'] = 0
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+        if not have:
             infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            if detail.temps_id.get().tache_id.get().facturable:
-                infos['facturable'] = 1
-            else:
-                infos['facturable'] = 0
-            infos['time'] = round(detail.conversion, 1)
-            infos['end'] = detail.temps_id.get().tache_id.get().end
+            infos['user'] = user
+            infos['user_id'] = user.key.id()
+            infos['facturable'] = 0
+            infos['time'] = 0.0
             analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    grouper = itemgetter("user_id", "user")
+
+
+    Nbre_current_day = function.networkdays(
+        date_start,
+        date_end,
+        [],
+        ()
+    )
 
     analyses = []
     total_bud = 0
@@ -1351,17 +1428,20 @@ def taux_HDispo_export_excel():
     total_HFact = 0
     total_pourc_c = 0
     total__budget = 0
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper,reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
+            Budget.user_id == temp_dict['user'].key,
             Budget.date_start == datetime.date(now_year, 1, 1)
         ).get()
 
         if budget:
 
-            temp_dict['budget'] = budget.heure
+            current_heure = budget.heure * Nbre_current_day
+            current_heure /= 365
+
+            temp_dict['budget'] = round(current_heure, 1)
             temp_dict['HDispo'] = 0
             temp_dict['HFact'] = 0
 
@@ -1371,20 +1451,28 @@ def taux_HDispo_export_excel():
             for item in grp:
                 temp_dict['HDispo'] += item['time']
                 HDispo += item['time']
-                if item['facturable'] and item['end']:
+                if item['facturable']:
                     temp_dict['HFact'] += item['time']
                     HFact += item['time']
 
-            temp_dict['Pourc_HD'] = round(((temp_dict['HFact'] * 100) / temp_dict['HDispo']), 1)
-            temp_dict['Pourc_Bubget'] = round(((temp_dict['HFact'] * 100) / temp_dict['budget']), 1)
+            temp_dict['Pourc_HD'] = 0.0
+            if temp_dict['HDispo']:
+                temp_dict['Pourc_HD'] = round(((temp_dict['HFact'] * 100) / temp_dict['HDispo']), 1)
+
+            temp_dict['Pourc_Bubget'] = 0.0
+            if temp_dict['budget']:
+                temp_dict['Pourc_Bubget'] = round(((temp_dict['HFact'] * 100) / temp_dict['budget']), 1)
+
             temp_dict['ecart'] = round((temp_dict['Pourc_HD'] - temp_dict['Pourc_Bubget']), 1)
 
 
             total_bud += temp_dict['budget']
             total_HDispo += round(HDispo, 1)
             total_HFact += round(HFact, 1)
-            total_pourc_c += temp_dict['Pourc_HD']
-            total__budget += temp_dict['Pourc_Bubget']
+            if total_HDispo:
+                total_pourc_c = round((total_HFact*100)/total_HDispo, 1)
+            if total_bud:
+                total__budget = round((total_HFact*100)/total_bud, 1)
 
             analyses.append(temp_dict)
 
@@ -1420,7 +1508,7 @@ def taux_HDispo_export_excel():
 
     start = 4
     for datas in analyses:
-        sheet.write(start, 0, datas['user'].get().last_name+" "+datas['user'].get().first_name, style_3)
+        sheet.write(start, 0, datas['user'].last_name+" "+datas['user'].first_name, style_3)
         sheet.write(start, 1, datas['budget'], style_3)
         sheet.write(start, 2, datas['HDispo'], style_3)
         sheet.write(start, 3, datas['HFact'], style_3)
@@ -1460,56 +1548,76 @@ def etat_conso():
     current_day = datetime.datetime.now(time_zones)
     First_day_of_year = datetime.date(now_year, 1, 1)
 
-    #Traitement du formulaire d'affichage du la liste des annees
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= datetime.date(now_year, 1, 1)
-    )
-
     exept_temps_year = [
         'FER',
         'ABS',
         'CONG'
     ]
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
 
     analyse = []
-    for detail in temps_year:
-        if detail.date.month <= current_month and detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
-            infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
-            infos['time'] = round(detail.conversion, 1)
-            analyse.append(infos)
+    for user in all_user:
+        have = False
+        for detail in user.time_user(First_day_of_year, current_day):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+        if not have:
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = 'RIEN'
+                infos['time'] = 0.0
+                analyse.append(infos)
+
+    grouper = itemgetter("user_id", "user")
+
+    Nbre_current_day = function.networkdays(
+        function.date_convert(function.get_first_day(First_day_of_year)),
+        function.date_convert(current_day),
+        [],
+        ()
+    )
 
     analyses = []
-    total_budget = 0
-    total_adm = 0
-    total_form = 0
-    total_dev = 0
-    total_prod = 0
+    total_budget = 0.0
+    total_adm = 0.0
+    total_form = 0.0
+    total_dev = 0.0
+    total_prod = 0.0
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
+            Budget.user_id == temp_dict['user'].key,
             Budget.date_start == datetime.date(now_year, 1, 1)
         ).get()
 
         if budget:
 
-            temp_dict['budget'] = budget.heure
-            temp_dict['dev_time'] = 0
-            temp_dict['form_time'] = 0
-            temp_dict['prod_time'] = 0
-            temp_dict['adm_time'] = 0
+            current_heure = budget.heure * Nbre_current_day
+            current_heure /= 365
 
-            dev_tot = 0
-            adm_tot = 0
-            prod_tot = 0
-            form_tot = 0
+            temp_dict['budget'] = round(current_heure, 1)
+            temp_dict['dev_time'] = 0.0
+            temp_dict['form_time'] = 0.0
+            temp_dict['prod_time'] = 0.0
+            temp_dict['adm_time'] = 0.0
+
+            dev_tot = 0.0
+            adm_tot = 0.0
+            prod_tot = 0.0
+            form_tot = 0.0
             for item in grp:
                 if item['prestation'] == 'DEV':
                     temp_dict['dev_time'] += item['time']
@@ -1521,6 +1629,19 @@ def etat_conso():
                     temp_dict['adm_time'] += item['time']
                     adm_tot += item['time']
                 if item['prestation'] == 'PRO':
+                    temp_dict['prod_time'] += item['time']
+                    prod_tot += item['time']
+
+                if item['prestation'] == 'RIEN':
+                    temp_dict['dev_time'] += item['time']
+                    dev_tot += item['time']
+
+                    temp_dict['form_time'] += item['time']
+                    form_tot += item['time']
+
+                    temp_dict['adm_time'] += item['time']
+                    adm_tot += item['time']
+
                     temp_dict['prod_time'] += item['time']
                     prod_tot += item['time']
 
@@ -1551,47 +1672,68 @@ def etat_conso_refresh():
     current_month = datetime.datetime.now(time_zones).month
     now_year = datetime.datetime.now(time_zones).year
 
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
-    )
-
     exept_temps_year = [
         'FER',
         'CONG',
         'ABS'
     ]
 
-    analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
-            infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
-            infos['time'] = round(detail.conversion, 1)
-            analyse.append(infos)
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
 
-    grouper = itemgetter("user", "user_infos")
+    analyse = []
+    for user in all_user:
+        have = False
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+        if not have:
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = 'RIEN'
+                infos['time'] = 0.0
+                analyse.append(infos)
+
+    grouper = itemgetter("user_id", "user")
+
+    Nbre_current_day = function.networkdays(
+        date_start,
+        date_end,
+        [],
+        ()
+    )
 
     analyses = []
-    total_budget = 0
-    total_adm = 0
-    total_form = 0
-    total_dev = 0
-    total_prod = 0
+    total_budget = 0.0
+    total_adm = 0.0
+    total_form = 0.0
+    total_dev = 0.0
+    total_prod = 0.0
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
+            Budget.user_id == temp_dict['user'].key,
             Budget.date_start == datetime.date(now_year, 1, 1)
         ).get()
 
         if budget:
 
-            temp_dict['budget'] = budget.heure
+            current_heure = budget.heure * Nbre_current_day
+            current_heure /= 365
+
+            temp_dict['budget'] = round(current_heure, 1)
             temp_dict['dev_time'] = 0.0
             temp_dict['form_time'] = 0.0
             temp_dict['prod_time'] = 0.0
@@ -1615,6 +1757,19 @@ def etat_conso_refresh():
                     temp_dict['prod_time'] += item['time']
                     prod_tot += item['time']
 
+                if item['prestation'] == 'RIEN':
+                    temp_dict['dev_time'] += item['time']
+                    dev_tot += item['time']
+
+                    temp_dict['form_time'] += item['time']
+                    form_tot += item['time']
+
+                    temp_dict['adm_time'] += item['time']
+                    adm_tot += item['time']
+
+                    temp_dict['prod_time'] += item['time']
+                    prod_tot += item['time']
+
             total_budget += temp_dict['budget']
             total_adm += adm_tot
             total_form += form_tot
@@ -1622,7 +1777,6 @@ def etat_conso_refresh():
             total_prod += prod_tot
 
             analyses.append(temp_dict)
-
 
     return render_template('rapport/etat_conso_heure_disponible_refresh.html', **locals())
 
@@ -1638,47 +1792,68 @@ def etat_conso_export_excel():
     time_zones = pytz.timezone('Africa/Douala')
     now_year = datetime.datetime.now(time_zones).year
 
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
-    )
-
     exept_temps_year = [
         'FER',
         'CONG',
         'ABS'
     ]
 
-    analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
-            infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
-            infos['time'] = round(detail.conversion, 1)
-            analyse.append(infos)
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
 
-    grouper = itemgetter("user", "user_infos")
+    analyse = []
+    for user in all_user:
+        have = False
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+        if not have:
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = 'RIEN'
+                infos['time'] = 0.0
+                analyse.append(infos)
+
+    grouper = itemgetter("user_id", "user")
+
+    Nbre_current_day = function.networkdays(
+        date_start,
+        date_end,
+        [],
+        ()
+    )
 
     analyses = []
-    total_budget = 0
-    total_adm = 0
-    total_form = 0
-    total_dev = 0
-    total_prod = 0
+    total_budget = 0.0
+    total_adm = 0.0
+    total_form = 0.0
+    total_dev = 0.0
+    total_prod = 0.0
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
+            Budget.user_id == temp_dict['user'].key,
             Budget.date_start == datetime.date(now_year, 1, 1)
         ).get()
 
         if budget:
 
-            temp_dict['budget'] = budget.heure
+            current_heure = budget.heure * Nbre_current_day
+            current_heure /= 365
+
+            temp_dict['budget'] = round(current_heure, 1)
             temp_dict['dev_time'] = 0.0
             temp_dict['form_time'] = 0.0
             temp_dict['prod_time'] = 0.0
@@ -1699,6 +1874,19 @@ def etat_conso_export_excel():
                     temp_dict['adm_time'] += item['time']
                     adm_tot += item['time']
                 if item['prestation'] == 'PRO':
+                    temp_dict['prod_time'] += item['time']
+                    prod_tot += item['time']
+
+                if item['prestation'] == 'RIEN':
+                    temp_dict['dev_time'] += item['time']
+                    dev_tot += item['time']
+
+                    temp_dict['form_time'] += item['time']
+                    form_tot += item['time']
+
+                    temp_dict['adm_time'] += item['time']
+                    adm_tot += item['time']
+
                     temp_dict['prod_time'] += item['time']
                     prod_tot += item['time']
 
@@ -1741,7 +1929,7 @@ def etat_conso_export_excel():
 
     start = 4
     for datas in analyses:
-        sheet.write(start, 0, datas['user'].get().last_name+" "+datas['user'].get().first_name, style_3)
+        sheet.write(start, 0, datas['user'].last_name+" "+datas['user'].first_name, style_3)
         sheet.write(start, 1, datas['budget'], style_3)
         sheet.write(start, 2, datas['adm_time'], style_3)
         sheet.write(start, 3, datas['form_time'], style_3)
@@ -1779,26 +1967,38 @@ def etat_conso_prod():
     current_day = datetime.datetime.now(time_zones)
     First_day_of_year = datetime.date(now_year, 1, 1)
 
-    temps_year = DetailTemps.query(
-            DetailTemps.date >= datetime.date(now_year, 1, 1)
-        )
-
     exept_temps_year = [
         'FER',
         'ABS',
         'CONG'
     ]
-    analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
-            infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
-            infos['time'] = round(detail.conversion, 1)
-            analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
+
+    analyse = []
+    for user in all_user:
+        have = False
+        for detail in user.time_user(First_day_of_year, current_day):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+        if not have:
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = 'RIEN'
+                infos['time'] = 0.0
+                analyse.append(infos)
+
+    grouper = itemgetter("user_id", "user")
 
     analyses = []
     total_budget = 0.0
@@ -1808,15 +2008,16 @@ def etat_conso_prod():
     total_dev = 0.0
     total_prod = 0.0
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
-            Budget.date_start == datetime.date(now_year, 1, 1)
+            Budget.user_id == temp_dict['user'].key,
+            Budget.date_start == First_day_of_year
         ).get()
 
         if budget:
+
             temp_dict['budget_origine'] = budget.heure
             temp_dict['dev_time'] = 0.0
             temp_dict['form_time'] = 0.0
@@ -1837,6 +2038,11 @@ def etat_conso_prod():
                 if item['prestation'] == 'ADM':
                     adm += item['time']
                 if item['prestation'] == 'PRO':
+                    prod += item['time']
+                if item['prestation'] == 'RIEN':
+                    dev += item['time']
+                    form += item['time']
+                    adm += item['time']
                     prod += item['time']
 
 
@@ -1903,29 +2109,38 @@ def etat_conso_prod_refresh():
     current_month = datetime.datetime.now(time_zones).month
     now_year = datetime.datetime.now(time_zones).year
 
-
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
-    )
-
     exept_temps_year = [
         'FER',
         'ABS',
         'CONG'
     ]
 
-    analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
-            infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
-            infos['time'] = round(detail.conversion, 1)
-            analyse.append(infos)
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
 
-    grouper = itemgetter("user", "user_infos")
+    analyse = []
+    for user in all_user:
+        have = False
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+        if not have:
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = 'RIEN'
+                infos['time'] = 0.0
+                analyse.append(infos)
+
+    grouper = itemgetter("user_id", "user")
 
     analyses = []
     total_budget = 0.0
@@ -1935,11 +2150,11 @@ def etat_conso_prod_refresh():
     total_dev = 0.0
     total_prod = 0.0
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
+            Budget.user_id == temp_dict['user'].key,
             Budget.date_start == datetime.date(now_year, 1, 1)
         ).get()
 
@@ -1950,6 +2165,7 @@ def etat_conso_prod_refresh():
             temp_dict['form_time'] = 0.0
             temp_dict['prod_time'] = 0.0
             temp_dict['adm_time'] = 0.0
+
 
             dev = 0.0
             adm = 0.0
@@ -1964,6 +2180,11 @@ def etat_conso_prod_refresh():
                 if item['prestation'] == 'ADM':
                     adm += item['time']
                 if item['prestation'] == 'PRO':
+                    prod += item['time']
+                if item['prestation'] == 'RIEN':
+                    dev += item['time']
+                    form += item['time']
+                    adm += item['time']
                     prod += item['time']
 
 
@@ -2025,28 +2246,38 @@ def etat_conso_prod_export_excel():
     time_zones = pytz.timezone('Africa/Douala')
     now_year = datetime.datetime.now(time_zones).year
 
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
-    )
-
     exept_temps_year = [
         'FER',
         'ABS',
         'CONG'
     ]
 
-    analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
-            infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
-            infos['time'] = round(detail.conversion, 1)
-            analyse.append(infos)
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
 
-    grouper = itemgetter("user", "user_infos")
+    analyse = []
+    for user in all_user:
+        have = False
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle not in exept_temps_year:
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = detail.temps_id.get().tache_id.get().prestation_id.get().sigle
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+        if not have:
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['prestation'] = 'RIEN'
+                infos['time'] = 0.0
+                analyse.append(infos)
+
+    grouper = itemgetter("user_id", "user")
 
     analyses = []
     total_budget = 0.0
@@ -2056,11 +2287,11 @@ def etat_conso_prod_export_excel():
     total_dev = 0.0
     total_prod = 0.0
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
+            Budget.user_id == temp_dict['user'].key,
             Budget.date_start == datetime.date(now_year, 1, 1)
         ).get()
 
@@ -2071,6 +2302,7 @@ def etat_conso_prod_export_excel():
             temp_dict['form_time'] = 0.0
             temp_dict['prod_time'] = 0.0
             temp_dict['adm_time'] = 0.0
+
 
             dev = 0.0
             adm = 0.0
@@ -2085,6 +2317,11 @@ def etat_conso_prod_export_excel():
                 if item['prestation'] == 'ADM':
                     adm += item['time']
                 if item['prestation'] == 'PRO':
+                    prod += item['time']
+                if item['prestation'] == 'RIEN':
+                    dev += item['time']
+                    form += item['time']
+                    adm += item['time']
                     prod += item['time']
 
 
@@ -2164,7 +2401,7 @@ def etat_conso_prod_export_excel():
 
     start = 4
     for datas in analyses:
-        sheet.write(start, 0, datas['user'].get().last_name+" "+datas['user'].get().first_name, style_3)
+        sheet.write(start, 0, datas['user'].last_name+" "+datas['user'].first_name, style_3)
         sheet.write(start, 1, datas['budget_origine'], style_3)
         sheet.write(start, 2, datas['budget'], style_3)
         sheet.write(start, 3, datas['adm_time'], style_3)
@@ -2204,47 +2441,49 @@ def etat_dev_charge():
     current_day = datetime.datetime.now(time_zones)
     First_day_of_year = datetime.date(now_year, 1, 1)
 
-    #Traitement du formulaire d'affichage du la liste des annees
-    temps_year = DetailTemps.query()
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
 
     analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'DEV':
-            infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            if detail.temps_id.get().tache_id.get().projet_id:
-                infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
-                infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
-                infos['prospect'] = None
-                if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
-                    infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
-                infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
-            else:
-                client_accent = Client.query(
-                    Client.myself == True
-                ).get()
-                infos['ref_client'] = client_accent.ref
-                infos['client'] = client_accent.name
-                infos['prospect'] = None
-                infos['client_ent'] = client_accent.myself
+    for user in all_user:
+        for detail in user.time_user(First_day_of_year, current_day):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'DEV':
+                infos = {}
+                infos['user'] = user
+                if detail.temps_id.get().tache_id.get().projet_id:
+                    infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
+                    infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
+                    infos['prospect'] = None
+                    if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
+                        infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
+                    infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
+                else:
+                    client_accent = Client.query(
+                        Client.myself == True
+                    ).get()
+                    infos['ref_client'] = client_accent.ref
+                    infos['client'] = client_accent.name
+                    infos['prospect'] = None
+                    infos['client_ent'] = client_accent.myself
 
-            infos['user_infos'] = 1
-            infos['client_infos'] = 1
-            infos['time'] = round(detail.conversion, 1)
-            analyse.append(infos)
+                infos['user_id'] = user.key.id()
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    grouper = itemgetter("user_id", "user")
 
     analyses = []
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         temp_dict['clients'] = []
-        under_grouper = itemgetter("ref_client", "client", "client_infos")
+        under_grouper = itemgetter("ref_client", "client")
         temp_dict['total'] = 0
         for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
-            temp_dict_under = dict(zip(["ref_client", "client", "client_infos"], key))
+            temp_dict_under = dict(zip(["ref_client", "client"], key))
             temp_dict_under['time'] = 0
             for item in grp:
                 temp_dict_under['time'] += item['time']
@@ -2271,50 +2510,49 @@ def etat_dev_charge_refresh():
     printer = request.args.get('print')
     title_page = 'Heures du developpement chargees'
 
-    #Traitement du formulaire d'affichage du la liste des annees
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
     )
 
     analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'DEV':
-            infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            if detail.temps_id.get().tache_id.get().projet_id:
-                infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
-                infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
-                infos['prospect'] = None
-                if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
-                    infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
-                infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
-            else:
-                client_accent = Client.query(
-                    Client.myself == True
-                ).get()
-                infos['ref_client'] = client_accent.ref
-                infos['client'] = client_accent.name
-                infos['prospect'] = None
-                infos['client_ent'] = client_accent.myself
+    for user in all_user:
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'DEV':
+                infos = {}
+                infos['user'] = user
+                if detail.temps_id.get().tache_id.get().projet_id:
+                    infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
+                    infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
+                    infos['prospect'] = None
+                    if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
+                        infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
+                    infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
+                else:
+                    client_accent = Client.query(
+                        Client.myself == True
+                    ).get()
+                    infos['ref_client'] = client_accent.ref
+                    infos['client'] = client_accent.name
+                    infos['prospect'] = None
+                    infos['client_ent'] = client_accent.myself
 
-            infos['user_infos'] = 1
-            infos['client_infos'] = 1
-            infos['time'] = round(detail.conversion, 1)
-            analyse.append(infos)
+                infos['user_id'] = user.key.id()
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    grouper = itemgetter("user_id", "user")
 
     analyses = []
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         temp_dict['clients'] = []
-        under_grouper = itemgetter("ref_client", "client", "client_infos")
+        under_grouper = itemgetter("ref_client", "client")
         temp_dict['total'] = 0
         for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
-            temp_dict_under = dict(zip(["ref_client", "client", "client_infos"], key))
+            temp_dict_under = dict(zip(["ref_client", "client"], key))
             temp_dict_under['time'] = 0
             for item in grp:
                 temp_dict_under['time'] += item['time']
@@ -2341,50 +2579,49 @@ def etat_dev_charge_export_excel():
     now_year = datetime.datetime.now(time_zones).year
 
 
-    #Traitement du formulaire d'affichage du la liste des annees
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
     )
 
     analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'DEV':
-            infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            if detail.temps_id.get().tache_id.get().projet_id:
-                infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
-                infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
-                infos['prospect'] = None
-                if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
-                    infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
-                infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
-            else:
-                client_accent = Client.query(
-                    Client.myself == True
-                ).get()
-                infos['ref_client'] = client_accent.ref
-                infos['client'] = client_accent.name
-                infos['prospect'] = None
-                infos['client_ent'] = client_accent.myself
+    for user in all_user:
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'DEV':
+                infos = {}
+                infos['user'] = user
+                if detail.temps_id.get().tache_id.get().projet_id:
+                    infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
+                    infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
+                    infos['prospect'] = None
+                    if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
+                        infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
+                    infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
+                else:
+                    client_accent = Client.query(
+                        Client.myself == True
+                    ).get()
+                    infos['ref_client'] = client_accent.ref
+                    infos['client'] = client_accent.name
+                    infos['prospect'] = None
+                    infos['client_ent'] = client_accent.myself
 
-            infos['user_infos'] = 1
-            infos['client_infos'] = 1
-            infos['time'] = round(detail.conversion, 1)
-            analyse.append(infos)
+                infos['user_id'] = user.key.id()
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    grouper = itemgetter("user_id", "user")
 
     analyses = []
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         temp_dict['clients'] = []
-        under_grouper = itemgetter("ref_client", "client", "client_infos")
+        under_grouper = itemgetter("ref_client", "client")
         temp_dict['total'] = 0
         for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
-            temp_dict_under = dict(zip(["ref_client", "client", "client_infos"], key))
+            temp_dict_under = dict(zip(["ref_client", "client"], key))
             temp_dict_under['time'] = 0
             for item in grp:
                 temp_dict_under['time'] += item['time']
@@ -2423,7 +2660,7 @@ def etat_dev_charge_export_excel():
 
     start = 4
     for datas in analyses:
-        sheet.write(start, 0, 'Collaborateur: '+datas['user'].get().last_name+" "+datas['user'].get().first_name, style_4)
+        sheet.write(start, 0, 'Collaborateur: '+datas['user'].last_name+" "+datas['user'].first_name, style_4)
         # sheet.write(start, 1, datas['user'].get().last_name+" "+datas['user'].get().first_name, style_4)
         # sheet.write(start, 2, 'Total', style_4)
         # sheet.write(start, 3, datas['total'], style_4)
@@ -2443,6 +2680,286 @@ def etat_dev_charge_export_excel():
                    prospect = client['prospect'].get().name
                sheet.write(start, 2, prospect, style_3)
                sheet.write(start, 3, client['time'], style_3)
+               start += 1
+
+        start += 1
+
+    out = StringIO()
+    workbook.save(out)
+
+    response = make_response(out.getvalue())
+    response.headers["Content-Type"] = "application/vnd.ms-excel"
+
+    return response
+
+
+@prefix.route('/production-par-collaborateur-et-par-client')
+@login_required
+@roles_required([('super_admin', 'stat')])
+def production_par_coll_client():
+    menu = 'stat'
+    submenu = 'prod_coll_client'
+    title_page = 'Production par collaborateur et par client'
+
+    time_zones = pytz.timezone('Africa/Douala')
+    current_month = datetime.datetime.now(time_zones).month
+    now_year = datetime.datetime.now(time_zones).year
+    current_day = datetime.datetime.now(time_zones)
+    First_day_of_year = datetime.date(now_year, 1, 1)
+
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
+
+    analyse = []
+    for user in all_user:
+        for detail in user.time_user(First_day_of_year, current_day):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'PRO':
+                infos = {}
+                infos['user'] = user
+                if detail.temps_id.get().tache_id.get().projet_id:
+                    infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
+                    infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
+                    infos['prospect'] = None
+                    if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
+                        infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
+                    infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
+                else:
+                    client_accent = Client.query(
+                        Client.myself == True
+                    ).get()
+                    infos['ref_client'] = client_accent.ref
+                    infos['client'] = client_accent.name
+                    infos['prospect'] = None
+                    infos['client_ent'] = client_accent.myself
+
+                infos['user_id'] = user.key.id()
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+    grouper = itemgetter("user_id", "user")
+
+    analyses = []
+
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
+
+        temp_dict['clients'] = []
+        under_grouper = itemgetter("ref_client", "client")
+        temp_dict['total'] = 0.0
+        for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
+            temp_dict_under = dict(zip(["ref_client", "client"], key))
+            temp_dict_under['time'] = 0.0
+            for item in grp:
+                temp_dict_under['time'] += item['time']
+                temp_dict_under['prospect'] = None
+                if item['client_ent']:
+                    if item['prospect']:
+                        temp_dict_under['prospect'] = item['prospect']
+
+            temp_dict_under['montant'] = 0.0
+            if temp_dict['user'].tauxH:
+                temp_dict_under['montant'] = temp_dict_under['time'] * temp_dict['user'].tauxH
+            temp_dict['clients'].append(temp_dict_under)
+            temp_dict['total'] += round(temp_dict_under['time'], 1)
+        analyses.append(temp_dict)
+
+    return render_template('rapport/production-par-collaborateur-et-par-client.html', **locals())
+
+
+@prefix.route('/production-par-collaborateur-et-par-client/refresh', methods=['GET', 'POST'])
+def production_par_coll_client_refresh():
+
+    if request.method == 'POST':
+        date_start = function.date_convert(request.form['date_start'])
+        date_end = function.date_convert(request.form['date_end'])
+    else:
+        date_start = function.date_convert(request.args.get('date_start'))
+        date_end = function.date_convert(request.args.get('date_end'))
+    printer = request.args.get('print')
+    title_page = 'Production par collaborateur et par client'
+
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
+
+    analyse = []
+    for user in all_user:
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'PRO':
+                infos = {}
+                infos['user'] = user
+                if detail.temps_id.get().tache_id.get().projet_id:
+                    infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
+                    infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
+                    infos['prospect'] = None
+                    if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
+                        infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
+                    infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
+                else:
+                    client_accent = Client.query(
+                        Client.myself == True
+                    ).get()
+                    infos['ref_client'] = client_accent.ref
+                    infos['client'] = client_accent.name
+                    infos['prospect'] = None
+                    infos['client_ent'] = client_accent.myself
+
+                infos['user_id'] = user.key.id()
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+    grouper = itemgetter("user_id", "user")
+
+    analyses = []
+
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
+
+        temp_dict['clients'] = []
+        under_grouper = itemgetter("ref_client", "client")
+        temp_dict['total'] = 0.0
+        for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
+            temp_dict_under = dict(zip(["ref_client", "client"], key))
+            temp_dict_under['time'] = 0.0
+            for item in grp:
+                temp_dict_under['time'] += item['time']
+                temp_dict_under['prospect'] = None
+                if item['client_ent']:
+                    if item['prospect']:
+                        temp_dict_under['prospect'] = item['prospect']
+
+            temp_dict_under['montant'] = 0.0
+            if temp_dict['user'].tauxH:
+                temp_dict_under['montant'] = temp_dict_under['time'] * temp_dict['user'].tauxH
+            temp_dict['clients'].append(temp_dict_under)
+            temp_dict['total'] += round(temp_dict_under['time'], 1)
+        analyses.append(temp_dict)
+
+    return render_template('rapport/production-par-collaborateur-et-par-client_refresh.html', **locals())
+
+
+@prefix.route('/collaborateur/production-par-collaborateur-et-par-client')
+def production_par_coll_client_export_excel():
+
+    date_start = function.date_convert(request.args.get('date_start'))
+    date_end = function.date_convert(request.args.get('date_end'))
+
+    title_page = 'Production par collaborateur et par client'
+
+    time_zones = pytz.timezone('Africa/Douala')
+    now_year = datetime.datetime.now(time_zones).year
+
+
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
+
+    analyse = []
+    for user in all_user:
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'PRO':
+                infos = {}
+                infos['user'] = user
+                if detail.temps_id.get().tache_id.get().projet_id:
+                    infos['ref_client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().ref
+                    infos['client'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().name
+                    infos['prospect'] = None
+                    if detail.temps_id.get().tache_id.get().projet_id.get().prospect_id:
+                        infos['prospect'] = detail.temps_id.get().tache_id.get().projet_id.get().prospect_id
+                    infos['client_ent'] = detail.temps_id.get().tache_id.get().projet_id.get().client_id.get().myself
+                else:
+                    client_accent = Client.query(
+                        Client.myself == True
+                    ).get()
+                    infos['ref_client'] = client_accent.ref
+                    infos['client'] = client_accent.name
+                    infos['prospect'] = None
+                    infos['client_ent'] = client_accent.myself
+
+                infos['user_id'] = user.key.id()
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+    grouper = itemgetter("user_id", "user")
+
+    analyses = []
+
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
+
+        temp_dict['clients'] = []
+        under_grouper = itemgetter("ref_client", "client")
+        temp_dict['total'] = 0.0
+        for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
+            temp_dict_under = dict(zip(["ref_client", "client"], key))
+            temp_dict_under['time'] = 0.0
+            for item in grp:
+                temp_dict_under['time'] += item['time']
+                temp_dict_under['prospect'] = None
+                if item['client_ent']:
+                    if item['prospect']:
+                        temp_dict_under['prospect'] = item['prospect']
+
+            temp_dict_under['montant'] = 0.0
+            if temp_dict['user'].tauxH:
+                temp_dict_under['montant'] = temp_dict_under['time'] * temp_dict['user'].tauxH
+            temp_dict['clients'].append(temp_dict_under)
+            temp_dict['total'] += round(temp_dict_under['time'], 1)
+        analyses.append(temp_dict)
+
+    workbook = Workbook()
+    sheet = workbook.add_sheet('Production collaborateur par client')
+
+    fnt = Font()
+    fnt.height = 16*20
+    fnt.bold = True
+    style = XFStyle()
+    style.font = fnt
+    sheet.row(0).set_style(style)
+    sheet.row(2).set_style(style)
+
+    style_string = "font: height 320, bold on;"
+    style_string_2 = "font: bold on; borders: bottom dashed; align: wrap 1;"
+    style_string_3 = "align: wrap 1;"\
+
+    style = easyxf(style_string)
+    style_2 = easyxf(style_string_2)
+    style_3 = easyxf(style_string_3)
+    style_4 = easyxf('font: height 240, bold on;')
+
+    sheet.write(0, 0, title_page, style)
+
+    sheet.write(2, 0, 'Periode du '+str(function.format_date(date_start,'%d/%m/%Y'))+' au '+str(function.format_date(date_end,'%d/%m/%Y'))+'', style)
+
+
+    start = 4
+    for datas in analyses:
+        sheet.write(start, 0, 'Collaborateur: '+datas['user'].last_name+" "+datas['user'].first_name, style_4)
+        # sheet.write(start, 1, datas['user'].get().last_name+" "+datas['user'].get().first_name, style_4)
+        # sheet.write(start, 2, 'Total', style_4)
+        # sheet.write(start, 3, datas['total'], style_4)
+
+        start += 1
+        sheet.write(start, 0, 'Code Client', style_2)
+        sheet.write(start, 1, 'Nom du Client', style_2)
+        sheet.write(start, 2, 'Prospect', style_2)
+        sheet.write(start, 3, 'Heure', style_2)
+        sheet.write(start, 4, 'Montant', style_2)
+
+        start += 1
+        for client in datas['clients']:
+               sheet.write(start, 0, client['ref_client'], style_3)
+               sheet.write(start, 1, client['client'], style_3)
+               prospect = ' - '
+               if client['prospect']:
+                   prospect = client['prospect'].get().name
+               sheet.write(start, 2, prospect, style_3)
+               sheet.write(start, 3, client['time'], style_3)
+               sheet.write(start, 4, function.format_price(client['montant']), style_3)
                start += 1
 
         start += 1

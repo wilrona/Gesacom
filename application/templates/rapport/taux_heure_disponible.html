@@ -14,7 +14,7 @@
           <div class="container-fluid">
             <div class="btn-toolbar" role="toolbar">
             <div class="btn-group">
-                  <h2 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" value="{{ First_day_of_year|get_first_day()|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ current_day|get_last_day()|format_date('%d/%m/%Y') }}"/> </h2>
+                  <h2 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" value="{{ First_day_of_year|get_first_day()|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ current_day|format_date('%d/%m/%Y') }}"/> </h2>
               </div>
               <div class="btn-group pull-right">
                   <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -22,8 +22,8 @@
                       <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <li><a href="{{ url_for('stat.taux_HDispo_refresh', print='1', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|get_last_day()|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
-                    <li><a href="{{ url_for('stat.taux_HDispo_export_excel', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|get_last_day()|format_date('%d/%m/%Y')) }}" target="_blank" id="print_excel">sous Excel</a></li>
+                    <li><a href="{{ url_for('stat.taux_HDispo_refresh', print='1', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
+                    <li><a href="{{ url_for('stat.taux_HDispo_export_excel', date_start=First_day_of_year|get_first_day()|format_date('%d/%m/%Y'), date_end=current_day|format_date('%d/%m/%Y')) }}" target="_blank" id="print_excel">sous Excel</a></li>
                   </ul>
               </div>
             </div>
@@ -56,7 +56,7 @@
                 <tbody>
                     {% for datas in analyses %}
                         <tr>
-                            <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                            <td>{{ datas.user.last_name }} {{ datas.user.first_name}}</td>
                             <td class="text-center">{{ datas.budget }} </td>
                             <td class="text-center">{{ datas.HDispo }}</td>
                             <td class="text-center">{{ datas.HFact }}</td>
