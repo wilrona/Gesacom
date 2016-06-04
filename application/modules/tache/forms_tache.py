@@ -14,10 +14,10 @@ def projet_id_required(form, field):
 
 
 def controle_date_start(form, field):
-    if field.data and not form.id.data:
-        date_start = function.date_convert(field.data)
-        if datetime.date.today() > date_start:
-            raise wtf.ValidationError('La date de debut doit etre >= date en cours')
+    # if field.data and not form.id.data:
+    #     date_start = function.date_convert(field.data)
+    #     if datetime.date.today() > date_start:
+    #         raise wtf.ValidationError('La date de debut doit etre >= date en cours')
 
     if form.id.data and field.data:
         date_start = function.date_convert(field.data)

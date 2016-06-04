@@ -2987,81 +2987,104 @@ def taux_mali_global():
     current_day = datetime.datetime.now(time_zones)
     First_day_of_year = datetime.date(now_year, 1, 1)
 
-    #Traitement du formulaire d'affichage du la liste des annees
-    temps_year = DetailTemps.query()
-
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
+    )
 
     analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'PRO':
+    for user in all_user:
+        have = False
+        for detail in user.time_user(First_day_of_year, current_day):
+            if detail.temps_id.get().tache_id.get().prestation_sigle() == 'PRO':
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+        if not have:
             infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            if detail.temps_id.get().tache_id.get().facturable:
-                infos['facturable'] = 1
-            else:
-                infos['facturable'] = 0
-            infos['time'] = round(detail.conversion, 1)
-            infos['end'] = detail.temps_id.get().tache_id.get().end
+            infos['user'] = user
+            infos['user_id'] = user.key.id()
+            infos['time'] = 0.0
             analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    grouper = itemgetter("user_id", "user")
+
+    Nbre_current_day = function.networkdays(
+        function.date_convert(function.get_first_day(First_day_of_year)),
+        function.date_convert(current_day),
+        [],
+        ()
+    )
 
     analyses = []
-    total_bud = 0
-    total_facturable = 0
-    total_facturee = 0
-    total_mali_tech = 0
-    total_mali_com = 0
-    total_global = 0
+    total_bud = 0.0
+    total_facturable = 0.0
+    total_facturee = 0.0
+    total_mali_tech = 0.0
+    total_mali_com = 0.0
+    total_global = 0.0
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
-            Budget.date_start == datetime.date(now_year, 1, 1)
+            Budget.user_id == temp_dict['user'].key,
+            Budget.date_start == First_day_of_year
         ).get()
 
         prest_prod = Prestation.query(
             Prestation.sigle == 'PRO'
         ).get()
 
-        budget_prod = BudgetPrestation.query(
-            BudgetPrestation.budget_id == budget.key,
-            BudgetPrestation.prestation_id == prest_prod.key
-        ).get()
+        if budget:
 
-        temp_dict['budget'] = budget_prod.heure * temp_dict['user'].get().tauxH
-        temp_dict['HFacturable'] = 0
-        temp_dict['HFacturee'] = 0
-
-        HFacturable = 0
-        HFacturee = 0
-
-        for item in grp:
-            if item['facturable']:
-                temp_dict['HFacturable'] += item['time'] * temp_dict['user'].get().tauxH
-                HFacturable += item['time'] * temp_dict['user'].get().tauxH
-                if item['end']:
-                    temp_dict['HFacturee'] += item['time'] * temp_dict['user'].get().tauxH
-                    HFacturee += item['time'] * temp_dict['user'].get().tauxH
-
-        temp_dict['mali_tech'] = round(1 - (temp_dict['HFacturable'] / temp_dict['budget']),1)
-        temp_dict['mali_com'] = 1
-        if temp_dict['HFacturee']:
-            temp_dict['mali_com'] = round(1 - (temp_dict['HFacturee'] / temp_dict['HFacturable']),1)
-        temp_dict['mali_global'] = round(temp_dict['mali_tech'] + temp_dict['mali_com'],1)
+            budget_prod = BudgetPrestation.query(
+                BudgetPrestation.budget_id == budget.key,
+                BudgetPrestation.prestation_id == prest_prod.key
+            ).get()
 
 
-        total_bud += temp_dict['budget']
-        total_facturable += temp_dict['HFacturable']
-        total_facturee += temp_dict['HFacturee']
-        total_mali_tech = round(1 - (total_facturable / total_bud), 1)
-        total_mali_com = round(1 - (total_facturee / total_facturable), 1)
-        total_global = round(total_mali_com + total_mali_tech, 1)
+            current_heure = budget_prod.heure * Nbre_current_day
+            current_heure /= 365
 
-        analyses.append(temp_dict)
+            temp_dict['budget'] = round(current_heure * temp_dict['user'].tauxH, 1)
+            temp_dict['HFacturable'] = 0.0
+            temp_dict['HFacturee'] = 0.0
+
+            HFacturable = 0.0
+            HFacturee = 0.0
+
+            for item in grp:
+                temp_dict['HFacturable'] += item['time'] * temp_dict['user'].tauxH
+                HFacturable += item['time'] * temp_dict['user'].tauxH
+
+            temp_dict['HFacturee'] = temp_dict['user'].valeur_facture()
+            HFacturee += temp_dict['user'].valeur_facture()
+
+            temp_dict['mali_tech'] = 0.0
+            if temp_dict['budget']:
+                temp_dict['mali_tech'] = round((temp_dict['budget'] - temp_dict['HFacturee']) / temp_dict['budget'], 1)
+            temp_dict['mali_com'] = 0.0
+            if temp_dict['HFacturee']:
+                temp_dict['mali_com'] = round((temp_dict['HFacturable'] - temp_dict['HFacturee']) / temp_dict['HFacturable'],1)
+            temp_dict['mali_global'] = round((temp_dict['mali_tech'] + temp_dict['mali_com'])/2,1)
+
+
+            total_bud += temp_dict['budget']
+            total_facturable += temp_dict['HFacturable']
+            total_facturee += temp_dict['HFacturee']
+            if total_bud:
+                total_mali_tech = round((total_bud - total_facturable) / total_bud, 1)
+            if total_facturable:
+                total_mali_com = round((total_facturable - total_facturee) / total_facturable, 1)
+            total_global = (total_mali_com + total_mali_tech) / 2
+
+
+            analyses.append(temp_dict)
 
     return render_template('rapport/taux-mali-global.html', **locals())
 
@@ -3081,41 +3104,52 @@ def taux_mali_global_refresh():
     time_zones = pytz.timezone('Africa/Douala')
     now_year = datetime.datetime.now(time_zones).year
 
-    #Traitement du formulaire d'affichage du la liste des annees
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
     )
 
     analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'PRO':
+    for user in all_user:
+        have = False
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_sigle() == 'PRO':
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+        if not have:
             infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            if detail.temps_id.get().tache_id.get().facturable:
-                infos['facturable'] = 1
-            else:
-                infos['facturable'] = 0
-            infos['time'] = round(detail.conversion, 1)
-            infos['end'] = detail.temps_id.get().tache_id.get().end
+            infos['user'] = user
+            infos['user_id'] = user.key.id()
+            infos['time'] = 0.0
             analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    grouper = itemgetter("user_id", "user")
+
+    Nbre_current_day = function.networkdays(
+        date_start,
+        date_end,
+        [],
+        ()
+    )
 
     analyses = []
-    total_bud = 0
-    total_facturable = 0
-    total_facturee = 0
-    total_mali_tech = 0
-    total_mali_com = 0
-    total_global = 0
+    total_bud = 0.0
+    total_facturable = 0.0
+    total_facturee = 0.0
+    total_mali_tech = 0.0
+    total_mali_com = 0.0
+    total_global = 0.0
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
+            Budget.user_id == temp_dict['user'].key,
             Budget.date_start == datetime.date(now_year, 1, 1)
         ).get()
 
@@ -3123,41 +3157,50 @@ def taux_mali_global_refresh():
             Prestation.sigle == 'PRO'
         ).get()
 
-        budget_prod = BudgetPrestation.query(
-            BudgetPrestation.budget_id == budget.key,
-            BudgetPrestation.prestation_id == prest_prod.key
-        ).get()
+        if budget:
 
-        temp_dict['budget'] = budget_prod.heure * temp_dict['user'].get().tauxH
-        temp_dict['HFacturable'] = 0
-        temp_dict['HFacturee'] = 0
-
-        HFacturable = 0
-        HFacturee = 0
-
-        for item in grp:
-            if item['facturable']:
-                temp_dict['HFacturable'] += item['time'] * temp_dict['user'].get().tauxH
-                HFacturable += item['time'] * temp_dict['user'].get().tauxH
-                if item['end']:
-                    temp_dict['HFacturee'] += item['time'] * temp_dict['user'].get().tauxH
-                    HFacturee += item['time'] * temp_dict['user'].get().tauxH
-
-        temp_dict['mali_tech'] = round(1 - (temp_dict['HFacturable'] / temp_dict['budget']),1)
-        temp_dict['mali_com'] = 1
-        if temp_dict['HFacturee']:
-            temp_dict['mali_com'] = round(1 - (temp_dict['HFacturee'] / temp_dict['HFacturable']),1)
-        temp_dict['mali_global'] = round(temp_dict['mali_tech'] + temp_dict['mali_com'],1)
+            budget_prod = BudgetPrestation.query(
+                BudgetPrestation.budget_id == budget.key,
+                BudgetPrestation.prestation_id == prest_prod.key
+            ).get()
 
 
-        total_bud += temp_dict['budget']
-        total_facturable += temp_dict['HFacturable']
-        total_facturee += temp_dict['HFacturee']
-        total_mali_tech = round(1 - (total_facturable / total_bud), 1)
-        total_mali_com = round(1 - (total_facturee / total_facturable), 1)
-        total_global = round(total_mali_com + total_mali_tech, 1)
+            current_heure = budget_prod.heure * Nbre_current_day
+            current_heure /= 365
 
-        analyses.append(temp_dict)
+            temp_dict['budget'] = round(current_heure * temp_dict['user'].tauxH, 1)
+            temp_dict['HFacturable'] = 0.0
+            temp_dict['HFacturee'] = 0.0
+
+            HFacturable = 0.0
+            HFacturee = 0.0
+
+            for item in grp:
+                temp_dict['HFacturable'] += item['time'] * temp_dict['user'].tauxH
+                HFacturable += item['time'] * temp_dict['user'].tauxH
+
+            temp_dict['HFacturee'] = temp_dict['user'].valeur_facture()
+            HFacturee += temp_dict['user'].valeur_facture()
+
+            temp_dict['mali_tech'] = 0.0
+            if temp_dict['budget']:
+                temp_dict['mali_tech'] = round((temp_dict['budget'] - temp_dict['HFacturee']) / temp_dict['budget'], 1)
+            temp_dict['mali_com'] = 0.0
+            if temp_dict['HFacturee']:
+                temp_dict['mali_com'] = round((temp_dict['HFacturable'] - temp_dict['HFacturee']) / temp_dict['HFacturable'],1)
+            temp_dict['mali_global'] = round((temp_dict['mali_tech'] + temp_dict['mali_com'])/2,1)
+
+
+            total_bud += temp_dict['budget']
+            total_facturable += temp_dict['HFacturable']
+            total_facturee += temp_dict['HFacturee']
+            if total_bud:
+                total_mali_tech = round((total_bud - total_facturable) / total_bud, 1)
+            if total_facturable:
+                total_mali_com = round((total_facturable - total_facturee) / total_facturable, 1)
+            total_global = (total_mali_com + total_mali_tech) / 2
+
+            analyses.append(temp_dict)
 
     return render_template('rapport/taux-mali-global_refresh.html', **locals())
 
@@ -3173,41 +3216,52 @@ def taux_mali_global_export_excel():
     time_zones = pytz.timezone('Africa/Douala')
     now_year = datetime.datetime.now(time_zones).year
 
-    #Traitement du formulaire d'affichage du la liste des annees
-    temps_year = DetailTemps.query(
-        DetailTemps.date >= date_start,
-        DetailTemps.date <= date_end
+    all_user = Users.query(
+            Users.email != 'admin@accentcom-cm.com',
+            Users.email != 'henri@accentcom-cm.com'
     )
 
     analyse = []
-    for detail in temps_year:
-        if detail.temps_id.get().tache_id.get().prestation_id.get().sigle == 'PRO':
+    for user in all_user:
+        have = False
+        for detail in user.time_user(date_start, date_end):
+            if detail.temps_id.get().tache_id.get().prestation_sigle() == 'PRO':
+                have = True
+                infos = {}
+                infos['user'] = user
+                infos['user_id'] = user.key.id()
+                infos['time'] = round(detail.conversion, 1)
+                analyse.append(infos)
+
+        if not have:
             infos = {}
-            infos['user'] = detail.temps_id.get().user_id
-            infos['user_infos'] = 1
-            if detail.temps_id.get().tache_id.get().facturable:
-                infos['facturable'] = 1
-            else:
-                infos['facturable'] = 0
-            infos['time'] = round(detail.conversion, 1)
-            infos['end'] = detail.temps_id.get().tache_id.get().end
+            infos['user'] = user
+            infos['user_id'] = user.key.id()
+            infos['time'] = 0.0
             analyse.append(infos)
 
-    grouper = itemgetter("user", "user_infos")
+    grouper = itemgetter("user_id", "user")
+
+    Nbre_current_day = function.networkdays(
+        date_start,
+        date_end,
+        [],
+        ()
+    )
 
     analyses = []
-    total_bud = 0
-    total_facturable = 0
-    total_facturee = 0
-    total_mali_tech = 0
-    total_mali_com = 0
-    total_global = 0
+    total_bud = 0.0
+    total_facturable = 0.0
+    total_facturee = 0.0
+    total_mali_tech = 0.0
+    total_mali_com = 0.0
+    total_global = 0.0
 
-    for key, grp in groupby(sorted(analyse, key=grouper), grouper):
-        temp_dict = dict(zip(["user", "user_infos"], key))
+    for key, grp in groupby(sorted(analyse, key=grouper, reverse=True), grouper):
+        temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
-            Budget.user_id == temp_dict['user'].get().key,
+            Budget.user_id == temp_dict['user'].key,
             Budget.date_start == datetime.date(now_year, 1, 1)
         ).get()
 
@@ -3215,41 +3269,50 @@ def taux_mali_global_export_excel():
             Prestation.sigle == 'PRO'
         ).get()
 
-        budget_prod = BudgetPrestation.query(
-            BudgetPrestation.budget_id == budget.key,
-            BudgetPrestation.prestation_id == prest_prod.key
-        ).get()
+        if budget:
 
-        temp_dict['budget'] = budget_prod.heure * temp_dict['user'].get().tauxH
-        temp_dict['HFacturable'] = 0
-        temp_dict['HFacturee'] = 0
-
-        HFacturable = 0
-        HFacturee = 0
-
-        for item in grp:
-            if item['facturable']:
-                temp_dict['HFacturable'] += item['time'] * temp_dict['user'].get().tauxH
-                HFacturable += item['time'] * temp_dict['user'].get().tauxH
-                if item['end']:
-                    temp_dict['HFacturee'] += item['time'] * temp_dict['user'].get().tauxH
-                    HFacturee += item['time'] * temp_dict['user'].get().tauxH
-
-        temp_dict['mali_tech'] = round(1 - (temp_dict['HFacturable'] / temp_dict['budget']),1)
-        temp_dict['mali_com'] = 1
-        if temp_dict['HFacturee']:
-            temp_dict['mali_com'] = round(1 - (temp_dict['HFacturee'] / temp_dict['HFacturable']),1)
-        temp_dict['mali_global'] = round(temp_dict['mali_tech'] + temp_dict['mali_com'],1)
+            budget_prod = BudgetPrestation.query(
+                BudgetPrestation.budget_id == budget.key,
+                BudgetPrestation.prestation_id == prest_prod.key
+            ).get()
 
 
-        total_bud += temp_dict['budget']
-        total_facturable += temp_dict['HFacturable']
-        total_facturee += temp_dict['HFacturee']
-        total_mali_tech = round(1 - (total_facturable / total_bud), 1)
-        total_mali_com = round(1 - (total_facturee / total_facturable), 1)
-        total_global = round(total_mali_com + total_mali_tech, 1)
+            current_heure = budget_prod.heure * Nbre_current_day
+            current_heure /= 365
 
-        analyses.append(temp_dict)
+            temp_dict['budget'] = round(current_heure * temp_dict['user'].tauxH, 1)
+            temp_dict['HFacturable'] = 0.0
+            temp_dict['HFacturee'] = 0.0
+
+            HFacturable = 0.0
+            HFacturee = 0.0
+
+            for item in grp:
+                temp_dict['HFacturable'] += item['time'] * temp_dict['user'].tauxH
+                HFacturable += item['time'] * temp_dict['user'].tauxH
+
+            temp_dict['HFacturee'] = temp_dict['user'].valeur_facture()
+            HFacturee += temp_dict['user'].valeur_facture()
+
+            temp_dict['mali_tech'] = 0.0
+            if temp_dict['budget']:
+                temp_dict['mali_tech'] = round((temp_dict['budget'] - temp_dict['HFacturee']) / temp_dict['budget'], 1)
+            temp_dict['mali_com'] = 0.0
+            if temp_dict['HFacturee']:
+                temp_dict['mali_com'] = round((temp_dict['HFacturable'] - temp_dict['HFacturee']) / temp_dict['HFacturable'],1)
+            temp_dict['mali_global'] = round((temp_dict['mali_tech'] + temp_dict['mali_com'])/2,1)
+
+
+            total_bud += temp_dict['budget']
+            total_facturable += temp_dict['HFacturable']
+            total_facturee += temp_dict['HFacturee']
+            if total_bud:
+                total_mali_tech = round((total_bud - total_facturable) / total_bud, 1)
+            if total_facturable:
+                total_mali_com = round((total_facturable - total_facturee) / total_facturable, 1)
+            total_global = (total_mali_com + total_mali_tech) / 2
+
+            analyses.append(temp_dict)
 
     workbook = Workbook()
     sheet = workbook.add_sheet('Taux du mali global')
@@ -3283,7 +3346,7 @@ def taux_mali_global_export_excel():
 
     start = 4
     for datas in analyses:
-        sheet.write(start, 0, datas['user'].get().last_name+" "+datas['user'].get().first_name, style_3)
+        sheet.write(start, 0, datas['user'].last_name+" "+datas['user'].first_name, style_3)
         sheet.write(start, 1, datas['budget'], style_3)
         sheet.write(start, 2, datas['HFacturable'], style_3)
         sheet.write(start, 3, datas['HFacturee'], style_3)

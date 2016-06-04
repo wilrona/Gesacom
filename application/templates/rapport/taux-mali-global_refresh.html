@@ -25,7 +25,7 @@
                     <tbody>
                         {% for datas in analyses %}
                             <tr>
-                                <td>{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}</td>
+                                <td>{{ datas.user.last_name }} {{ datas.user.first_name}}</td>
                                 <td class="text-center">{{ datas.budget|format_price() }} </td>
                                 <td class="text-center">{{ datas.HFacturable|format_price() }}</td>
                                 <td class="text-center">{{ datas.HFacturee|format_price() }}</td>
@@ -111,7 +111,7 @@
                                         { text: 'Taux Mali Global',bold: true }
                                     ],
                                     {% for datas in analyses %}
-                                       [{text:'{{ datas.user.get().last_name }} {{ datas.user.get().first_name}}', alignment:'left'},'{{ datas.budget|format_price() }} ','{{ datas.HFacturable|format_price() }}','{{ datas.HFacturee|format_price() }}','{{ (datas.mali_tech * 100) }}','{{ (datas.mali_com * 100) }}','{{ (datas.mali_global * 100) }}'],
+                                       [{text:'{{ datas.user.last_name }} {{ datas.user.first_name}}', alignment:'left'},'{{ datas.budget|format_price() }} ','{{ datas.HFacturable|format_price() }}','{{ datas.HFacturee|format_price() }}','{{ (datas.mali_tech * 100) }}','{{ (datas.mali_com * 100) }}','{{ (datas.mali_global * 100) }}'],
                                     {% else %}
                                         ['Collaborateur','0','0','0','0','0','0'],
                                     {% endfor %}

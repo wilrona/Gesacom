@@ -136,6 +136,31 @@ class Users(ndb.Model):
 
         return the_time_user
 
+    def projet_user(self):
+        from ..tache.models_tache import Tache
+
+        List_projet = []
+
+        for tache in Tache.query(Tache.user_id == self.key):
+            if tache.projet_id and tache.projet_id.get().facturable and tache.projet_id.get().key.id() not in List_projet:
+                List_projet.append(tache.projet_id.get().key.id())
+
+        return List_projet
+
+    def valeur_facture(self):
+        from ..tache.models_tache import Projet
+
+        montant = 0.0
+        for projet_id in self.projet_user():
+            self_projet = Projet.get_by_id(projet_id)
+            ratio = self_projet.ratio_user(self.key.id())
+
+            montant_sur_projet = self_projet.montant * ratio
+
+            montant += montant_sur_projet
+
+        return montant
+
 
 class UserRole(ndb.Model):
     user_id = ndb.KeyProperty(kind=Users)
