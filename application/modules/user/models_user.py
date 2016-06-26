@@ -28,6 +28,7 @@ class Users(ndb.Model):
     grade_id = ndb.KeyProperty(kind=Grade)
 
     tauxH = ndb.FloatProperty(default=0.00)
+    date_start = ndb.DateProperty()
 
     def is_active(self):
         return self.is_enabled
@@ -143,19 +144,17 @@ class Users(ndb.Model):
 
         for tache in Tache.query(Tache.user_id == self.key):
             if tache.projet_id and tache.projet_id.get().facturable and tache.projet_id.get().key.id() not in List_projet:
-                List_projet.append(tache.projet_id.get().key.id())
+                List_projet.append(tache.projet_id.get())
 
         return List_projet
 
     def valeur_facture(self):
-        from ..tache.models_tache import Projet
 
         montant = 0.0
         for projet_id in self.projet_user():
-            self_projet = Projet.get_by_id(projet_id)
-            ratio = self_projet.ratio_user(self.key.id())
+            ratio = projet_id.ratio_user(self.key.id())
 
-            montant_sur_projet = self_projet.montant * ratio
+            montant_sur_projet = projet_id.montant * ratio
 
             montant += montant_sur_projet
 

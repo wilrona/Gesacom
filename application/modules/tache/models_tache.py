@@ -17,21 +17,22 @@ class Tache(ndb.Model):
     prestation_id = ndb.KeyProperty(kind=Prestation)
     end = ndb.BooleanProperty(default=False)
     closed = ndb.BooleanProperty(default=False)
+    detail_heure = ndb.FloatProperty()
 
     def prestation_sigle(self):
         return self.prestation_id.get().sigle
 
-    def time_tache(self):
-        from ..temps.models_temps import Temps, DetailTemps
-
-        time_taches = []
-
-        for temps in Temps.query(Temps.tache_id == self.key):
-            details = DetailTemps.query(
-                DetailTemps.temps_id == temps.key
-            )
-            for detail in details:
-                time_taches.append(detail)
-
-        return time_taches
+    # def time_tache(self):
+    #     from ..temps.models_temps import Temps, DetailTemps
+    #
+    #     time_taches = []
+    #
+    #     for temps in Temps.query(Temps.tache_id == self.key):
+    #         details = DetailTemps.query(
+    #             DetailTemps.temps_id == temps.key
+    #         )
+    #         for detail in details:
+    #             time_taches.append(detail)
+    #
+    #     return time_taches
 

@@ -193,6 +193,9 @@ def infos(user_id):
 
         user.is_enabled = True
 
+        if form.date_start.data:
+            user.date_start = function.date_convert(form.date_start.data)
+
         user.put()
 
         flash('Enregistement effectue avec succes', 'success')

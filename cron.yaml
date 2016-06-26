@@ -6,3 +6,11 @@ cron:
 - description: Active jours feriers parametre dans l'application
   url: /parametre/ferier/tache/refresh
   schedule: every day 00:00
+
+- description: Affecter la somme des feuilles de temps rempli sur chaque tache
+  url: /tache/fdt_tache
+  schedule: every day 00:00
+
+- description: Calcul du montant des feuilles de temps remplit sur un projet
+  url: /tache/montant_projet_fdt
+  schedule: every day 00:10

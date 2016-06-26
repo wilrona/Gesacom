@@ -21,27 +21,7 @@ class Projet(ndb.Model):
     responsable_id = ndb.KeyProperty(kind=Users)
     closed = ndb.BooleanProperty(default=False)
     suspend = ndb.BooleanProperty(default=False)
-
-    def montant_projet_fdt(self):
-        from ..tache.models_tache import Tache
-
-        tache_projet = Tache.query(
-            Tache.projet_id == self.key
-        )
-
-        total = 0.0
-        for tache in tache_projet:
-            if tache.prestation_sigle() == 'PRO' and tache.facturable:
-                user_taux = tache.user_id.get().tauxH
-                time = 0.0
-                for times in tache.time_tache():
-                    time += times.conversion
-
-                pre_total = user_taux * time
-
-                total += pre_total
-
-        return total
+    montant_projet_fdt = ndb.FloatProperty()
 
     def ratio_user(self, user_id):
         from ..tache.models_tache import Tache, Users
@@ -57,17 +37,13 @@ class Projet(ndb.Model):
         for tache in tache_projet:
             if tache.prestation_sigle() == 'PRO' and tache.facturable:
                 user_taux = tache.user_id.get().tauxH
-                time = 0.0
-                for times in tache.time_tache():
-                    time += times.conversion
+                time = tache.detail_heure
 
                 pre_total = user_taux * time
 
                 total += pre_total
-
         ratio = 0.0
-
-        if total:
-            ratio = total / self.montant_projet_fdt()
+        if self.montant_projet_fdt:
+            ratio = total / self.montant_projet_fdt
 
         return round(ratio, 1)

@@ -12,6 +12,7 @@ class FormUser(wtf.Form):
     fonction_id = wtf.SelectField(label='Selectionez une fonction :', coerce=int, validators=[validators.Required('Choix obligatoire')])
     site_id = wtf.SelectField(label='Selectionez un site :', coerce=int, validators=[validators.Required('Choix obligatoire')])
     departement_id = wtf.SelectField(label='Selectionez un departement :', coerce=int, validators=[validators.Required('Choix obligatoire')])
+    date_start = wtf.DateField(label='A commencer le:', format="%d/%m/%Y")
 
 
 # formulaire pour le taux horaire

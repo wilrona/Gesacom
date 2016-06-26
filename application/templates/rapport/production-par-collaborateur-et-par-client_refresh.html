@@ -49,6 +49,10 @@
                                       <td>{{ client.montant|format_price() }}</td>
                                   </tr>
                               {% endfor %}
+                                    <tr>
+                                        <td colspan="4"><strong>Total</strong></td>
+                                        <td>{{ datas.total_gene|format_price() }}</td>
+                                    </tr>
                               </tbody>
                           </table>
                       </div>
@@ -118,6 +122,7 @@
                                                             {% for client in datas.clients %}
                                                             ['{{ client.ref_client }}', '{{ client.client }}', '{% if client.prospect %}{{ client.prospect.get().name }}{% else %} - {% endif %}', '{{ client.time }}', '{{ client.montant|format_price() }}'],
                                                             {% endfor %}
+                                                            [{ text:'Total', bold:true},'','','','{{ datas.total_gene|format_price() }}']
                                                      ]
                                                 },
                                                 layout: 'lightHorizontalLines'

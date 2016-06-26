@@ -583,3 +583,50 @@ def facturations(prestation_id = None):
             data['nfact'] = 1
     resp = jsonify(data)
     return resp
+
+
+# cron temps remplit sur une tache
+@prefix.route('/fdt_tache')
+def fdt_tache():
+    from ..temps.models_temps import Temps, Tache, DetailTemps
+
+    for tache in Tache.query():
+        total = 0.0
+        for temps in Temps.query(Temps.tache_id == tache.key):
+            details = DetailTemps.query(
+                DetailTemps.temps_id == temps.key
+            )
+            for detail in details:
+                total += detail.conversion
+
+        tache.detail_heure = total
+        tache.put()
+
+    return render_template('401.html')
+
+
+@prefix.route('/montant_projet_fdt')
+def montant_projet_fdt():
+    from ..tache.models_tache import Tache, Projet
+
+    for projet in Projet.query():
+
+        tache_projet = Tache.query(
+            Tache.projet_id == projet.key
+        )
+
+        total = 0.0
+        for tache in tache_projet:
+            if tache.prestation_sigle() == 'PRO' and tache.facturable:
+                user_taux = tache.user_id.get().tauxH
+                time = tache.detail_heure
+
+                pre_total = user_taux * time
+
+                total += pre_total
+
+        projet.montant_projet_fdt = total
+        projet.put()
+
+    return render_template('401.html')
+

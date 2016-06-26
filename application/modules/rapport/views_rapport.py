@@ -782,12 +782,6 @@ def taux_HProd():
 
     grouper = itemgetter("user_id", "user")
 
-    Nbre_current_day = function.networkdays(
-        function.date_convert(function.get_first_day(First_day_of_year)),
-        function.date_convert(current_day),
-        [],
-        ()
-    )
 
     analyses = []
     total_bud = 0.0
@@ -814,10 +808,40 @@ def taux_HProd():
                 BudgetPrestation.prestation_id == prest_prod.key
             ).get()
 
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == current_day.year:
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(function.get_first_day(First_day_of_year)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
 
+                Nbre_current_day = function.networkdays(
+                    function.date_convert(temp_dict['user'].date_start),
+                    function.date_convert(current_day),
+                    [],
+                    ()
+                )
 
-            current_heure = budget_prod.heure * Nbre_current_day
-            current_heure /= 365
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur
+                production = Nbre_days_reste * budget_prod.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    function.date_convert(function.get_first_day(First_day_of_year)),
+                    function.date_convert(current_day),
+                    [],
+                    ()
+                )
+                current_heure = budget_prod.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure, 1)
             temp_dict['HProd_Charg'] = 0.0
@@ -903,13 +927,6 @@ def taux_HProd_refresh():
 
     grouper = itemgetter("user_id", "user")
 
-    Nbre_current_day = function.networkdays(
-                date_start,
-                date_end,
-                [],
-                ()
-            )
-
     analyses = []
     total_bud = 0.0
     total_HP_charge = 0.0
@@ -917,6 +934,7 @@ def taux_HProd_refresh():
     total_pourc_c = 0.0
     total__budget = 0.0
     for key, grp in groupby(sorted(analyse, key=grouper,reverse=True), grouper):
+
         temp_dict = dict(zip(["user_id", "user"], key))
 
         budget = Budget.query(
@@ -935,8 +953,53 @@ def taux_HProd_refresh():
                 BudgetPrestation.prestation_id == prest_prod.key
             ).get()
 
-            current_heure = budget_prod.heure * Nbre_current_day
-            current_heure /= 365
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == now_year:
+
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(datetime.date(now_year, 1, 1)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+                if date_start > temp_dict['user'].date_start:
+
+                    Nbre_current_day = function.networkdays(
+                        function.date_convert(date_start),
+                        function.date_convert(date_end),
+                        [],
+                        ()
+                    )
+                else:
+                    if date_end > temp_dict['user'].date_start:
+                        Nbre_current_day = function.networkdays(
+                            function.date_convert(temp_dict['user'].date_start),
+                            function.date_convert(date_end),
+                            [],
+                            ()
+                        )
+                    else:
+                        Nbre_current_day = 0
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur au proratat
+                production = Nbre_days_reste * budget_prod.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    date_start,
+                    date_end,
+                    [],
+                    ()
+                )
+                current_heure = budget_prod.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure, 1)
             temp_dict['HProd_Charg'] = 0.0
@@ -1017,14 +1080,6 @@ def taux_HProd_export_excel():
 
     grouper = itemgetter("user_id", "user")
 
-
-    Nbre_current_day = function.networkdays(
-                date_start,
-                date_end,
-                [],
-                ()
-            )
-
     analyses = []
     total_bud = 0.0
     total_HP_charge = 0.0
@@ -1050,8 +1105,53 @@ def taux_HProd_export_excel():
                 BudgetPrestation.prestation_id == prest_prod.key
             ).get()
 
-            current_heure = budget_prod.heure * Nbre_current_day
-            current_heure /= 365
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == now_year:
+
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(datetime.date(now_year, 1, 1)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+                if date_start > temp_dict['user'].date_start:
+
+                    Nbre_current_day = function.networkdays(
+                        function.date_convert(date_start),
+                        function.date_convert(date_end),
+                        [],
+                        ()
+                    )
+                else:
+                    if date_end > temp_dict['user'].date_start:
+                        Nbre_current_day = function.networkdays(
+                            function.date_convert(temp_dict['user'].date_start),
+                            function.date_convert(date_end),
+                            [],
+                            ()
+                        )
+                    else:
+                        Nbre_current_day = 0
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur au proratat
+                production = Nbre_days_reste * budget_prod.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    date_start,
+                    date_end,
+                    [],
+                    ()
+                )
+                current_heure = budget_prod.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure, 1)
             temp_dict['HProd_Charg'] = 0.0
@@ -1191,13 +1291,6 @@ def taux_HDispo():
 
     grouper = itemgetter("user_id", "user")
 
-    Nbre_current_day = function.networkdays(
-        function.date_convert(function.get_first_day(First_day_of_year)),
-        function.date_convert(current_day),
-        [],
-        ()
-    )
-
     analyses = []
     total_bud = 0.0
     total_HDispo = 0.0
@@ -1214,8 +1307,40 @@ def taux_HDispo():
 
         if budget:
 
-            current_heure = budget.heure * Nbre_current_day
-            current_heure /= 365
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == current_day.year:
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(function.get_first_day(First_day_of_year)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+
+                Nbre_current_day = function.networkdays(
+                    function.date_convert(temp_dict['user'].date_start),
+                    function.date_convert(current_day),
+                    [],
+                    ()
+                )
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur
+                production = Nbre_days_reste * budget.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    function.date_convert(function.get_first_day(First_day_of_year)),
+                    function.date_convert(current_day),
+                    [],
+                    ()
+                )
+                current_heure = budget.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure, 1)
 
@@ -1306,14 +1431,6 @@ def taux_HDispo_refresh():
 
     grouper = itemgetter("user_id", "user")
 
-
-    Nbre_current_day = function.networkdays(
-        date_start,
-        date_end,
-        [],
-        ()
-    )
-
     analyses = []
     total_bud = 0
     total_HDispo = 0
@@ -1330,8 +1447,53 @@ def taux_HDispo_refresh():
 
         if budget:
 
-            current_heure = budget.heure * Nbre_current_day
-            current_heure /= 365
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == now_year:
+
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(datetime.date(now_year, 1, 1)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+                if date_start > temp_dict['user'].date_start:
+
+                    Nbre_current_day = function.networkdays(
+                        function.date_convert(date_start),
+                        function.date_convert(date_end),
+                        [],
+                        ()
+                    )
+                else:
+                    if date_end > temp_dict['user'].date_start:
+                        Nbre_current_day = function.networkdays(
+                            function.date_convert(temp_dict['user'].date_start),
+                            function.date_convert(date_end),
+                            [],
+                            ()
+                        )
+                    else:
+                        Nbre_current_day = 0
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur au proratat
+                production = Nbre_days_reste * budget.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    date_start,
+                    date_end,
+                    [],
+                    ()
+                )
+                current_heure = budget.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure, 1)
             temp_dict['HDispo'] = 0
@@ -1415,12 +1577,7 @@ def taux_HDispo_export_excel():
     grouper = itemgetter("user_id", "user")
 
 
-    Nbre_current_day = function.networkdays(
-        date_start,
-        date_end,
-        [],
-        ()
-    )
+
 
     analyses = []
     total_bud = 0
@@ -1438,8 +1595,53 @@ def taux_HDispo_export_excel():
 
         if budget:
 
-            current_heure = budget.heure * Nbre_current_day
-            current_heure /= 365
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == now_year:
+
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(datetime.date(now_year, 1, 1)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+                if date_start > temp_dict['user'].date_start:
+
+                    Nbre_current_day = function.networkdays(
+                        function.date_convert(date_start),
+                        function.date_convert(date_end),
+                        [],
+                        ()
+                    )
+                else:
+                    if date_end > temp_dict['user'].date_start:
+                        Nbre_current_day = function.networkdays(
+                            function.date_convert(temp_dict['user'].date_start),
+                            function.date_convert(date_end),
+                            [],
+                            ()
+                        )
+                    else:
+                        Nbre_current_day = 0
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur au proratat
+                production = Nbre_days_reste * budget.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    date_start,
+                    date_end,
+                    [],
+                    ()
+                )
+                current_heure = budget.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure, 1)
             temp_dict['HDispo'] = 0
@@ -1581,13 +1783,6 @@ def etat_conso():
 
     grouper = itemgetter("user_id", "user")
 
-    Nbre_current_day = function.networkdays(
-        function.date_convert(function.get_first_day(First_day_of_year)),
-        function.date_convert(current_day),
-        [],
-        ()
-    )
-
     analyses = []
     total_budget = 0.0
     total_adm = 0.0
@@ -1605,8 +1800,39 @@ def etat_conso():
 
         if budget:
 
-            current_heure = budget.heure * Nbre_current_day
-            current_heure /= 365
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == current_day.year:
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(function.get_first_day(First_day_of_year)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+
+                Nbre_current_day = function.networkdays(
+                    function.date_convert(temp_dict['user'].date_start),
+                    function.date_convert(current_day),
+                    [],
+                    ()
+                )
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur
+                production = Nbre_days_reste * budget.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    function.date_convert(function.get_first_day(First_day_of_year)),
+                    function.date_convert(current_day),
+                    [],
+                    ()
+                )
+                current_heure = budget.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure, 1)
             temp_dict['dev_time'] = 0.0
@@ -1706,12 +1932,6 @@ def etat_conso_refresh():
 
     grouper = itemgetter("user_id", "user")
 
-    Nbre_current_day = function.networkdays(
-        date_start,
-        date_end,
-        [],
-        ()
-    )
 
     analyses = []
     total_budget = 0.0
@@ -1730,8 +1950,53 @@ def etat_conso_refresh():
 
         if budget:
 
-            current_heure = budget.heure * Nbre_current_day
-            current_heure /= 365
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == now_year:
+
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(datetime.date(now_year, 1, 1)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+                if date_start > temp_dict['user'].date_start:
+
+                    Nbre_current_day = function.networkdays(
+                        function.date_convert(date_start),
+                        function.date_convert(date_end),
+                        [],
+                        ()
+                    )
+                else:
+                    if date_end > temp_dict['user'].date_start:
+                        Nbre_current_day = function.networkdays(
+                            function.date_convert(temp_dict['user'].date_start),
+                            function.date_convert(date_end),
+                            [],
+                            ()
+                        )
+                    else:
+                        Nbre_current_day = 0
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur au proratat
+                production = Nbre_days_reste * budget.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    date_start,
+                    date_end,
+                    [],
+                    ()
+                )
+                current_heure = budget.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure, 1)
             temp_dict['dev_time'] = 0.0
@@ -1826,13 +2091,6 @@ def etat_conso_export_excel():
 
     grouper = itemgetter("user_id", "user")
 
-    Nbre_current_day = function.networkdays(
-        date_start,
-        date_end,
-        [],
-        ()
-    )
-
     analyses = []
     total_budget = 0.0
     total_adm = 0.0
@@ -1850,8 +2108,52 @@ def etat_conso_export_excel():
 
         if budget:
 
-            current_heure = budget.heure * Nbre_current_day
-            current_heure /= 365
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == now_year:
+
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(datetime.date(now_year, 1, 1)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+                if date_start > temp_dict['user'].date_start:
+
+                    Nbre_current_day = function.networkdays(
+                        function.date_convert(date_start),
+                        function.date_convert(date_end),
+                        [],
+                        ()
+                    )
+                else:
+                    if date_end > temp_dict['user'].date_start:
+                        Nbre_current_day = function.networkdays(
+                            function.date_convert(temp_dict['user'].date_start),
+                            function.date_convert(date_end),
+                            [],
+                            ()
+                        )
+                    else:
+                        Nbre_current_day = 0
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur au proratat
+                production = Nbre_days_reste * budget.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    date_start,
+                    date_end,
+                    [],
+                    ()
+                )
+                current_heure = budget.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure, 1)
             temp_dict['dev_time'] = 0.0
@@ -2018,7 +2320,26 @@ def etat_conso_prod():
 
         if budget:
 
-            temp_dict['budget_origine'] = budget.heure
+            budget_origine = budget.heure
+            Nbre_days_reste = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == current_day.year:
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(function.get_first_day(First_day_of_year)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur
+                production = Nbre_days_reste * budget.heure
+                production /= 365
+
+                budget_origine = production
+
+
+            temp_dict['budget_origine'] = round(budget_origine, 1)
             temp_dict['dev_time'] = 0.0
             temp_dict['form_time'] = 0.0
             temp_dict['prod_time'] = 0.0
@@ -2051,24 +2372,45 @@ def etat_conso_prod():
             )
 
             for budgets in budget_prest:
+
                 if budgets.prestation_id.get().sigle == 'DEV':
-                    temp_dict['dev_time'] = budgets.heure - dev
-                    if budgets.heure - dev < 0:
+                    current_budget = budgets.heure
+                    if Nbre_days_reste:
+                        current_budget = Nbre_days_reste * budgets.heure
+                        current_budget /= 365
+                        current_budget = round(current_budget, 1)
+                    temp_dict['dev_time'] = current_budget - dev
+                    if current_budget - dev < 0:
                         temp_dict['dev_time'] = 0.0
 
                 if budgets.prestation_id.get().sigle == 'FOR':
-                    temp_dict['form_time'] = budgets.heure - form
-                    if budgets.heure - form < 0:
+                    current_budget = budgets.heure
+                    if Nbre_days_reste:
+                        current_budget = Nbre_days_reste * budgets.heure
+                        current_budget /= 365
+                        current_budget = round(current_budget, 1)
+                    temp_dict['form_time'] = current_budget - form
+                    if current_budget - form < 0:
                         temp_dict['form_time'] = 0.0
 
                 if budgets.prestation_id.get().sigle == 'ADM':
-                    temp_dict['adm_time'] = budgets.heure - adm
-                    if budgets.heure - adm < 0:
+                    current_budget = budgets.heure
+                    if Nbre_days_reste:
+                        current_budget = Nbre_days_reste * budgets.heure
+                        current_budget /= 365
+                        current_budget = round(current_budget, 1)
+                    temp_dict['adm_time'] = current_budget - adm
+                    if current_budget - adm < 0:
                         temp_dict['adm_time'] = 0.0
 
                 if budgets.prestation_id.get().sigle == 'PRO':
-                    temp_dict['prod_time'] = budgets.heure - prod
-                    if budgets.heure - prod < 0:
+                    current_budget = budgets.heure
+                    if Nbre_days_reste:
+                        current_budget = Nbre_days_reste * budgets.heure
+                        current_budget /= 365
+                        current_budget = round(current_budget, 1)
+                    temp_dict['prod_time'] = current_budget - prod
+                    if current_budget - prod < 0:
                         temp_dict['prod_time'] = 0.0
 
 
@@ -2748,6 +3090,7 @@ def production_par_coll_client():
         temp_dict['clients'] = []
         under_grouper = itemgetter("ref_client", "client")
         temp_dict['total'] = 0.0
+        temp_dict['total_gene'] = 0.0
         for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
             temp_dict_under = dict(zip(["ref_client", "client"], key))
             temp_dict_under['time'] = 0.0
@@ -2763,6 +3106,7 @@ def production_par_coll_client():
                 temp_dict_under['montant'] = temp_dict_under['time'] * temp_dict['user'].tauxH
             temp_dict['clients'].append(temp_dict_under)
             temp_dict['total'] += round(temp_dict_under['time'], 1)
+            temp_dict['total_gene'] += round(temp_dict_under['montant'], 1)
         analyses.append(temp_dict)
 
     return render_template('rapport/production-par-collaborateur-et-par-client.html', **locals())
@@ -2821,6 +3165,7 @@ def production_par_coll_client_refresh():
         temp_dict['clients'] = []
         under_grouper = itemgetter("ref_client", "client")
         temp_dict['total'] = 0.0
+        temp_dict['total_gene'] = 0.0
         for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
             temp_dict_under = dict(zip(["ref_client", "client"], key))
             temp_dict_under['time'] = 0.0
@@ -2836,6 +3181,7 @@ def production_par_coll_client_refresh():
                 temp_dict_under['montant'] = temp_dict_under['time'] * temp_dict['user'].tauxH
             temp_dict['clients'].append(temp_dict_under)
             temp_dict['total'] += round(temp_dict_under['time'], 1)
+            temp_dict['total_gene'] += round(temp_dict_under['montant'], 1)
         analyses.append(temp_dict)
 
     return render_template('rapport/production-par-collaborateur-et-par-client_refresh.html', **locals())
@@ -2894,6 +3240,7 @@ def production_par_coll_client_export_excel():
         temp_dict['clients'] = []
         under_grouper = itemgetter("ref_client", "client")
         temp_dict['total'] = 0.0
+        temp_dict['total_gene'] = 0.0
         for key, grp in groupby(sorted(grp, key=under_grouper), under_grouper):
             temp_dict_under = dict(zip(["ref_client", "client"], key))
             temp_dict_under['time'] = 0.0
@@ -2909,6 +3256,7 @@ def production_par_coll_client_export_excel():
                 temp_dict_under['montant'] = temp_dict_under['time'] * temp_dict['user'].tauxH
             temp_dict['clients'].append(temp_dict_under)
             temp_dict['total'] += round(temp_dict_under['time'], 1)
+            temp_dict['total_gene'] += round(temp_dict_under['montant'], 1)
         analyses.append(temp_dict)
 
     workbook = Workbook()
@@ -2961,7 +3309,8 @@ def production_par_coll_client_export_excel():
                sheet.write(start, 3, client['time'], style_3)
                sheet.write(start, 4, function.format_price(client['montant']), style_3)
                start += 1
-
+        sheet.write(start, 0, 'Total', style_2)
+        sheet.write(start, 4, function.format_price(datas.total_gene), style_2)
         start += 1
 
     out = StringIO()
@@ -3013,13 +3362,6 @@ def taux_mali_global():
 
     grouper = itemgetter("user_id", "user")
 
-    Nbre_current_day = function.networkdays(
-        function.date_convert(function.get_first_day(First_day_of_year)),
-        function.date_convert(current_day),
-        [],
-        ()
-    )
-
     analyses = []
     total_bud = 0.0
     total_facturable = 0.0
@@ -3047,9 +3389,40 @@ def taux_mali_global():
                 BudgetPrestation.prestation_id == prest_prod.key
             ).get()
 
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == current_day.year:
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(function.get_first_day(First_day_of_year)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
 
-            current_heure = budget_prod.heure * Nbre_current_day
-            current_heure /= 365
+                Nbre_current_day = function.networkdays(
+                    function.date_convert(temp_dict['user'].date_start),
+                    function.date_convert(current_day),
+                    [],
+                    ()
+                )
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur
+                production = Nbre_days_reste * budget_prod.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    function.date_convert(function.get_first_day(First_day_of_year)),
+                    function.date_convert(current_day),
+                    [],
+                    ()
+                )
+                current_heure = budget_prod.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure * temp_dict['user'].tauxH, 1)
             temp_dict['HFacturable'] = 0.0
@@ -3130,13 +3503,6 @@ def taux_mali_global_refresh():
 
     grouper = itemgetter("user_id", "user")
 
-    Nbre_current_day = function.networkdays(
-        date_start,
-        date_end,
-        [],
-        ()
-    )
-
     analyses = []
     total_bud = 0.0
     total_facturable = 0.0
@@ -3165,8 +3531,53 @@ def taux_mali_global_refresh():
             ).get()
 
 
-            current_heure = budget_prod.heure * Nbre_current_day
-            current_heure /= 365
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == now_year:
+
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(datetime.date(now_year, 1, 1)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+                if date_start > temp_dict['user'].date_start:
+
+                    Nbre_current_day = function.networkdays(
+                        function.date_convert(date_start),
+                        function.date_convert(date_end),
+                        [],
+                        ()
+                    )
+                else:
+                    if date_end > temp_dict['user'].date_start:
+                        Nbre_current_day = function.networkdays(
+                            function.date_convert(temp_dict['user'].date_start),
+                            function.date_convert(date_end),
+                            [],
+                            ()
+                        )
+                    else:
+                        Nbre_current_day = 0
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur au proratat
+                production = Nbre_days_reste * budget_prod.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    date_start,
+                    date_end,
+                    [],
+                    ()
+                )
+                current_heure = budget_prod.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure * temp_dict['user'].tauxH, 1)
             temp_dict['HFacturable'] = 0.0
@@ -3277,8 +3688,53 @@ def taux_mali_global_export_excel():
             ).get()
 
 
-            current_heure = budget_prod.heure * Nbre_current_day
-            current_heure /= 365
+            Nbre_Days_start = 0.0
+            if temp_dict['user'].date_start and temp_dict['user'].date_start.year == now_year:
+
+                Nbre_Days_start = function.networkdays(
+                        function.date_convert(datetime.date(now_year, 1, 1)),
+                        function.date_convert(temp_dict['user'].date_start),
+                        [],
+                        ()
+                    )
+                if date_start > temp_dict['user'].date_start:
+
+                    Nbre_current_day = function.networkdays(
+                        function.date_convert(date_start),
+                        function.date_convert(date_end),
+                        [],
+                        ()
+                    )
+                else:
+                    if date_end > temp_dict['user'].date_start:
+                        Nbre_current_day = function.networkdays(
+                            function.date_convert(temp_dict['user'].date_start),
+                            function.date_convert(date_end),
+                            [],
+                            ()
+                        )
+                    else:
+                        Nbre_current_day = 0
+
+                Nbre_days_reste = 365 - Nbre_Days_start
+
+                # Trouver la production d'un utilisateur au proratat
+                production = Nbre_days_reste * budget_prod.heure
+                production /= 365
+
+                current_heure = production * Nbre_current_day
+                current_heure /= Nbre_days_reste
+
+            else:
+
+                Nbre_current_day = function.networkdays(
+                    date_start,
+                    date_end,
+                    [],
+                    ()
+                )
+                current_heure = budget_prod.heure * Nbre_current_day
+                current_heure /= 365
 
             temp_dict['budget'] = round(current_heure * temp_dict['user'].tauxH, 1)
             temp_dict['HFacturable'] = 0.0

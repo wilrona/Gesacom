@@ -79,6 +79,10 @@
                                       <td>{{ client.montant|format_price() }}</td>
                                   </tr>
                               {% endfor %}
+                                    <tr>
+                                        <td colspan="4"><strong>Total</strong></td>
+                                        <td>{{ datas.total_gene|format_price() }}</td>
+                                    </tr>
                               </tbody>
                           </table>
                       </div>
