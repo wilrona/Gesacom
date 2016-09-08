@@ -8,7 +8,7 @@ from flask import render_template
 
 from application import app
 from application.modules import dashboard, home, user, societe, site, departement, grade, fonction, frais, domaine, profil, \
-    prestation, role, budget, charge, client, projet, tache, temps, rapport, conge
+    prestation, role, budget, charge, client, projet, tache, temps, rapport, conge, api
 
 ## Error handlers
 # Handle 404 errors

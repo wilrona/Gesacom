@@ -13,3 +13,10 @@ class Grade(ndb.Model):
         ).count()
 
         return user_exist
+
+    def make_to_dict(self):
+
+        to_dict = {}
+        to_dict['libelle'] = self.libelle
+
+        return to_dict

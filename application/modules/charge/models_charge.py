@@ -16,3 +16,22 @@ class Charge(ndb.Model):
 
         return bugdet
 
+    def make_to_dict(self):
+
+        to_dict = {}
+        to_dict['libelle'] = self.libelle
+
+        from ..budget.models_budget import ChargeBudget
+
+        bugdet_charge = ChargeBudget.query(
+            ChargeBudget.charge_id == self.key
+        )
+
+        budget = [{
+            'montant': bud.montant,
+            'date_app': str(bud.date_app)
+        } for bud in bugdet_charge]
+        to_dict['budget'] = budget
+
+        return to_dict
+

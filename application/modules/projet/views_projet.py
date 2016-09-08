@@ -141,7 +141,7 @@ def me():
             projet['responsable_id'] = proj.responsable_id.get().key.id()
             all_projet.append(projet)
 
-    pagination = Pagination(css_framework='bootstrap3', page=page, total=len(all_projet), search=search, record_name='Projet')
+    # pagination = Pagination(css_framework='bootstrap3', page=page, total=len(all_projet), search=search, record_name='Projet')
 
     return render_template('projet/me.html', **locals())
 

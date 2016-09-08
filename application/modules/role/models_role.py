@@ -14,3 +14,17 @@ class roles(polymodel.PolyModel):
 
 class Roles(roles):
     parent = ndb.KeyProperty(kind=roles)
+
+    def make_to_dict(self):
+        to_dict = {}
+
+        to_dict['titre'] = self.titre
+        to_dict['description'] = self.description
+        to_dict['valeur'] = self.valeur
+        to_dict['action'] = self.action
+        to_dict['active'] = self.active
+        to_dict['parent'] = None
+        if self.parent:
+            to_dict['parent'] = self.parent.get().valeur
+
+        return to_dict

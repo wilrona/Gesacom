@@ -16,6 +16,28 @@ class Profil(ndb.Model):
 
         return profil_role_exist
 
+    def make_to_dict(self):
+        to_dict = {}
+
+        to_dict['name'] = self.name
+        to_dict['description'] = self.description
+        to_dict['active'] = self.active
+
+        profil_role = ProfilRole.query(
+            ProfilRole.profil_id == self.key
+        )
+
+        roles = [{
+            'role': role.role_id.get().valeur,
+            'edit': role.edit,
+            'delecte': role.delete
+        } for role in profil_role]
+
+        to_dict['roles'] = roles
+
+        return to_dict
+
+
 
 class ProfilRole(ndb.Model):
     role_id = ndb.KeyProperty(kind=Roles)

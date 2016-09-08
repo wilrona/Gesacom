@@ -160,6 +160,60 @@ class Users(ndb.Model):
 
         return montant
 
+    def make_to_dict(self):
+
+        to_dict = {}
+        to_dict['email'] = self.email
+        to_dict['date_create'] = str(self.date_create)
+        to_dict['matricule'] = self.matricule
+        to_dict['is_enabled'] = self.is_enabled
+        to_dict['first_name'] = self.first_name
+        to_dict['last_name'] = self.last_name
+        to_dict['logged'] = self.logged
+        to_dict['date_last_logged'] = str(self.date_last_logged)
+        to_dict['google_id'] = self.google_id
+        to_dict['date_update'] = str(self.date_update)
+        to_dict['tauxH'] = self.tauxH
+        to_dict['date_start'] = str(self.date_start)
+
+        to_dict['fonction_id'] = None
+        if self.fonction_id:
+            to_dict['fonction_id'] = self.fonction_id.get().libelle
+
+        to_dict['site_id'] = None
+        if self.site_id:
+            to_dict['site_id'] = self.site_id.get().libelle
+        to_dict['departement_id'] = None
+        if self.departement_id:
+            to_dict['departement_id'] = self.departement_id.get().libelle
+        to_dict['grade_id'] = None
+        if self.grade_id:
+            to_dict['grade_id'] = self.grade_id.get().libelle
+
+        role = UserRole.query(
+            UserRole.user_id == self.key
+        )
+        roles = [{
+            'role': rol.role_id.get().valeur,
+            'edit': rol.edit,
+            'delete': rol.delete
+        } for rol in role]
+
+        to_dict['roles'] = roles
+
+
+        horaire = Horaire.query(
+            Horaire.user == self.key
+        )
+        horaires = [{
+            'montant': horai.montant,
+            'date_start': str(horai.date_start)
+        } for horai in horaire]
+
+        to_dict['horaires'] = horaires
+
+        return to_dict
+
 
 class UserRole(ndb.Model):
     user_id = ndb.KeyProperty(kind=Users)

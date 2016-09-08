@@ -8,6 +8,15 @@ class Frais(ndb.Model):
     factu = ndb.BooleanProperty()
     nfactu = ndb.BooleanProperty()
 
+    def make_to_dict(self):
+
+        to_dict = {}
+        to_dict['libelle'] = self.libelle
+        to_dict['factu'] = self.factu
+        to_dict['nfactu'] = self.nfactu
+
+        return to_dict
+
 
 
 class FraisProjet(ndb.Model):
