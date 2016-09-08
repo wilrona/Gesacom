@@ -28,7 +28,7 @@ class Client(ndb.Model):
         to_dict['pays'] = self.pays
         to_dict['email'] = self.email
         to_dict['phone'] = self.phone
-        to_dict['date_created'] = self.date_created
+        to_dict['date_created'] = str(self.date_created)
         to_dict['prospect'] = self.prospect
         to_dict['myself'] = self.myself
 
