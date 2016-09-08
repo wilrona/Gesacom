@@ -15,9 +15,6 @@ class Temps(ndb.Model):
 
     def make_to_dict(self):
 
-        to_dict = {}
-
-        to_dict['user_id'] = self.user_id.get().email
 
         detail = DetailTemps.query(
             DetailTemps.temps_id == self.key
@@ -33,7 +30,7 @@ class Temps(ndb.Model):
             'parent': dels.parent
         } for dels in detail]
 
-        to_dict['details'] = details
+        to_dict = details
 
         return to_dict
 

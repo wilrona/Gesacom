@@ -52,7 +52,8 @@ class Tache(ndb.Model):
         Temps = [{
             'date_start':  str(tem.date_start),
             'date_end': str(tem.date_end),
-            'list_temps': tem.make_to_dict()
+            'user_id': tem.user_id.get().email,
+            'list_details': tem.make_to_dict()
         } for tem in temps]
 
         to_dict['temps'] = Temps
